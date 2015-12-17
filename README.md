@@ -25,14 +25,8 @@ vagrant mutate wily libvirt --input-provider virtualbox
 https://piratenpad.de/p/SarTB5QEQ
 
 https://hitchtest.readthedocs.org/en/latest/faq/how_does_hitch_compare_to_other_technologies.html
-
 https://cookiecutter-django.readthedocs.org/en/latest/developing-locally.html
-
 https://github.com/joke2k/django-environ
-
-hamlpy has not a lot of support,
-best options so far:
-https://bitbucket.org/dlamotte/haml-scss/src/d784e16cc04484b2c4e788e55ba1ded463221fe4/example/?at=default
 
 
 look for best asset compressor
@@ -40,4 +34,3 @@ https://www.djangopackages.com/packages/p/django-pipeline/
 
 https://pypi.python.org/pypi/django-taggit
 https://www.djangopackages.com/packages/p/django-filter/
-https://github.com/jessemiller/HamlPy
