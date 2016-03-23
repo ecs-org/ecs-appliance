@@ -27,10 +27,3 @@ https://piratenpad.de/p/SarTB5QEQ
 https://hitchtest.readthedocs.org/en/latest/faq/how_does_hitch_compare_to_other_technologies.html
 https://cookiecutter-django.readthedocs.org/en/latest/developing-locally.html
 https://github.com/joke2k/django-environ
-
-
-look for best asset compressor
-https://www.djangopackages.com/packages/p/django-pipeline/
-
-https://pypi.python.org/pypi/django-taggit
-https://www.djangopackages.com/packages/p/django-filter/

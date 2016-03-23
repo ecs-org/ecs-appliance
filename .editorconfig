@@ -8,12 +8,14 @@ end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.{py,rst,ini}]
+[*.{rst,ini,sls}]
 indent_style = space
 indent_size = 2
 
 [*.py]
-line_length=180
+indent_style = space
+indent_size = 4
+line_length=80
 known_first_party=ecs
 multi_line_output=3
 default_section=THIRDPARTY

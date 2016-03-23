@@ -1,32 +1,57 @@
-
-postgres:
-  image: postgres:9.4
-  volumes:
-    - /data/ecs/postgres:/var/lib/postgresql/data
-  env_file: .env
-
-django:
+web:
   build: .
-  user: django
+  user: app
+  volumes:
+    - /data/ecs/storage-vault:/app/ecs-storage-vault
+  env_file: .env
   links:
     - postgres
     - redis
     - postfix
     - sentry
     - memcached
-  command: /gunicorn.sh
+  command: web
+
+worker:
+  build: .
+  user: app
+  volumes:
+    - /data/ecs/storage-vault:/app/ecs-storage-vault
   env_file: .env
+  links:
+   - postgres
+   - redis
+   - postfix
+   - memcached
+  command: celery -A ecs.taskapp worker -l INFO
+
+celerybeat:
+  build: .
+  user: app
+  env_file: .env
+  links:
+    - postgres
+    - redis
+    - postfix
+    - memcached
+  command: celery -A ecs.taskapp beat -l INFO
 
 nginx:
   build: ./compose/nginx
   # nginx does not do location bases client_cert_verify,
   # but client_cert_optional and export the client check result would be ok
   links:
-    - django
+    - web
     - sentry
   ports:
     - "0.0.0.0:80:80"
     - "443"
+
+postgres:
+  image: postgres:9.4
+  volumes:
+    - /data/ecs/postgres:/var/lib/postgresql/data
+  env_file: .env
 
 redis:
   image: redis:3.0
@@ -42,7 +67,7 @@ mocca:
 pdfas:
   build: ./compose/pdfas
   links: nginx
-  
+
 memcache:
   image: memcached
 
@@ -51,25 +76,3 @@ sentry:
   links:
     - postgres
     - redis
-
-celeryworker:
-  build: .
-  user: django
-  env_file: .env
-  links:
-   - postgres
-   - redis
-   - postfix
-   - memcached
-  command: celery -A ecs.taskapp worker -l INFO
-
-celerybeat:
-  build: .
-  user: django
-  env_file: .env
-  links:
-    - postgres
-    - redis
-    - postfix
-    - memcached
-  command: celery -A ecs.taskapp beat -l INFO
