@@ -1,22 +1,21 @@
-web:
+ecs.web:
   build: .
   user: app
   volumes:
-    - /data/ecs/storage-vault:/app/ecs-storage-vault
+    - /data/ecs-storage-vault:/app/ecs-storage-vault
   env_file: .env
   links:
     - postgres
     - redis
     - postfix
-    - sentry
     - memcached
   command: web
 
-worker:
+ecs.worker:
   build: .
   user: app
   volumes:
-    - /data/ecs/storage-vault:/app/ecs-storage-vault
+    - /data/ecs-storage-vault:/app/ecs-storage-vault
   env_file: .env
   links:
    - postgres
@@ -25,7 +24,7 @@ worker:
    - memcached
   command: celery -A ecs.taskapp worker -l INFO
 
-celerybeat:
+ecs.beat:
   build: .
   user: app
   env_file: .env
@@ -38,11 +37,13 @@ celerybeat:
 
 nginx:
   build: ./compose/nginx
+  # use nginx as reverse proxy
   # nginx does not do location bases client_cert_verify,
   # but client_cert_optional and export the client check result would be ok
   links:
     - web
     - sentry
+    - piwik
   ports:
     - "0.0.0.0:80:80"
     - "443"
@@ -50,7 +51,7 @@ nginx:
 postgres:
   image: postgres:9.4
   volumes:
-    - /data/ecs/postgres:/var/lib/postgresql/data
+    - /data/ecs-postgres:/var/lib/postgresql/data
   env_file: .env
 
 redis:
@@ -76,3 +77,8 @@ sentry:
   links:
     - postgres
     - redis
+
+piwik:
+  image:
+  links:
+    - mariadb
