@@ -1,35 +1,72 @@
+* xenial cloud image partition layout:
+mbr
+p1 Boot ext4 label cloudimg-rootfs (2359MB)
+    ecs-appliance:  /app/
 
-hardisk Layout:
-+ mdadm raid1 on hda/hdb if present
-gpt:
-  10g boot
-  lvm
-    20g root
-    250g ecs-files -> /data/ecs-storage-vault
-    50g  ecs-database -> /data/ecs-postgres/
-    or only one vg ? ecs-data 300g
-    50g temp
+  * currently written on run (todo):
+    ECS_CA_ROOT     /app/ecs-ca
+    ECSHELP_ROOT    /app/ecs-help
+    STORAGE_VAULT:gpghome /app/ecs-gpg
+    ECSMAIL:undeliverable_maildir /app/ecs-undeliverable-mail
+    HAYSTACK_CONNECTIONS:default:PATH /app/ecs-whoosh
 
-ecs-appliance:  /app/
-ecs-data: /data/container/*
-ecs-storage-vault: /data/ecs-storage-vault
+freespace (8377MB)
+
+* create
+p2 volatile
+  /volatile
+    /tmp
+    /var/tmp  
+    /docker
+    LOGFILE_DIR => /ecs-log
+    ECS_DOWNLOAD_CACHE_DIR => /ecs-cache
+    /container/ecs-elasticsearch
+    /container/redis
+
+* make it:
+other lvm
+  lvm permanent
+    /data
+      /ecs-storage-vault
+      /container/ecs-postgres
+      /container/ecs-postfix
+      /dump/ecs-postgres
+  lvm freespace for snapshots
 
 
-start machine:
+vagrant appliance builder:
+
+  * create-ecs-config
+    * creates a env.yml with all key material inside
+    * see env.yml for Examples
+    * creates a iso with env.yml and therelike inside
+
+  * create-build-config
+    * create a machine.yml with all key material inside (for using with packer)
+
+  * build-image --config machine.yml
+    i: hardisk Layout: make mdadm raid1 on hda/hdb if both are present
+
+  * upload-image image
+  * deploy-image
+
+
+start appliance:
   look for meta-data, load env.yml, put into environment
 
   look if postgres-data is found /data/postgres-ecs/*
-    start ecs-postgres
+  start ecs-postgres
 
-    no (or yes but empty):
-      recover-from-backup ?
-        yes:  duplicity restore to /data/ecs-files and /tmp/pgdump
-      restore from dump ?
-        yes:  pgimport from pgdump
-      not restored from dump ?
-        yes: create new database
+  no postgres-data or postgres-data but database is empty:
+    ECS_RECOVER_FROM_BACKUP ?
+      yes:  duplicity restore to /data/ecs-files and /tmp/pgdump
+    ECS_RECOVER_FROM_DUMP ?
+      yes:  pgimport from pgdump
+    restored from somewhere ?
+      premigrate (if old dump) and migrate
+    not restored from dump ?
+      yes: create new database
 
-  database-migration  
   update letsencrypt
   start all support container
   start ecs.* container
@@ -50,6 +87,12 @@ update-ecs:
   look if database migration is needed diff current/expected branch of *migrations*
     yes: database-migrate
   start ecs.*
+  if not ok/started:
+    stop ecs.*
+    if was database-migrate
+      stop database
+      revert to PRE_migrate snapshot
+    start old-container ecs.*
 
 clone-ecs:
   snapshot ecs-files and ecs-database to CLONE R/W snapshot
@@ -66,7 +109,7 @@ cron-jobs:
     download all updated container
     stop ecs-*
     for every updated container:
-      stop container, start container
+      stop container, migrate data (eg.pgcontainer), start container
     start ecs.*
   .) backup
     assert non empty database
@@ -74,6 +117,20 @@ cron-jobs:
     pgdump to temp
     duplicity to thirdparty of ecs-files, pgdump and envsettings
 
+
+* production prepare:
+  build new container,
+  make clone,
+  migrate clone with new container
+  run hitchtest
+  if ok: set flag update_ready
+
+* if createfirstuser:
+  create user (group office) plus 1 Days certificate send to email address with transport password
+  useremail,user first,last,gender, transportpass (min 15chars)
+
+* meta-data setup
+  * env config via: https://pypi.python.org/pypi/python-decouple
 
 
 add https://prometheus.io/ for monitoring:
