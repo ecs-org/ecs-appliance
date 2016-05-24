@@ -1,22 +1,15 @@
 * xenial cloud image partition layout:
-mbr
-p1 Boot ext4 label cloudimg-rootfs (2359MB)
-    ecs-appliance:  /app/
+  * dos-mbr
+  * p1 Boot ext4 label cloudimg-rootfs (10G)
+  * used space ~ 900MB
 
-  * currently written on run (todo):
-    ECS_CA_ROOT     /app/ecs-ca
-    ECSHELP_ROOT    /app/ecs-help
-    STORAGE_VAULT:gpghome /app/ecs-gpg
-    ECSMAIL:undeliverable_maildir /app/ecs-undeliverable-mail
-    HAYSTACK_CONNECTIONS:default:PATH /app/ecs-whoosh
-
-freespace (8377MB)
+* ecs-appliance:  /app/
 
 * create
 p2 volatile
   /volatile
     /tmp
-    /var/tmp  
+    /var/tmp
     /docker
     LOGFILE_DIR => /ecs-log
     ECS_DOWNLOAD_CACHE_DIR => /ecs-cache
@@ -39,12 +32,10 @@ vagrant appliance builder:
   * create-ecs-config
     * creates a env.yml with all key material inside
     * see env.yml for Examples
-    * creates a iso with env.yml and therelike inside
-
-  * create-build-config
-    * create a machine.yml with all key material inside (for using with packer)
-
+    * creates a iso with user-data and meta-data for cloud-init
   * build-image --config machine.yml
+    * create-build-config
+      * create a machine.yml with all key material inside (for using with packer)
     i: hardisk Layout: make mdadm raid1 on hda/hdb if both are present
 
   * upload-image image
@@ -52,7 +43,7 @@ vagrant appliance builder:
 
 
 start appliance:
-  look for meta-data, load env.yml, put into environment
+  look for user-data, load env.yml, put into environment
 
   look if postgres-data is found /data/postgres-ecs/*
   start ecs-postgres
@@ -148,9 +139,28 @@ add https://prometheus.io/ for monitoring:
   * ? https://github.com/cherti/mailexporter
 
 
+
+### packages fit for python 3 and django and maybe useful
+  * https://pypi.python.org/pypi/django-taggit
+  * https://pypi.python.org/pypi/django-extensions/1.6.1
+  * https://pypi.python.org/pypi/django-crispy-forms/1.5.2
+  * https://pypi.python.org/pypi/django-model-utils
+  * https://pypi.python.org/pypi/django-filter
+  * https://pypi.python.org/pypi/django-braces
+  * https://pypi.python.org/pypi/django-mptt
+  * https://pypi.python.org/pypi/django-guardian
+  * https://pypi.python.org/pypi/django-imagekit (no more pil if we need pictures)
+  * https://www.djangopackages.com/packages/p/django-tastypie/
+
+### Assets compression
+
+  * https://pypi.python.org/pypi/django_compressor
+  * https://pypi.python.org/pypi/django-pipeline
+
 add piwik and others in front of:
  *.ecsname.org
 
+* reintegrate pdfas, mocca, logrotate, duply
 
 nginx does not support location based client certificates,
 but client_cert_verify = optional, and export a variable.
