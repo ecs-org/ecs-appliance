@@ -1,24 +1,22 @@
-* xenial cloud image partition layout:
+## Partitioning
+
+* default xenial cloud image partition layout:
   * dos-mbr
   * p1 Boot ext4 label cloudimg-rootfs (10G)
   * used space ~ 900MB
 
-* ecs-appliance:  /app/
-
-* create
-p2 volatile
+* create: p2 volatile
   /volatile
     /tmp
     /var/tmp
     /docker
-    LOGFILE_DIR => /ecs-log
-    ECS_DOWNLOAD_CACHE_DIR => /ecs-cache
+    /ecs-log  # LOGFILE_DIR
+    /ecs-cache # ECS_DOWNLOAD_CACHE_DIR
     /container/ecs-elasticsearch
     /container/redis
 
-* make it:
-other lvm
-  lvm permanent
+* create: vg permanent
+  vgpermanent:
     /data
       /ecs-storage-vault
       /container/ecs-postgres
@@ -26,6 +24,7 @@ other lvm
       /dump/ecs-postgres
   lvm freespace for snapshots
 
+## Builder
 
 vagrant appliance builder:
 
@@ -35,12 +34,13 @@ vagrant appliance builder:
     * creates a iso with user-data and meta-data for cloud-init
   * build-image --config machine.yml
     * create-build-config
-      * create a machine.yml with all key material inside (for using with packer)
+      * create a machine.json with all key material inside (for using with packer)
     i: hardisk Layout: make mdadm raid1 on hda/hdb if both are present
 
   * upload-image image
   * deploy-image
 
+## Appliance
 
 start appliance:
   look for user-data, load env.yml, put into environment
@@ -103,8 +103,8 @@ cron-jobs:
       stop container, migrate data (eg.pgcontainer), start container
     start ecs.*
   .) backup
-    assert non empty database
-    assert non empty ecs-files
+    assure non empty database
+    assure non empty ecs-files
     pgdump to temp
     duplicity to thirdparty of ecs-files, pgdump and envsettings
 
@@ -180,11 +180,6 @@ cat test.txt | grep -E "([^:]+:)(instbin|static|static64|static32|req:apt).*" | 
 cat test.txt | grep -E "([^:]+:)(instbin|static|static64|static32).*" | grep -v ":win:" | sort
 
 ```
-
-use ubuntu wily
-
-vagrant box add http://cloud-images.ubuntu.com/vagrant/wily/current/wily-server-cloudimg-amd64-vagrant-disk1.box --name wily --checksum c87753b8e40e90369c1d0591b567ec7b2a08ba4576714224bb24463a4b209d1a --checksum-type sha256
-vagrant mutate wily libvirt --input-provider virtualbox
 
 https://piratenpad.de/p/SarTB5QEQ
 
