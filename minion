@@ -1,0 +1,13 @@
+root_dir: /app/_salt_run
+file_client: local
+
+fileserver_backend:
+  - roots
+
+pillar_roots:
+  base:
+    - /app/pillar
+
+file_roots:
+  base:
+    - /app/salt/
