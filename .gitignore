@@ -3,40 +3,7 @@
 .AppleDouble
 .LSOverride
 
-# Basics
-*.py[cod]
-__pycache__
-
-# Logs
-*.log
-pip-log.txt
-
-# Unit test / coverage reports
-.coverage
-.tox
-nosetests.xml
-htmlcov
-
-# Integration tests / Hitch directory
-tests/.hitch
-
-# Compass
-.sass-cache
-
-# virtual environments
-.env
-
-# Translations
-*.mo
-*.pot
-
 # Vim
 *~
 *.swp
 *.swo
-
-# npm
-node_modules/
-
-# User-uploaded media
-ecs/media/
