@@ -27,6 +27,19 @@ hostname:
     hostnamectl set-hostname #{$server_name}.local
     echo "127.0.0.1 #{$server_name}.local" >> /etc/hosts
 
+/etc/sudoers.d/ssh_auth:
+  file.managed:
+    - makedirs: True
+    - mode: "0440"
+    - contents: |
+        Defaults env_keep += "SSH_AUTH_SOCK"
+
+packer_profile_settings:
+  file.append:
+    - name: /app/.profile
+    - text: |
+        export PACKER_CACHE_DIR=/tmp/packer_cache
+
 setlocale:
   cmd.run:
     - name:
@@ -36,20 +49,11 @@ export LANG=en_US.UTF-8
 printf %b "LANG=en_US.UTF-8\nLANGUAGE=en_US:en\nLC_MESSAGES=POSIX\n" > /etc/default/locale
 locale-gen en_US.UTF-8 && dpkg-reconfigure locales
 
-
-profile_packer_settings:
-  file.append:
-    - name: /home/{{ s.user }}/.profile
-    - text: |
-        export PACKER_CACHE_DIR={{ s.image_base }}/tmp/packer_cache
-
 sed -i.bak 's/^Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades
 apt-get -y update
 apt-get -y install software-properties-common spice-vdagent cloud-initramfs-growroot git
 apt-get -y dist-upgrade --force-yes
 
-echo "Defaults env_keep+='http_proxy'" > /etc/sudoers.d/10-env-http-proxy
-echo "Defaults env_keep+=SSH_AUTH_SOCK" > /etc/sudoers.d/10-env-ssh-auth-sock
 echo 'set salt-minion systemstart to manual, workaround saltbootstrap/vagrant issue'
 echo 'manual' > /etc/init/salt-minion.override
 

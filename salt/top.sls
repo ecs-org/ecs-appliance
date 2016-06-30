@@ -1,6 +1,6 @@
 base:
   '*':
-    - common
     - use_proxy
+    - common
     - ssh
     - extra

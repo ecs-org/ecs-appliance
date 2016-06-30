@@ -1,6 +1,6 @@
 include:
   - common
-  
+
 docker:
   pkgrepo.managed:
     - repo: 'deb http://apt.dockerproject.org/repo ubuntu-xenial main'
@@ -37,7 +37,7 @@ docker:
     - watch:
       - file: docker
 
-# enable cgroup memory and swap accounting
+# enable cgroup memory and swap accounting, needs kernel restart
 docker-grub-settings:
   file.managed:
     - name: /etc/default/grub.d/docker.cfg
