@@ -32,6 +32,7 @@ lvm:
 
 ### Full example
 
+```
 storage:
   parted:
 {% for a in ["/dev/vdb", "/dev/vdc"] %}
@@ -137,7 +138,7 @@ storage:
       destination: /mnt/images
       copy_content: True
       watch_in: "service: apt-cacher-ng"
-
+```
 
 ## Options
 
