@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 snapshotcreate() {
     # Args: $1= orgdev, $2 = shotvol  $3 = shotsize
