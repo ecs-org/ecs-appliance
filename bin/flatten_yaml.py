@@ -7,6 +7,7 @@ try:
 except ImportError as e:
     print("ERROR: fatal, could not import: {0}".format(e))
 
+
 def usage():
     print('''
 usage: {0} input.yml/stdin [top [--upper]]
@@ -34,6 +35,7 @@ def flatten(d, parent_key='', sep='_'):
             items.append((new_key, v))
     return dict(items)
 
+
 def main():
 
     with open('env.yml') as f:
@@ -44,6 +46,7 @@ def main():
 
     for key,value in flatten(data).iteritems():
         print("{key}={value}".format(key=key.upper(), value=value))
+
 
 if __name__ == '__main__':
     main()
