@@ -38,7 +38,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision :salt do |salt|
     salt.masterless = true
-    salt.minion_config = "minion"
+    salt.minion_config = "salt/minion"
     salt.run_highstate = true
     salt.log_level = "info"
     #salt.install_type = "git"

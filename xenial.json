@@ -5,7 +5,10 @@
     "iso_checksum": "68f669933e4d481d6bc4fc81a4546556b398dc3d262819e2b21e46fd51753c38",
     "iso_checksum_type": "sha256",
 
-    "memory": "2048",
+    "memory": 2048,
+    "cpus": 2,
+    "disk_size_gb": 10,
+    "disk_size_mb": 10*1024,
 
     "esx_remote_host": "",
     "esx_remote_datastore": "datastore1",
@@ -15,7 +18,7 @@
 
     "gce_account_file": "account.json",
     "gce_project_id": "my-project",
-    "gce_source_image": "ubuntu-14-04",
+    "gce_source_image": "ubuntu-16-04",
     "gce_image_name" : "xenial",
     "gce_zone": "europe-west1-c",
     "gce_machine_type": "n1-standard-1",
@@ -23,103 +26,105 @@
   },
 
   "builders": [
-  {
-    "vm_name" : "{{user `vm_name`}}",
-    "headless": "true",
-    "iso_url": "{{user `iso_url`}}",
-    "iso_checksum": "{{user `iso_checksum`}}",
-    "iso_checksum_type": "{{user `iso_checksum_type`}}",
-    "ssh_username": "vagrant",
-    "ssh_password": "vagrant",
-    "ssh_wait_timeout": "2400s",
-    "boot_wait": "10s",
-    "boot_command": ["<esc><esc><wait>linux fb=false preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/./preseed-simple-http.cfg auto=true priority=critical debconf/frontend=noninteractive DEBCONF_DEBUG=1 hostname={{.Name}} initrd=initrd.gz -- <enter>"],
-    "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
+    {
+      "type": "qemu",
 
-    "type": "virtualbox",
-    "disk_size": 10240,
-    "http_directory": "http",
-    "guest_os_type": "Ubuntu_64",
-    "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
-    "virtualbox_version_file": ".vbox_version",
-    "vboxmanage": [
-      ["modifyvm", "{{.Name}}", "--memory", "512"],
-      ["modifyvm", "{{.Name}}", "--cpus", "1"]
-    ]
-  },
+      "vm_name" : "{{user `vm_name`}}",
+      "headless": "true",
+      "iso_url": "{{user `iso_url`}}",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_wait_timeout": "2400s",
+      "boot_wait": "10s",
+      "boot_command": ["<esc><esc><wait>/linux fb=false auto=true priority=critical debconf/frontend=noninteractive DEBCONF_DEBUG=1 hostname={{.Name}} initrd=/initrd.gz -- <enter>"],
+      "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
 
-  {
-    "vm_name" : "{{user `vm_name`}}",
-    "headless": "true",
-    "iso_url": "{{user `iso_url`}}",
-    "iso_checksum": "{{user `iso_checksum`}}",
-    "iso_checksum_type": "{{user `iso_checksum_type`}}",
-    "ssh_username": "vagrant",
-    "ssh_password": "vagrant",
-    "ssh_wait_timeout": "2400s",
-    "boot_wait": "10s",
-    "boot_command": ["<esc><esc><wait>/linux fb=false auto=true priority=critical debconf/frontend=noninteractive DEBCONF_DEBUG=1 hostname={{.Name}} initrd=/initrd.gz -- <enter>"],
-    "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
+      "disk_size": 10240,
+      "http_directory": "http",
+      "format": "qcow2",
+      "headless": "true",
+      "accelerator": "kvm",
+      "ssh_host_port_min": 3213,
+      "ssh_host_port_max": 3214,
+      "qemuargs": [
+        [ "-m", "512m" ],
+        [ "-netdev", "user,id=user.0,net=10.0.2.0/24,host=10.0.2.1,dns=10.0.2.2,dhcpstart=10.0.2.15,hostfwd=tcp::3213-:22"]
+      ]
+    },
+    {
+      "type": "googlecompute",
 
-    "type": "qemu",
-    "disk_size": 10240,
-    "http_directory": "http",
-    "format": "qcow2",
-    "headless": "true",
-    "accelerator": "kvm",
-    "ssh_host_port_min": 3213,
-    "ssh_host_port_max": 3214,
-    "qemuargs": [
-      [ "-m", "512m" ],
-      [ "-netdev", "user,id=user.0,net=10.0.2.0/24,host=10.0.2.1,dns=10.0.2.2,dhcpstart=10.0.2.15,hostfwd=tcp::3213-:22"]
-    ]
-  },
+      "ssh_username": "root",
+      "ssh_timeout": "1m",
+      "disk_size": 10,
+      "account_file": "{{user `gce_account_file`}}",
+      "project_id": "{{user `gce_project_id`}}",
+      "source_image": "{{user `gce_source_image`}}",
+      "image_name" : "{{user `gce_image_name`}}",
+      "zone": "{{user `gce_zone`}}",
+      "machine_type": "{{user `gce_machine_type`}}",
+      "network": "{{user `gce_network`}}"
+    },
+    {
+      "type": "virtualbox",
 
-  {
-    "vm_name" : "{{user `vm_name`}}",
-    "headless": "true",
-    "http_directory": "http",
-    "iso_url": "{{user `iso_url`}}",
-    "iso_checksum": "{{user `iso_checksum`}}",
-    "iso_checksum_type": "{{user `iso_checksum_type`}}",
-    "ssh_username": "vagrant",
-    "ssh_password": "vagrant",
-    "ssh_wait_timeout": "2400s",
-    "boot_wait": "10s",
-    "boot_command": ["<esc><esc><wait>/linux fb=false auto=true priority=critical debconf/frontend=noninteractive DEBCONF_DEBUG=1 hostname={{.Name}} initrd=/initrd.gz -- <enter>"],
-    "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
+      "vm_name" : "{{user `vm_name`}}",
+      "headless": "true",
+      "iso_url": "{{user `iso_url`}}",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_wait_timeout": "2400s",
+      "boot_wait": "10s",
+      "boot_command": ["<esc><esc><wait>linux fb=false preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/./preseed-simple-http.cfg auto=true priority=critical debconf/frontend=noninteractive DEBCONF_DEBUG=1 hostname={{.Name}} initrd=initrd.gz -- <enter>"],
+      "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
 
-    "type": "vmware-iso",
-    "guest_os_type": "ubuntu-64",
-    "disk_size": 10240,
-    "remote_type": "esx5",
-    "remote_host": "{{user `esx_remote_host`}}",
-    "remote_datastore": "{{user `esx_remote_datastore`}}",
-    "remote_cache_directory": "{{user `esx_remote_cache_directory`}}",
-    "remote_username": "{{user `esx_remote_username`}}",
-    "remote_password": "{{user `esx_remote_password`}}",
-    "vmx_data": {
-        "memsize": "512",
-        "numvcpus": "1",
-        "cpuid.coresPerSocket": "1",
-        "ethernet0.networkName": "VM Network",
-        "ethernet0.present": "TRUE"
+      "disk_size": 10240,
+      "http_directory": "http",
+      "guest_os_type": "Ubuntu_64",
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "virtualbox_version_file": ".vbox_version",
+      "vboxmanage": [
+        ["modifyvm", "{{.Name}}", "--memory", "512"],
+        ["modifyvm", "{{.Name}}", "--cpus", "1"]
+      ]
+    },
+    {
+      "type": "vmware-iso",
+
+      "vm_name" : "{{user `vm_name`}}",
+      "headless": "true",
+      "http_directory": "http",
+      "iso_url": "{{user `iso_url`}}",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_wait_timeout": "2400s",
+      "boot_wait": "10s",
+      "boot_command": ["<esc><esc><wait>/linux fb=false auto=true priority=critical debconf/frontend=noninteractive DEBCONF_DEBUG=1 hostname={{.Name}} initrd=/initrd.gz -- <enter>"],
+      "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
+
+      "guest_os_type": "ubuntu-64",
+      "disk_size": 10240,
+      "remote_type": "esx5",
+      "remote_host": "{{user `esx_remote_host`}}",
+      "remote_datastore": "{{user `esx_remote_datastore`}}",
+      "remote_cache_directory": "{{user `esx_remote_cache_directory`}}",
+      "remote_username": "{{user `esx_remote_username`}}",
+      "remote_password": "{{user `esx_remote_password`}}",
+      "vmx_data": {
+          "memsize": "512",
+          "numvcpus": "1",
+          "cpuid.coresPerSocket": "1",
+          "ethernet0.networkName": "VM Network",
+          "ethernet0.present": "TRUE"
+      }
     }
-  },
-
-  {
-    "ssh_username": "root",
-    "ssh_timeout": "1m",
-    "type": "googlecompute",
-    "disk_size": 10,
-    "account_file": "{{user `gce_account_file`}}",
-    "project_id": "{{user `gce_project_id`}}",
-    "source_image": "{{user `gce_source_image`}}",
-    "image_name" : "{{user `gce_image_name`}}",
-    "zone": "{{user `gce_zone`}}",
-    "machine_type": "{{user `gce_machine_type`}}",
-    "network": "{{user `gce_network`}}"
-  }],
+  ],
 
   "provisioners": [{
     "type": "file",
@@ -142,14 +147,7 @@
     "local_pillar_roots": "pillar",
     "local_state_tree": "salt",
     "bootstrap_args": "-P -X",
-    "minion_config": "minion"
-  },{
-    "type": "shell",
-    "execute_command": "{{ .Vars }} sudo -E sh '{{ .Path }}'",
-    "inline": [
-      "echo 'set salt-minion systemstart to manual, workaround packer <0.8 issue'",
-      "echo 'manual' > /etc/init/salt-minion.override"
-    ]
+    "minion_config": "salt/minion"
   },{
     "type": "shell",
     "execute_command": "{{ .Vars }} sudo -E sh '{{ .Path }}'",

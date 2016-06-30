@@ -4,27 +4,6 @@
   * dos-mbr
   * p1 Boot ext4 label cloudimg-rootfs (10G)
   * used space ~ 900MB
-* create: mbr-p2 volatile (~10-50G) and mount to /volatile
-* create: vg permanent (Big)
-  * with a data volume (Big-15%)
-  * and some freespace for snapshots
-* Directories
-```
-/volatile
-    /tmp
-    /var/tmp
-    /docker
-    /ecs-log   # LOGFILE_DIR
-    /ecs-cache # ECS_DOWNLOAD_CACHE_DIR
-    /container/ecs-elasticsearch
-    /container/redis
-    /container/ecs-postfix
-/data
-    /ecs-storage-vault
-    /container/ecs-postgres
-    /dump/ecs-postgres
-```
-
 
 ## vagrant appliance builder
 + create-ecs-config
