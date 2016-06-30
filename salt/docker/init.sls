@@ -1,5 +1,7 @@
-
-docker-ppa:
+include:
+  - common
+  
+docker:
   pkgrepo.managed:
     - repo: 'deb http://apt.dockerproject.org/repo ubuntu-xenial main'
     - humanname: "Ubuntu docker Repository"
@@ -8,6 +10,32 @@ docker-ppa:
     - keyserver: pgp.mit.edu
     - require:
       - pkg: ppa_ubuntu_installer
+
+  pkg.installed:
+    - pkgs:
+      - iptables
+      - ca-certificates
+      - lxc
+      - cgroup-bin
+      - docker-engine
+    - require:
+      - pkgrepo: docker
+
+  file.managed:
+    - name: /etc/default/docker
+    - template: jinja
+    - source: salt://docker/files/docker
+    - context:
+      docker: {{ s|d({}) }}
+
+  service.running:
+    - enable: true
+    - require:
+      - pkg: docker
+      - cmd: docker-grub-settings
+      - pip: docker-compose
+    - watch:
+      - file: docker
 
 # enable cgroup memory and swap accounting
 docker-grub-settings:
@@ -27,30 +55,3 @@ docker-compose:
   pip.installed:
     - require:
       - pkg: docker-compose
-
-docker:
-  pkg.installed:
-    - pkgs:
-      - iptables
-      - ca-certificates
-      - lxc
-      - cgroup-bin
-      - docker-engine
-    - require:
-      - pkgrepo: docker-ppa
-
-  file.managed:
-    - name: /etc/default/docker
-    - template: jinja
-    - source: salt://docker/files/docker
-    - context:
-      docker: {{ s|d({}) }}
-
-  service.running:
-    - enable: true
-    - require:
-      - pkg: docker
-      - cmd: docker-grub-settings
-      - pip: docker-compose
-    - watch:
-      - file: docker
