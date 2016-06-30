@@ -10,13 +10,10 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 line_length = 80
 
-[*.{rst,ini,sls,yml,conf}]
+[*.{rst,ini,sls,yml,conf,json}]
 indent_size = 2
 
-[*.py]
-indent_size = 4
-
-[*.{html,css,scss,json}]
+[*.{sh,py,html,css,scss}]
 indent_size = 4
 
 [*.md]
