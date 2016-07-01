@@ -23,7 +23,6 @@ program will exit with code:
   '''.format(sys.argv[0]))
     sys.exit(10)
 
-
 def flatten(d, parent_key='', sep='_'):
     items = []
     for k, v in d.items():
@@ -34,20 +33,15 @@ def flatten(d, parent_key='', sep='_'):
             items.append((new_key, v))
     return dict(items)
 
-
 def main():
-
     if len(sys.argv) > 1:
         usage()
-
     with sys.stdin as f:
         data=yaml.safe_load(f)
-
-    data = data[sys.argv[1]]
-
+    if sys.argv[1] != ".":
+        data = data[sys.argv[1]]
     for key,value in flatten(data).iteritems():
         print("{key}={value}".format(key=key.upper(), value=value))
-
 
 if __name__ == '__main__':
     main()
