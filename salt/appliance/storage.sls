@@ -1,3 +1,8 @@
+{% if salt['pillar.get']('ecs:appliance:custom_storage', false) %}
+{% from 'storage/lib.sls' import storage_setup with context %}
+{{ storage_setup(salt['pillar.get']('ecs:appliance:custom_storage')) }}
+{% endif %}
+
 * check for /dev/disk/by-label/ecs-volatile
   * if not found:
 ```
