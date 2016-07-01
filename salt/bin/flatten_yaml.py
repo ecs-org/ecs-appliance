@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import collections
 
 try:
@@ -10,15 +11,13 @@ except ImportError as e:
 
 def usage():
     print('''
-usage: {0} input.yml/stdin [top [--upper]]
+usage: {0} {root|.} < data.yml
 
-takes yaml of input.yml or stdin,
-selects optional beginning via top,
-flatten and optional uppercase keynames,
-print to stdout
+takes yaml from stdin,
+selects optional root to filter yaml or "." for all,
+flatten, upper case key names, print to stdout
 
 program will exit with code:
-
 10 = wrong/empty parameter, missing library, other fatal errors
 
   '''.format(sys.argv[0]))
@@ -38,11 +37,13 @@ def flatten(d, parent_key='', sep='_'):
 
 def main():
 
-    with open('env.yml') as f:
+    if len(sys.argv) > 1:
+        usage()
+
+    with sys.stdin as f:
         data=yaml.safe_load(f)
 
-    if top:
-        data = data[top]
+    data = data[sys.argv[1]]
 
     for key,value in flatten(data).iteritems():
         print("{key}={value}".format(key=key.upper(), value=value))
