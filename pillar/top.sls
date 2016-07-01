@@ -3,8 +3,7 @@ base:
     - common
 
   'ecs-builder':
-    - ecs-builder
+    - builder
 
   'ecs-appliance':
-    - ecs-appliance
-  
+    - appliance

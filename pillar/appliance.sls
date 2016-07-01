@@ -1,3 +1,2 @@
 ecs:
   appliance:
-    
