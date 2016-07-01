@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import sys
 import collections
 
@@ -7,7 +6,7 @@ try:
     import yaml
 except ImportError as e:
     print("ERROR: fatal, could not import: {0}".format(e))
-
+    sys.exit(1)
 
 def usage():
     print('''
@@ -17,11 +16,10 @@ takes yaml from stdin,
 selects optional root to filter yaml or "." for all,
 flatten, upper case key names, print to stdout
 
-program will exit with code:
-10 = wrong/empty parameter, missing library, other fatal errors
+program will exit with code 1 on error (empty parameter, missing library)
 
   '''.format(sys.argv[0]))
-    sys.exit(10)
+    sys.exit(1)
 
 def flatten(d, parent_key='', sep='_'):
     items = []
@@ -34,13 +32,13 @@ def flatten(d, parent_key='', sep='_'):
     return dict(items)
 
 def main():
-    if len(sys.argv) > 1:
+    if len(sys.argv) != 2:
         usage()
     with sys.stdin as f:
-        data=yaml.safe_load(f)
+        data = yaml.safe_load(f)
     if sys.argv[1] != ".":
         data = data[sys.argv[1]]
-    for key,value in flatten(data).iteritems():
+    for key, value in flatten(data).iteritems():
         print("{key}={value}".format(key=key.upper(), value=value))
 
 if __name__ == '__main__':
