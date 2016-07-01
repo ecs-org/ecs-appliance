@@ -1,4 +1,4 @@
-ppa_ubuntu_installer:
+ubuntu_ppa_support:
   pkg.installed:
     - pkgs:
       - python-software-properties
@@ -6,14 +6,15 @@ ppa_ubuntu_installer:
       - apt-transport-https
     - order: 10
 
-console-tools:
+base_packages:
   pkg.installed:
     - pkgs:
+      - ca-certificates
       - haveged
       - acpi
       - tmux
 
-SystemTimezone:
+system_timezone:
   timezone.system:
     - name: {{ pillar['timezone'] }}
     - utc: True
@@ -34,7 +35,7 @@ hostname:
     - contents: |
         Defaults env_keep += "SSH_AUTH_SOCK"
 
-packer_profile_settings:
+profile_packer:
   file.append:
     - name: /app/.profile
     - text: |

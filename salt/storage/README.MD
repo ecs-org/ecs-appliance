@@ -14,7 +14,7 @@ Features:
  * relocate:    relocate data and make a symlink from old to new location
 
 **Warning**: lvm makes a difference if you use "g" or "G" for gigabyte.
- g=GiB (1024*1024*1024) and G means 1000*1000*1000
+  * g=GiB (1024*1024*1024) , G= (1000*1000*1000)
 
 ## Usage
 

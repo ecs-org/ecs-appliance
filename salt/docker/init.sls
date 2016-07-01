@@ -9,7 +9,7 @@ docker:
     - keyid: 58118E89F3A912897C070ADBF76221572C52609D
     - keyserver: pgp.mit.edu
     - require:
-      - pkg: ppa_ubuntu_installer
+      - pkg: ubuntu_ppa_support
 
   pkg.installed:
     - pkgs:
