@@ -1,5 +1,4 @@
 # http://editorconfig.org
-
 root = true
 
 [*]
@@ -9,6 +8,7 @@ indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
 line_length = 80
+indent_size = 4
 
 [*.{rst,ini,sls,yml,conf,json}]
 indent_size = 2
