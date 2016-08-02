@@ -1,2 +1,4 @@
-ecs:
-  appliance:
+extra_states:
+  - appliance
+
+appliance:
