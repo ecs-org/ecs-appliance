@@ -1,11 +1,8 @@
-{% if salt['pillar.get']('ecs:appliance:custom_storage', false) %}
 {% from 'storage/lib.sls' import storage_setup with context %}
-{{ storage_setup(salt['pillar.get']('ecs:appliance:custom_storage')) }}
-{% endif %}
 
-* check for /dev/disk/by-label/ecs-volatile
-  * if not found:
-```
+
+{% if not salt['files.exists']('/dev/disk/by-label/ecs-volatile') %}
+  {% load_yaml as custom_storage %}
 format:
   /dev/{{ pillar.get('ecs:storage:volatile') }}:
     fstype: ext4
@@ -49,18 +46,22 @@ relocate:
     destination: /volatile/container/redis
   /container/postfix:
     destination: /volatile/container/postfix
+  {% endload %}
 
-```
-* check for /dev/disk/by-label/ecs-data
-  * if not found:
-```
+  {{ storage_setup(custom_storage) }}
+{% endif %}
+
+
+{% if not salt['files.exists']('/dev/disk/by-label/ecs-data') %}
+  {% load_yaml as custom_storage %}
+    {% if pillar.get('ecs:storage:permanent:snapshot_type', 'unknown') == 'lvm' %}
 lvm:
   pv:
-    - /dev/{{ pillar.get('ecs:storage:permanent') }}
+    - /dev/{{ pillar.get('ecs:storage:permanent:device') }}
   vg:
     vgdata:
       devices:
-        - /dev/{{ pillar.get('ecs:storage:permanent') }}
+        - /dev/{{ pillar.get('ecs:storage:permanent:device') }}
   lv:
     lv_ecs:
       vgname: vgdata
@@ -69,6 +70,14 @@ format:
   /dev/mapper/vgdata-lvdata:
     fstype: ext4
     opts: "-L ecs-data"
+
+    {% else %}
+format:
+  /dev/{{ pillar.get('ecs:storage:permanent:device') }}:
+    fstype: ext4
+    opts: "-L ecs-data"
+    {% endif %}
+
 mount:
   /data:
     device: /dev/disk/by-label/ecs-data
@@ -87,4 +96,6 @@ directories:
       - file_mode: 664
     onlyif: mountpoint -q /data
 
-```
+  {% endload %}
+  {{ storage_setup(custom_storage) }}
+{% endif %}

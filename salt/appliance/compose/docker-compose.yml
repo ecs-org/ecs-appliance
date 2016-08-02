@@ -22,7 +22,7 @@ ecs.worker:
    - redis
    - postfix
    - memcached
-  command: celery -A ecs.taskapp worker -l INFO
+  command: worker
 
 ecs.beat:
   build: .
@@ -33,12 +33,12 @@ ecs.beat:
     - redis
     - postfix
     - memcached
-  command: celery -A ecs.taskapp beat -l INFO
+  command: beat
 
 nginx:
   build: ./compose/nginx
   # use nginx as reverse proxy
-  # nginx does not do location bases client_cert_verify,
+  # nginx does not do location based client_cert_verify,
   # but client_cert_optional and export the client check result would be ok
   links:
     - web
@@ -49,7 +49,7 @@ nginx:
     - "443"
 
 postgres:
-  image: postgres:9.4
+  image: postgres:9.5
   volumes:
     - /data/ecs-postgres:/var/lib/postgresql/data
   env_file: .env
@@ -77,6 +77,9 @@ sentry:
   links:
     - postgres
     - redis
+
+cadvisor:
+  image: google/cadvisor
 
 piwik:
   image:
