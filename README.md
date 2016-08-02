@@ -1,37 +1,48 @@
-## Partitioning
+# ECS-Appliance
 
-* default xenial cloud image partition layout:
-  * dos-mbr
-  * p1 Boot ext4 label cloudimg-rootfs (10G)
-  * used space ~ 900MB
-
-## vagrant appliance builder
+## Vagrant Appliance Builder
 + create-ecs-config
     + creates a env.yml with all key material inside
     + see env.yml for Examples
     + creates a iso with user-data and meta-data for cloud-init
+    + creates a pdf to print with qrcodes of the config data for offline storage
+
 + build-image --config machine.yml
     + create-build-config
         + create a machine.json with all key material inside (for using with packer)
     i: hardisk Layout: make mdadm raid1 on hda/hdb if both are present
+
 + upload-image image
 + deploy-image
 
+easy disaster recovery:
+    deploying with a different env.yml using "ecs_recover_from_backup=True "
+
 ## Appliance
+
+### start errors
++ service mode: just display info and wait, start nothing
+    (get cert,self-sign if fail) display simple http&s page: Service not available
+    + no user-data found
+    + no storage found
+    + recover_from_backup but error while duplicity restore/connect
+    + update in progress
+    + manual service
 
 ### start appliance
 + look for user-data, load env.yml, put into environment
++ look for storage, decide if need to partition storage
 + look if postgres-data is found /data/postgres-ecs/*
 + start ecs-postgres
 + no postgres-data or postgres-data but database is empty:
-    ECS_RECOVER_FROM_BACKUP ?
-      yes:  duplicity restore to /data/ecs-files and /tmp/pgdump
-    ECS_RECOVER_FROM_DUMP ?
-      yes:  pgimport from pgdump
-    restored from somewhere ?
-      premigrate (if old dump) and migrate
-    not restored from dump ?
-      yes: create new database
+    + ECS_RECOVER_FROM_BACKUP ?
+        + yes: duplicity restore to /data/ecs-files and /tmp/pgdump
+    + ECS_RECOVER_FROM_DUMP ?
+        + yes: pgimport from pgdump
+    + restored from somewhere ?
+        + premigrate (if old dump) and migrate
+    + not restored from dump ?
+        + yes: create new database
 + update letsencrypt
 + start all support container
 + start ecs.* container
@@ -91,4 +102,10 @@
 
 ### if createfirstuser:
 + create user (group office) plus 1 Day certificate send to email address with transport password
-  + useremail,user first,last,gender, transportpass (min 15chars)
+    + useremail,user first,last,gender, transportpass (min 15chars)
+
+### Partitioning
++ default xenial cloud image partition layout:
+    + dos-mbr
+    + p1 Boot ext4 label cloudimg-rootfs (10G)
+    + used space ~ 900MB

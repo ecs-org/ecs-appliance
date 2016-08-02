@@ -11,18 +11,18 @@
     "disk_size_mb": 10*1024,
 
     "esx_remote_host": "",
-    "esx_remote_datastore": "datastore1",
-    "esx_remote_cache_directory": "http",
     "esx_remote_username": "",
     "esx_remote_password": "",
+    "esx_remote_datastore": "datastore1",
+    "esx_remote_cache_directory": "http",
 
+    "gce_project_id": "",
+    "gce_zone": "europe-west1-c",
+    "gce_network": "default",
     "gce_account_file": "account.json",
-    "gce_project_id": "my-project",
     "gce_source_image": "ubuntu-16-04",
     "gce_image_name" : "xenial",
-    "gce_zone": "europe-west1-c",
-    "gce_machine_type": "n1-standard-1",
-    "gce_network": "default"
+    "gce_machine_type": "n1-standard-1"
   },
 
   "builders": [

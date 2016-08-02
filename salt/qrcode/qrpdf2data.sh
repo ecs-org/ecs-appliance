@@ -2,7 +2,7 @@
 
 usage() {
     cat <<EOF
-Usage: $0 {pdffile|multiple pictures} outputfile
+Usage: $0 {pdffile|"multiple pictures"} outputfile
 
 example:
   $0 test.pdf test.zip
