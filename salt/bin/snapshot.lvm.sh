@@ -1,4 +1,18 @@
 #!/bin/bash
+usage() {
+    cat << EOF
+Usage: $0
+    start volumegroup volumename snapshotname ["-","ro"]
+    stop  volumegroup volumename snapshotname ["-","ro"]
+
+"-": do not mount/unmount
+"ro": do mount readonly
+
+use "mount | grep snapshotname" for status
+
+EOF
+    exit 1
+}
 
 snapshotcreate() {
     # Args: $1= orgdev, $2 = shotvol  $3 = shotsize
@@ -42,15 +56,6 @@ verifymount() {
     fi
 }
 
-issafeimage() {
-    # Args: $1 shotdev
-    echo "Testing snapshot device $1 for compatibility"
-    ourlvm="vg0"
-    echo "ERROR: not yet implemented!"
-
-}
-
-
 snapshotmount() {
     # Args: $1=shotdev , $2=shotmount, $3=mount options (default to "-o ro")
     SHOTDEV=$1
@@ -80,106 +85,40 @@ snapshotunmount() {
 }
 
 
-MOUNTBASE=/mnt
-SHOTSIZE=6G
 command=$1
 shift
-
-if test "$command" = "status"; then
-    mount | grep $1
-    exit 0
-fi
-
-if test "$command" != "start" -a "$command" != "stop" -a "$command" != "info"; then
+if test "$command" != "start" -a "$command" != "stop" -a "$command" != "_test"; then
     echo "Error: Wrong usage." 1>&2
-    cat << EOF
-Usage: $0
-  status snapshotname
-  info  volumegroup volumename snapshotname
-  start volumegroup volumename snapshotname [([-]"disk")|([-](partition-number)|(logical-volume-name))*]
-  stop  volumegroup volumename snapshotname [([-]"disk")|([-](partition-number)|(logical-volume-name))*]
-
-"disk":
-  whole volume is a filesystem, no partitions are used
-"-" before partition-number, logical-volume-name or "disk":
-  do not mount/unmount,
-  remove from device-mapper before stopping snapshot if a recursive logical-volume
-EOF
-    exit 1
+    usage
 fi
 
 LVMVG=$1
 ORGVOL=$2
 SNAPVOL=$3
-shift 3
-SNAPPART=$*
-if test "$SNAPPART" = ""; then SNAPPART="disk"; fi
-
+SNAPPART="disk"
+MOUNTBASE=/mnt
+SHOTSIZE=6G
 echo "LVMVG=$LVMVG , ORGVOL=$ORGVOL , SNAPVOL=$SNAPVOL , SNAPPART=$SNAPPART"
 
-if test "$command" = "info"; then
-    echo "info at `date`"
+echo "Fixme: - , ro parameter unimplemented "
+exit 1
+
+case "$command" in
+_test)
+    echo "at `date`"
     snapshotcreate ${LVMVG}/${ORGVOL} ${SNAPVOL} ${SHOTSIZE}
     /sbin/kpartx -l -v /dev/mapper/${LVMVG}-${SNAPVOL}
     snapshotremove ${LVMVG}/${SNAPVOL}
-fi
-
-if test "$command" = "start"; then
+    ;;
+start)
     echo "startsnapshot at `date`"
-
-    for a in $SNAPPART; do
-        verifymount ${MOUNTBASE}/${SNAPVOL}_${a}
-    done
-
+    verifymount ${MOUNTBASE}/${SNAPVOL}_$SNAPPART
     snapshotcreate ${LVMVG}/${ORGVOL} ${SNAPVOL} ${SHOTSIZE}
-    if test "$SNAPPART" = "disk"; then
-      snapshotmount /dev/mapper/${LVMVG}-${SNAPVOL} ${MOUNTBASE}/${SNAPVOL}_${SNAPPART}
-    else
-      echo "test if there is a mdadm or an lvm partition inside the snapshot, if yes, test if setup (eg. names) collide, abort if"
-      issafeimage /dev/mapper/${LVMVG}-${SNAPVOL}
-      echo "add partitions of /dev/mapper/${LVMVG}-${SNAPVOL}"
-      /sbin/kpartx -a /dev/mapper/${LVMVG}-${SNAPVOL}
-      sleep 1
-
-      for a in $SNAPPART; do
-
-        if test "${a:0:1}" != "-";  then # if "-"as first character do not mount
-          # test if there is a "-" inside a
-          b=${a//[^-]/}
-          if test "${b:0:1}" = "-"; then
-            snapshotmount /dev/mapper/${a} ${MOUNTBASE}/${SNAPVOL}_${a}
-          else
-            snapshotmount /dev/mapper/${LVMVG}-${SNAPVOL}${a} ${MOUNTBASE}/${SNAPVOL}_${a}
-          fi
-        fi
-      done
-    fi
-fi
-
-if test "$command" = "stop"; then
+    snapshotmount /dev/mapper/${LVMVG}-${SNAPVOL} ${MOUNTBASE}/${SNAPVOL}_${SNAPPART}
+    ;;
+stop)
     echo "stopsnapshot at `date`"
-
-    if test "$SNAPPART" = "disk"; then
-      snapshotunmount ${MOUNTBASE}/${SNAPVOL}_${SNAPPART}
-    else
-      for a in $SNAPPART; do
-        if test "${a:0:1}" = "-";  then
-          a=${a:1}
-          # remove "-" as first char (for correct mapper removal)
-        else
-          snapshotunmount ${MOUNTBASE}/${SNAPVOL}_${a}
-        fi
-        # test if there is a "-" inside a, its a recursive logical volume
-        b=${a//[^-]/}
-        if test "${b:0:1}" = "-"; then
-          dmsetup remove /dev/mapper/${a}
-        fi
-
-      done
-
-      echo "remove partitions of /dev/${LVMVG}/${SNAPVOL}"
-      /sbin/kpartx -d /dev/mapper/${LVMVG}-${SNAPVOL}
-    fi
-
+    snapshotunmount ${MOUNTBASE}/${SNAPVOL}_${SNAPPART}
     snapshotremove ${LVMVG}/${SNAPVOL}
-fi
+    ;;
+esac
