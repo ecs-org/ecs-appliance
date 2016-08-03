@@ -24,7 +24,7 @@ docker:
   file.managed:
     - name: /etc/default/docker
     - template: jinja
-    - source: salt://docker/files/docker
+    - source: salt://docker/docker-defaults
     - context:
       docker: {{ s|d({}) }}
 
