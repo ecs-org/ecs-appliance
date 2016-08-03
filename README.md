@@ -1,6 +1,9 @@
 # ECS-Appliance
 
 ## Vagrant Appliance Builder
+
+"vagrant up" installs all packages needed for builder
+
 + create-ecs-config
     + creates a env.yml with all key material inside
     + see env.yml for Examples
@@ -20,14 +23,7 @@ easy disaster recovery:
 
 ## Appliance
 
-### start errors
-+ service mode: just display info and wait, start nothing
-    (get cert,self-sign if fail) display simple http&s page: Service not available
-    + no user-data found
-    + no storage found
-    + recover_from_backup but error while duplicity restore/connect
-    + update in progress
-    + manual service
+appliance gets build using packer
 
 ### start appliance
 + look for user-data, load env.yml, put into environment
@@ -46,6 +42,15 @@ easy disaster recovery:
 + update letsencrypt
 + start all support container
 + start ecs.* container
+
+### start errors
++ service mode: just display info and wait, start nothing
+    (get cert,self-sign if fail) display simple http&s page: Service not available
+    + no user-data found
+    + no storage found
+    + recover_from_backup but error while duplicity restore/connect
+    + update in progress
+    + manual service
 
 ### update-appliance
 + clone neweset git ecs-appliance to workdir
