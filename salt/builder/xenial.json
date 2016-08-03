@@ -28,7 +28,6 @@
   "builders": [
     {
       "type": "qemu",
-
       "vm_name" : "{{user `vm_name`}}",
       "headless": "true",
       "iso_url": "{{user `iso_url`}}",
@@ -41,7 +40,7 @@
       "boot_command": ["<esc><esc><wait>/linux fb=false auto=true priority=critical debconf/frontend=noninteractive DEBCONF_DEBUG=1 hostname={{.Name}} initrd=/initrd.gz -- <enter>"],
       "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
 
-      "disk_size": 10240,
+      "disk_size": {{user `disk_size_mb`}},
       "http_directory": "http",
       "format": "qcow2",
       "headless": "true",
@@ -49,16 +48,16 @@
       "ssh_host_port_min": 3213,
       "ssh_host_port_max": 3214,
       "qemuargs": [
-        [ "-m", "512m" ],
+        [ "-m", "{{user `memory`}}m" ],
+        [ "-smp", "{{user `cpus`}}" ],
         [ "-netdev", "user,id=user.0,net=10.0.2.0/24,host=10.0.2.1,dns=10.0.2.2,dhcpstart=10.0.2.15,hostfwd=tcp::3213-:22"]
       ]
     },
     {
       "type": "googlecompute",
-
       "ssh_username": "root",
       "ssh_timeout": "1m",
-      "disk_size": 10,
+      "disk_size": {{user `disk_size_gb`}},
       "account_file": "{{user `gce_account_file`}}",
       "project_id": "{{user `gce_project_id`}}",
       "source_image": "{{user `gce_source_image`}}",
@@ -69,7 +68,6 @@
     },
     {
       "type": "virtualbox",
-
       "vm_name" : "{{user `vm_name`}}",
       "headless": "true",
       "iso_url": "{{user `iso_url`}}",
@@ -82,19 +80,18 @@
       "boot_command": ["<esc><esc><wait>linux fb=false preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/./preseed-simple-http.cfg auto=true priority=critical debconf/frontend=noninteractive DEBCONF_DEBUG=1 hostname={{.Name}} initrd=initrd.gz -- <enter>"],
       "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
 
-      "disk_size": 10240,
+      "disk_size": {{user `disk_size_mb`}},
       "http_directory": "http",
       "guest_os_type": "Ubuntu_64",
       "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
       "virtualbox_version_file": ".vbox_version",
       "vboxmanage": [
-        ["modifyvm", "{{.Name}}", "--memory", "512"],
-        ["modifyvm", "{{.Name}}", "--cpus", "1"]
+        ["modifyvm", "{{.Name}}", "--memory", "{{user `memory`}}"],
+        ["modifyvm", "{{.Name}}", "--cpus", "{{user `cpus`}}"]
       ]
     },
     {
       "type": "vmware-iso",
-
       "vm_name" : "{{user `vm_name`}}",
       "headless": "true",
       "http_directory": "http",
@@ -109,7 +106,7 @@
       "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
 
       "guest_os_type": "ubuntu-64",
-      "disk_size": 10240,
+      "disk_size": {{user `disk_size_mb`}},
       "remote_type": "esx5",
       "remote_host": "{{user `esx_remote_host`}}",
       "remote_datastore": "{{user `esx_remote_datastore`}}",
@@ -117,8 +114,8 @@
       "remote_username": "{{user `esx_remote_username`}}",
       "remote_password": "{{user `esx_remote_password`}}",
       "vmx_data": {
-          "memsize": "512",
-          "numvcpus": "1",
+          "memsize": "{{user `memory`}}",
+          "numvcpus": "{{user `cpus`}}",
           "cpuid.coresPerSocket": "1",
           "ethernet0.networkName": "VM Network",
           "ethernet0.present": "TRUE"
@@ -126,35 +123,38 @@
     }
   ],
 
-  "provisioners": [{
-    "type": "file",
-    "source": ".ssh/authorized_keys",
-    "destination": "/tmp/authorized_keys"
-  },{
-    "type": "shell",
-    "execute_command": "{{ .Vars }} sudo -E sh '{{ .Path }}'",
-    "inline": [
-      "if test ! -d /etc/salt; then mkdir -p /etc/salt; fi",
-      "echo '{{user `vm_name`}}' > /etc/salt/minion_id",
-      "if test ! -d /root/.ssh; then mkdir -p /root/.ssh; fi",
-      "chmod 0700 /root/.ssh",
-      "cp /tmp/authorized_keys /root/.ssh/authorized_keys",
-      "chmod 0700 /root/.ssh/authorized_keys",
-      "chown root:root /root/.ssh/authorized_keys"
-    ]
-  },{
-    "type": "salt-masterless",
-    "local_pillar_roots": "pillar",
-    "local_state_tree": "salt",
-    "bootstrap_args": "-P -X",
-    "minion_config": "salt/minion"
-  },{
-    "type": "shell",
-    "execute_command": "{{ .Vars }} sudo -E sh '{{ .Path }}'",
-    "inline": [
-      "echo 'Zero out the free space to save space in the final image'",
-      "dd if=/dev/zero of=/EMPTY bs=1M",
-      "rm -f /EMPTY"
-    ]
-  }]
+  "provisioners": [
+    {
+      "type": "file",
+      "source": ".ssh/authorized_keys",
+      "destination": "/tmp/authorized_keys"
+    },{
+      "type": "shell",
+      "execute_command": "{{ .Vars }} sudo -E sh '{{ .Path }}'",
+      "inline": [
+        "if test ! -d /etc/salt; then mkdir -p /etc/salt; fi",
+        "echo '{{user `vm_name`}}' > /etc/salt/minion_id",
+        "if test ! -d /root/.ssh; then mkdir -p /root/.ssh; fi",
+        "chmod 0700 /root/.ssh",
+        "cp /tmp/authorized_keys /root/.ssh/authorized_keys",
+        "chmod 0700 /root/.ssh/authorized_keys",
+        "chown root:root /root/.ssh/authorized_keys"
+      ]
+    },{
+      "type": "salt-masterless",
+      "local_pillar_roots": "pillar",
+      "local_state_tree": "salt",
+      "bootstrap_args": "-P -X",
+      "minion_config": "salt/minion"
+    },{
+      "type": "shell",
+      "execute_command": "{{ .Vars }} sudo -E sh '{{ .Path }}'",
+      "inline": [
+        "echo 'Zero out the free space to save space in the final image'",
+        "dd if=/dev/zero of=/EMPTY bs=1M",
+        "rm -f /EMPTY"
+      ]
+    }
+  ]
+
 }

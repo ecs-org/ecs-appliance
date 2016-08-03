@@ -12,4 +12,9 @@ profile_packer:
       - sls: common
       - sls: qrcode
       - sls: packer
-  
+
+
+upgrade_system:
+  apt-get -y update
+  apt-get -y install
+  apt-get -y dist-upgrade --force-yes
