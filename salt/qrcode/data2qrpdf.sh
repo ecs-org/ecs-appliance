@@ -36,28 +36,26 @@ EOF
     exit 1
 }
 
+
 unittest() {
-
-  for a in 2110 4200 19900 50000 114100; do
-    x="test${a}"
-    echo "a: $a x: $x"
-    if test -f $x; then rm $x; fi
-    if test -f ${x}.pdf; then rm ${x}.pdf; fi
-    if test -f ${x}.new; then rm ${x}.new; fi
-    touch $x
-    shred -x -s $a $x
-    data2pdf $x
-    zbarimg --raw -q "-S*.enable=0" "-Sqrcode.enable=1" ${x}.pdf |
-       sort -n | cut -f 2 -d " " | tr -d "\n" | ./base32.py decode > ${x}.new
-    diff $x ${x}.new
-  done
-
-
+    for a in 2110 4200 19900 50000 114100; do
+        x="test${a}"
+        echo "a: $a x: $x"
+        if test -f $x; then rm $x; fi
+        if test -f ${x}.pdf; then rm ${x}.pdf; fi
+        if test -f ${x}.new; then rm ${x}.new; fi
+        touch $x
+        shred -x -s $a $x
+        data2pdf $x
+        zbarimg --raw -q "-S*.enable=0" "-Sqrcode.enable=1" ${x}.pdf |
+            sort -n | cut -f 2 -d " " | tr -d "\n" | ./base32.py decode > ${x}.new
+        diff $x ${x}.new
+    done
 }
 
-make_decode_manual() {
 
-convert -font "DejaVu Sans Mono" text:- $1 <<"EOF"
+make_decode_manual() {
+    convert -font "DejaVu Sans Mono" text:- $1 <<"EOF"
 #!/bin/bash
 # decode target: debian/ubuntu machine
 # save and run this file under bash
@@ -76,47 +74,46 @@ EOF
 
 
 data2pdf() {
+    fname=`readlink -f $1`
+    fbase=`basename $fname`
+    fdir=`dirname $fname`
+    fsize=`stat -c "%s" $fname`
 
-  fname=`readlink -f $1`
-  fbase=`basename $fname`
-  fdir=`dirname $fname`
-  fsize=`stat -c "%s" $fname`
+    if test ! -f $fname; then
+        echo "ERROR: could not find datafile $fname; call $0 for usage information"
+        exit 2
+    fi
 
-  if test ! -f $fname; then
-    echo "ERROR: could not find datafile $fname; call "$0" for usage information"
-    exit 2
-  fi
+    if test $fsize -gt 114100; then
+        echo "ERROR: source file bigger than max capacity of 1141*100 bytes ($fsize); call $0 for usage information"
+        exit 3
+    fi
 
-  if test $fsize -gt 114100; then
-    echo "ERROR: source file bigger than max capacity of 1141*100 bytes ($fsize); call "$0" for usage information"
-    exit 3
-  fi
+    tempdir=`mktemp -d`
+    if test ! -d $tempdir; then echo "ERROR: creating tempdir"; exit 10; fi
+    if test "${tempdir:0:5}" != "/tmp/"; then echo "ERROR: creating tempdir"; exit 10; fi
 
-  tempdir=`mktemp -d`
-  if test ! -d $tempdir; then echo "ERROR: creating tempdir"; exit 10; fi
-  if test "${tempdir:0:5}" != "/tmp/"; then echo "ERROR: creating tempdir"; exit 10; fi
+    if test $fsize -le 2110; then
+        cat $fname | ./base32.py encode | qrencode -o $tempdir/$fbase.png -l M -i
+    else
+        cat $fname | ./base32.py encode | split -a 2 -b 1826 -d - $tempdir/$fbase-
+        for a in `ls $tempdir/$fbase-* | sort -n`; do
+            echo -n "${a: -2:2} " | cat - $a | qrencode -o $tempdir/`basename $a`.png -l M -i
+        done
+    fi
+    list=`ls $tempdir/$fbase*.png | sort -n`
+    montage -label '%f' -page A4 -tile 2x2 -geometry +10 $list $tempdir/${fbase}.pdf
 
-  if test $fsize -le 2110; then
-      cat $fname | ./base32.py encode | qrencode -o $tempdir/$fbase.png -l M -i
-  else
-      cat $fname | ./base32.py encode | split -a 2 -b 1826 -d - $tempdir/$fbase-
-      for a in `ls $tempdir/$fbase-* | sort -n`; do
-          echo -n "${a: -2:2} " | cat - $a | qrencode -o $tempdir/`basename $a`.png -l M -i
-      done
-  fi
-  list=`ls $tempdir/$fbase*.png | sort -n`
-  montage -label '%f' -page A4 -tile 2x2 -geometry +10 $list $tempdir/${fbase}.pdf
+    if test "$2" = "--no-manual"; then
+        cp $tempdir/${fbase}.pdf ${fbase}.pdf
+    else
+        make_decode_manual $tempdir/decode_manual.pdf
+        pdftk $tempdir/${fbase}.pdf $tempdir/decode_manual.pdf cat output ${fbase}.pdf
+    fi
 
-  if test "$2" = "--no-manual"; then
-      cp $tempdir/${fbase}.pdf ${fbase}.pdf
-  else
-      make_decode_manual $tempdir/decode_manual.pdf
-      pdftk $tempdir/${fbase}.pdf $tempdir/decode_manual.pdf cat output ${fbase}.pdf
-  fi
-
-  if test -d $tempdir; then
-    rm -r $tempdir
-  fi
+    if test -d $tempdir; then
+        rm -r $tempdir
+    fi
 }
 
 
