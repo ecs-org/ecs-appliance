@@ -1,5 +1,31 @@
 include:
   - common
+  - python
+
+docker-defaults:
+  file.managed:
+    - name: /etc/default/docker
+    - template: jinja
+    - source: salt://docker/docker.defaults
+    - context:
+      docker: {{ salt['pillar.get']('docker', {}) }}
+
+docker-service:
+  file.managed:
+    - name: /etc/systemd/system/docker.service
+    - source: salt://docker/docker.service
+
+# enable cgroup memory and swap accounting, needs kernel restart
+docker-grub-settings:
+  file.managed:
+    - name: /etc/default/grub.d/docker.cfg
+    - makedirs: true
+    - contents: |
+        GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX cgroup_enable=memory swapaccount=1"
+  cmd.run:
+    - name: update-grub
+    - watch:
+      - file: docker-grub-settings
 
 docker:
   pkgrepo.managed:
@@ -21,13 +47,6 @@ docker:
     - require:
       - pkgrepo: docker
 
-  file.managed:
-    - name: /etc/default/docker
-    - template: jinja
-    - source: salt://docker/docker-defaults
-    - context:
-      docker: {{ s|d({}) }}
-
   service.running:
     - enable: true
     - require:
@@ -35,23 +54,10 @@ docker:
       - cmd: docker-grub-settings
       - pip: docker-compose
     - watch:
-      - file: docker
-
-# enable cgroup memory and swap accounting, needs kernel restart
-docker-grub-settings:
-  file.managed:
-    - name: /etc/default/grub.d/docker.cfg
-    - makedirs: true
-    - contents: |
-        GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX cgroup_enable=memory swapaccount=1"
-  cmd.run:
-    - name: update-grub
-    - watch:
-      - file: docker-grub-settings
+      - file: docker-defaults
+      - file: docker-service
 
 docker-compose:
-  pkg.installed:
-    - name: python
   pip.installed:
     - require:
-      - pkg: docker-compose
+      - sls: python
