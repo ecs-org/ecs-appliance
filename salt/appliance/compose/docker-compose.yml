@@ -1,87 +1,123 @@
-ecs.web:
-  build: .
-  user: app
-  volumes:
-    - /data/ecs-storage-vault:/app/ecs-storage-vault
-  env_file: .env
-  links:
-    - postgres
-    - redis
-    - postfix
-    - memcached
-  command: web
+version: 2
 
-ecs.worker:
-  build: .
-  user: app
-  volumes:
-    - /data/ecs-storage-vault:/app/ecs-storage-vault
-  env_file: .env
-  links:
-   - postgres
-   - redis
-   - postfix
-   - memcached
-  command: worker
+services:
 
-ecs.beat:
-  build: .
-  user: app
-  env_file: .env
-  links:
-    - postgres
-    - redis
-    - postfix
-    - memcached
-  command: beat
+  ecs.web:
+    build:
+      context: ecs
+      args:
+        - http_proxy
+    user: app
+    volumes:
+      - /data/ecs-storage-vault:/app/ecs-storage-vault
+    env_file:
+      - .env
+    expose:
+      - "5000"
+    links:
+      - postgres
+      - redis
+      - postfix
+      - memcached
+    command: web
 
-nginx:
-  build: ./compose/nginx
-  # use nginx as reverse proxy
-  # nginx does not do location based client_cert_verify,
-  # but client_cert_optional and export the client check result would be ok
-  links:
-    - web
-    - sentry
-    - piwik
-  ports:
-    - "0.0.0.0:80:80"
-    - "443"
+  ecs.worker:
+    build:
+      context: ecs
+      args:
+        - http_proxy
+    user: app
+    volumes:
+      - /data/ecs-storage-vault:/app/ecs-storage-vault
+    env_file:
+      - .env
+    links:
+      - postgres
+      - redis
+      - postfix
+      - memcached
+    command: worker
 
-postgres:
-  image: postgres:9.5
-  volumes:
-    - /data/ecs-postgres:/var/lib/postgresql/data
-  env_file: .env
+  ecs.beat:
+    build:
+      context: ecs
+      args:
+        - http_proxy
+    build: ecs
+    user: app
+    env_file:
+      - .env
+    links:
+      - postgres
+      - redis
+      - postfix
+      - memcached
+    command: beat
 
-redis:
-  image: redis:3.0
+  postgres:
+    image: postgres:9.5
+    volumes:
+      - /data/container/ecs-postgres:/var/lib/postgresql/data
+    env_file:
+      - .env
 
-postfix:
-  image: marvambass/versatile-postfix
-  env_file: .env
+  memcache:
+    image: memcached
+    expose:
+      - ""
 
-mocca:
-  build: ./compose/mocca
-  links: nginx
+  redis:
+    image: redis:3.0
+    volumes:
+      - /volatile/container/redis:
 
-pdfas:
-  build: ./compose/pdfas
-  links: nginx
+  postfix:
+    image: marvambass/versatile-postfix
+    env_file:
+      - .env
+    volumes:
+      -  /volatile/container/postfix:
 
-memcache:
-  image: memcached
+  mocca:
+    build:
+      context: mocca
+      args:
+        - http_proxy
+    expose:
+      - ""
 
-sentry:
-  image: slafs/sentry
-  links:
-    - postgres
-    - redis
+  pdfas:
+    build:
+      context: pdfas
+      args:
+        - http_proxy
+    expose:
+      - ""
 
-cadvisor:
-  image: google/cadvisor
+  cadvisor:
+    image: google/cadvisor
+    expose:
+      - "8080"
+    command: ["", "--housekeeping_interval=4s"]
 
-piwik:
-  image:
-  links:
-    - mariadb
+  {%- if pillar.get('ecs:sentry:enabled') %}
+  sentry:
+    image: slafs/sentry
+    links:
+      - postgres
+      - redis
+  {%- endif %}
+
+  {%- if pillar.get('ecs:piwik:enabled') %}
+  piwik:
+    image:
+    links:
+      - mariadb
+  {%- endif %}
+
+  {%- if pillar.get('ecs:prometheus:enabled') %}
+  prometheus:
+    image:
+    links:
+      - cadvisor
+  {%- endif %}
