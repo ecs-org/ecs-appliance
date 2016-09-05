@@ -7,9 +7,7 @@ Usage: $0 [--no-manual] datafile
 takes (compressed) binary data,
 encodes it in base32 and generates one alphanumeric qrcode,
 and put this qrcode inside a pdf,
-
-or if to large for one qrcode, encodes data in base32,
-and generates max 100 x Version 29 alphanumeric qrcodes
+or if to large for one qrcode generates max 100 x Version 29 alphanumeric qrcodes
 and arranges them in a 2x2 matrix per page pdf
 
 Option:
@@ -48,7 +46,7 @@ unittest() {
         shred -x -s $a $x
         data2pdf $x
         zbarimg --raw -q "-S*.enable=0" "-Sqrcode.enable=1" ${x}.pdf |
-            sort -n | cut -f 2 -d " " | tr -d "\n" | ./base32.py decode > ${x}.new
+            sort -n | cut -f 2 -d " " | tr -d "\n" | python -c "import sys, base64; sys.stdout.write(base64.b32decode(sys.stdin.read()))" > ${x}.new
         diff $x ${x}.new
     done
 }
@@ -76,7 +74,6 @@ EOF
 data2pdf() {
     fname=`readlink -f $1`
     fbase=`basename $fname`
-    fdir=`dirname $fname`
     fsize=`stat -c "%s" $fname`
 
     if test ! -f $fname; then
@@ -94,9 +91,9 @@ data2pdf() {
     if test "${tempdir:0:5}" != "/tmp/"; then echo "ERROR: creating tempdir"; exit 10; fi
 
     if test $fsize -le 2110; then
-        cat $fname | ./base32.py encode | qrencode -o $tempdir/$fbase.png -l M -i
+        cat $fname | python -c "import sys, base64; sys.stdout.write(base64.b32encode(sys.stdin.read()))" | qrencode -o $tempdir/$fbase.png -l M -i
     else
-        cat $fname | ./base32.py encode | split -a 2 -b 1826 -d - $tempdir/$fbase-
+        cat $fname | python -c "import sys, base64; sys.stdout.write(base64.b32encode(sys.stdin.read()))" | split -a 2 -b 1826 -d - $tempdir/$fbase-
         for a in `ls $tempdir/$fbase-* | sort -n`; do
             echo -n "${a: -2:2} " | cat - $a | qrencode -o $tempdir/`basename $a`.png -l M -i
         done

@@ -3,7 +3,5 @@ qrcode:
     - pkgs:
       - qrencode
       - imagemagick
-      - zbar-tools
-      - poppler-utils
       - pdftk
-
+      - zbar-tools
