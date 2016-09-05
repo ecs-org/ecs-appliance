@@ -9,6 +9,8 @@ ecs:
 
   debug: false
   sentry_dsn:
+  prometheus:
+    enabled: true
   logo_border_color: green
   userswitcher:
     enabled: true

@@ -4,19 +4,25 @@
 
 "vagrant up" installs all packages needed for builder
 
-+ create-ecs-config
++ ecs config new
     + creates a env.yml with all key material inside
     + see env.yml for Examples
-    + creates a iso with user-data and meta-data for cloud-init
+
++ ecs config build
+    + creates several iso's with user-data and meta-data for cloud-init
     + creates a pdf to print with qrcodes of the config data for offline storage
 
-+ build-image --config machine.yml
-    + create-build-config
-        + create a machine.json with all key material inside (for using with packer)
-    i: hardisk Layout: make mdadm raid1 on hda/hdb if both are present
++ ecs image build [provider]
+    + calls packer to build a ecs machine
 
-+ upload-image image
-+ deploy-image
++ ecs rescueshell install user@host env.yml
+    + ssh into target user@host,
+    + partition harddisk as stated in env.yml
+    + copy image files to harddisk,
+    + copy env to harddisk
+
++ ecs image upload  image
++ ecs image deploy
 
 easy disaster recovery:
     deploying with a different env.yml using "ecs_recover_from_backup=True "
@@ -25,11 +31,14 @@ easy disaster recovery:
 
 appliance gets build using packer
 
+
 ### start appliance
 + look for user-data, load env.yml, put into environment
-+ look for storage, decide if need to partition storage
++ start nginx container, service mode
++ run salt-call appliance.storage
+  + look for storage, decide if need to partition storage
 + look if postgres-data is found /data/postgres-ecs/*
-+ start ecs-postgres
++ start ecs-postgres container
 + no postgres-data or postgres-data but database is empty:
     + ECS_RECOVER_FROM_BACKUP ?
         + yes: duplicity restore to /data/ecs-files and /tmp/pgdump
@@ -42,25 +51,22 @@ appliance gets build using packer
 + update letsencrypt
 + start all support container
 + start ecs.* container
++ change nginx container app mode
 
 ### start errors
 + service mode: just display info and wait, start nothing
     (get cert,self-sign if fail) display simple http&s page: Service not available
-    + no user-data found
-    + no storage found
-    + recover_from_backup but error while duplicity restore/connect
-    + update in progress
-    + manual service
+    + startup ("Appliance starting")
+    + no user-data found ("no user-data found")
+    + no storage found ("no storage found")
+    + recover_from_backup but error while duplicity restore/connect ("recover from backup error")
+    + update in progress ("Update in progress")
+    + manual service ("Manual Service")
 
 ### update-appliance
 + clone neweset git ecs-appliance to workdir
 + run update from there, update will move to /app
-
-### database-migrate
-+ if old PRE_MIGRATE snapshot exists, delete
-+ snapshot ecs-database to "PRE_MIGRATE" snapshot
-+ start ecs.web with migrate
-+ add a onetime cronjob to delete PRE_MIGRATE snapshot after 1 week (which can fail if removed in the meantime)
++ run state.highstate
 
 ### update-ecs
 + build new ecs.* container
@@ -74,6 +80,12 @@ appliance gets build using packer
         + stop database
     + revert to PRE_migrate snapshot
     + start old-container ecs.*
+
+#### database-migrate
++ if old PRE_MIGRATE snapshot exists, delete
++ snapshot ecs-database to "PRE_MIGRATE" snapshot
++ start ecs.web with migrate
++ add a onetime cronjob to delete PRE_MIGRATE snapshot after 1 week (which can fail if removed in the meantime)
 
 ### clone-ecs
 + snapshot ecs-files and ecs-database to CLONE R/W snapshot
