@@ -62,5 +62,6 @@ def main():
     for key, value in flatten(data).items():
         print("{prefix}{key}={value}{postfix}".format(prefix=prefix, key=keyroot+key.upper(), value=value, postfix=postfix))
 
+
 if __name__ == '__main__':
     main()

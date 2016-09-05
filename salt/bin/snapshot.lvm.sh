@@ -40,7 +40,6 @@ snapshotremove() {
        echo "ERROR: Error deactivating snapshot, lvremove exited with $iserr"
        exit $iserr
     fi
-
 }
 
 verifymount() {
