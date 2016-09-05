@@ -13,8 +13,6 @@ profile_packer:
       - sls: qrcode
       - sls: packer
 
-
-upgrade_system:
-  apt-get -y update
-  apt-get -y install
-  apt-get -y dist-upgrade --force-yes
+final_stuff:
+  file.managed:
+    - name: cleanup.sh
