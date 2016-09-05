@@ -95,8 +95,8 @@ storage:
         size: 1g
 
   format:
-    /dev/md1:
-      fstype: ext2
+    /dev/md0:
+      fstype: ext3
     /dev/mapper/vg0-host_root:
       fstype: ext4
     /dev/mapper/vg0-host_swap:
