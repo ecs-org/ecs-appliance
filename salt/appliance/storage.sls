@@ -4,7 +4,7 @@
 {% if not salt['files.exists']('/dev/disk/by-label/ecs-volatile') %}
   {% load_yaml as custom_storage %}
 format:
-  /dev/{{ pillar.get('ecs:storage:volatile') }}:
+  /dev/{{ pillar.get('ecs:storage:volatile:device') }}:
     fstype: ext4
     opts: "-L ecs-volatile"
 mount:
@@ -15,14 +15,15 @@ mount:
 directories:
   /volatile:
     names:
-      - tmp
-      - var/tmp
       - docker
       - ecs-log
       - ecs-cache
-      - container/elasticsearch
       - container/redis
       - container/postfix
+      - container/elasticsearch
+      # FIXME tmp and var/tmp have different dir_mode
+      # - tmp
+      # - var/tmp
     options:
       - group: app
       - user: app
@@ -34,18 +35,19 @@ relocate:
     destination: /volatile/docker
     copy_content: False
     watch_in: "service: docker"
-  /tmp:
-    destination: /volatile/tmp
-  /var/tmp:
-    destination: /volatile/var/tmp
   /app/ecs-log:
     destination: /volatile/ecs-log
   /app/ecs-cache:
     destination: /volatile/ecs-cache
-  /container/redis:
+  /app/container/redis:
     destination: /volatile/container/redis
-  /container/postfix:
+  /app/container/postfix:
     destination: /volatile/container/postfix
+  # FIXME tmp and var/tmp have different dir_mode
+  # /tmp:
+  #   destination: /volatile/tmp
+  # /var/tmp:
+  #  destination: /volatile/var/tmp
   {% endload %}
 
   {{ storage_setup(custom_storage) }}
