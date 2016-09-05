@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if test "$PACKER_BUILDER_TYPE" = "googlecompute"; then
-    echo "on googlecompute; skip udev,network,openssh serverkey regeneration modification"
+    echo "on googlecompute; skip udev,network,openssh-serverkey modifications"
 
 else
     echo "Make sure Udev doesn't block our network http://6.ptmc.org/?p=164"
