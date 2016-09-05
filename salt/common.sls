@@ -1,11 +1,8 @@
+# we use only masterless salt, so no minion is needed
 salt-minion:
   service.dead:
-    - enable: false
-
-/etc/update-manager/release-upgrades:
-  file.replace:
-    pattern: "^Prompt=.*$"
-    repl: Prompt=never
+    - enable: False
+    - order: 10
 
 ubuntu_ppa_support:
   pkg.installed:
@@ -15,16 +12,25 @@ ubuntu_ppa_support:
       - apt-transport-https
     - order: 10
 
+# upgrade everything, but stay on same release
+update_system:
+  file.replace:
+    - name: /etc/update-manager/release-upgrades
+    - pattern: "^Prompt=.*$"
+    - repl: Prompt=never
+  pkg.uptodate:
+    - refresh: True
+
 base_packages:
   pkg.installed:
     - pkgs:
       - ca-certificates
-      - haveged
       - acpi
       - git
       - wget
       - curl
       - tmux
+      - haveged
 
 system_timezone:
   timezone.system:

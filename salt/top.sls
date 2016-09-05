@@ -1,6 +1,7 @@
 base:
   '*':
     - http_proxy
+    - python
     - common
     - guest-tools
     - ssh
