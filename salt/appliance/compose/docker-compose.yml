@@ -43,7 +43,6 @@ services:
       context: ecs
       args:
         - http_proxy
-    build: ecs
     user: app
     env_file:
       - .env
