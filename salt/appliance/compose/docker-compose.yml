@@ -15,9 +15,7 @@ services:
     expose:
       - "5000"
     links:
-      - postgres
       - redis
-      - postfix
       - memcached
     command: web
 
@@ -32,9 +30,7 @@ services:
     env_file:
       - .env
     links:
-      - postgres
       - redis
-      - postfix
       - memcached
     command: worker
 
@@ -47,18 +43,9 @@ services:
     env_file:
       - .env
     links:
-      - postgres
       - redis
-      - postfix
       - memcached
     command: beat
-
-  postgres:
-    image: postgres:9.5
-    volumes:
-      - /data/container/ecs-postgres:/var/lib/postgresql/data
-    env_file:
-      - .env
 
   memcache:
     image: memcached
@@ -70,20 +57,13 @@ services:
     volumes:
       - /volatile/container/redis:
 
-  postfix:
-    image: marvambass/versatile-postfix
-    env_file:
-      - .env
-    volumes:
-      -  /volatile/container/postfix:
-
   mocca:
     build:
       context: mocca
       args:
         - http_proxy
     expose:
-      - ""
+      - "8080"
 
   pdfas:
     build:
@@ -91,28 +71,13 @@ services:
       args:
         - http_proxy
     expose:
-      - ""
+      - "8080"
 
   cadvisor:
     image: google/cadvisor
     expose:
       - "8080"
     command: ["", "--housekeeping_interval=4s"]
-
-  {%- if pillar.get('ecs:sentry:enabled') %}
-  sentry:
-    image: slafs/sentry
-    links:
-      - postgres
-      - redis
-  {%- endif %}
-
-  {%- if pillar.get('ecs:piwik:enabled') %}
-  piwik:
-    image:
-    links:
-      - mariadb
-  {%- endif %}
 
   {%- if pillar.get('ecs:prometheus:enabled') %}
   prometheus:
