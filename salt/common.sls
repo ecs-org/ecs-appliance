@@ -37,10 +37,10 @@ system_timezone:
     - name: {{ pillar['timezone'] }}
     - utc: True
 
-set_hostname:
-  host.present:
-    - name: {{ pillar['hostname'] }}
-    - ip: 127.0.0.1
+#set_hostname:
+#  host.present:
+#    - name: {{ pillar['hostname'] }}
+#    - ip: 127.0.0.1
 
 /etc/sudoers.d/ssh_auth:
   file.managed:
