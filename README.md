@@ -4,27 +4,26 @@
 
 "vagrant up" installs all packages needed for builder
 
-+ ecs config new
++ config new
     + creates a env.yml with all key material inside
     + see env.yml for Examples
 
-+ ecs config build
++ config build
     + creates several iso's with user-data and meta-data for cloud-init
     + creates a pdf to print with qrcodes of the config data for offline storage
 
-+ ecs image build [provider]
++ image build [provider]
     + calls packer to build a ecs machine
++ image upload [provider]
++ image deploy [provider]
 
-+ ecs rescueshell install user@host env.yml
++ deploy rescueshell_install user@host env.yml
     + ssh into target user@host,
     + partition harddisk as stated in env.yml
     + copy image files to harddisk,
     + copy env to harddisk
 
-+ ecs image upload  image
-+ ecs image deploy
-
-easy disaster recovery:
++ easy disaster recovery:
     deploying with a different env.yml using "ecs_recover_from_backup=True "
 
 ## Appliance
@@ -34,11 +33,12 @@ appliance gets build using packer
 
 ### start appliance
 + look for user-data, load env.yml, put into environment
-+ start nginx container, service mode
++ start local nginx
++ update letsencrypt
 + run salt-call appliance.storage
   + look for storage, decide if need to partition storage
 + look if postgres-data is found /data/postgres-ecs/*
-+ start ecs-postgres container
++ start local postgres
 + no postgres-data or postgres-data but database is empty:
     + ECS_RECOVER_FROM_BACKUP ?
         + yes: duplicity restore to /data/ecs-files and /tmp/pgdump
@@ -48,10 +48,8 @@ appliance gets build using packer
         + premigrate (if old dump) and migrate
     + not restored from dump ?
         + yes: create new database
-+ update letsencrypt
-+ start all support container
-+ start ecs.* container
-+ change nginx container app mode
++ compose start ecs.* container
++ change nginx config, reload
 
 ### start errors
 + service mode: just display info and wait, start nothing
@@ -78,7 +76,7 @@ appliance gets build using packer
     + stop ecs.*
     + if was database-migrate
         + stop database
-    + revert to PRE_migrate snapshot
+        + revert to PRE_migrate snapshot
     + start old-container ecs.*
 
 #### database-migrate
@@ -97,12 +95,12 @@ appliance gets build using packer
 + update letsencrypt
 + update sessions in ecs container
 + update packages (unattended-upgrades)
-    + reboot machine if kernel update and sunday
+    + reboot machine if update-needs-restart and sunday
 + update aux container
     + download all updated container
     + stop ecs-*
     + for every updated container:
-        + stop container, migrate data (eg.pgcontainer), start container
+        + stop container, start container
     + start ecs.*
 + backup
     + assure non empty database

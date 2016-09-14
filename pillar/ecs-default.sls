@@ -2,12 +2,12 @@
 
 {% else %}
 ecs:
-  absolute_url_prefix: https://host.domain
-  authorative_domain: host.domain
-  allowed_hosts: host.domain
-  secure_proxy_ssl: true
+  absolute_url_prefix: http://localhost
+  authorative_domain: localhost
+  allowed_hosts: localhost
+  secure_proxy_ssl: false
 
-  debug: false
+  debug: true
   sentry_dsn:
   prometheus:
     enabled: true
@@ -61,7 +61,7 @@ ecs:
   firstrun:
     example_data: false
     user:
-      email: user@example.org
+      email: user@localhost
       first: first
       last: last
       cert_pass: "pwgen 16"
@@ -76,6 +76,6 @@ ecs:
       z="jo"
 
   authorized_keys: |
-      ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABQQDkGuAI7uACKaJkeSJGbUmLzGV6DQF/BJTWYhhzHKK7YHbHMMUGNK/AqYTaU301GPbzUaCfSkGlOJlmDEL7jWzZb81iTBt6uyRAv5PtPoyuugYkLIwmwBDqidlI/AaAaC8uDPAQcgGV+/4W+roDwO7LTdJDLZL7kDw5n1n5XgqLwjBASQRyTN3StePCzMEQvM21FbdmFberyK4LlEKU6a2p17T41cq7zOgbLut+1v6gAppuv0d6ZU0LFXUT1ABxueQdQeOwELvBBWbmkEFTMNWr54+4qReQhucxEMSnvIbTVvDTmCU8/71nSuVJZs5tCw9cDhWtN22AzrCLgjr88R4mp2xyH9ZE25IxtXwH+b8CQv/iHHdexy+9QTy4RR77pH929dhE3L0exgHrgJsMDgChEvgb/BPmpbcZ9RVyRoKpVQ== wuxxin@petit
+      # insert your ssh-keys here
 
 {% endif %}
