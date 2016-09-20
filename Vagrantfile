@@ -7,6 +7,15 @@ Vagrant.require_version ">= 1.6.0"
 $cpus = 2
 $memory = 1500
 $server_name = File.basename(File.expand_path(File.dirname(__FILE__)))
+$libvirt_management_network_name = "vagrant-libvirt"
+$libvirt_management_network_address = ""
+$libvirt_management_network_mac = nil
+$clouddrive_path = nil
+
+CUSTOM_CONFIG = File.join(File.dirname(__FILE__), "vagrant-include.rb")
+if File.exist?(CUSTOM_CONFIG)
+  require CUSTOM_CONFIG
+end
 
 Vagrant.configure(2) do |config|
     config.ssh.forward_agent = true
@@ -27,6 +36,14 @@ Vagrant.configure(2) do |config|
         lv.nic_model_type = "virtio"
         lv.video_type = "vmvga"
         lv.volume_cache = "none"
+        lv.management_network_name = $libvirt_management_network_name
+        lv.management_network_address = $libvirt_management_network_address
+        if $libvirt_management_network_mac
+            lv.management_network_mac = $libvirt_management_network_mac
+        end
+        if $clouddrive_path
+            lv.storage :file, :device => :cdrom, :allow_existing => true, :path => $clouddrive_path
+        end
     end
 
     config.vm.provider "virtualbox" do |vb, override|
@@ -42,6 +59,7 @@ Vagrant.configure(2) do |config|
         salt.log_level = "info"
         #salt.install_type = "git"
         #salt.install_args = "v2015.5.1"
+        #salt.bootstrap_options = "-F -c /tmp/ -P"
         salt.pillar({
             "builder" => {
                 "enabled" => true
