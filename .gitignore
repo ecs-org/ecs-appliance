@@ -7,3 +7,7 @@
 *~
 *.swp
 *.swo
+
+# ecs
+env.yml
+vagrant-include.rb
