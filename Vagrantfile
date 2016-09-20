@@ -1,12 +1,12 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-require 'fileutils'
+require "fileutils"
 Vagrant.require_version ">= 1.6.0"
 
 $cpus = 2
 $memory = 1500
-$server_name = File.expand_path(File.dirname(__FILE__)).split('/').last
+$server_name = File.basename(File.expand_path(File.dirname(__FILE__)))
 
 Vagrant.configure(2) do |config|
     config.ssh.forward_agent = true
@@ -25,8 +25,8 @@ Vagrant.configure(2) do |config|
         lv.cpus = $cpus
         lv.disk_bus = "virtio"
         lv.nic_model_type = "virtio"
-        lv.video_type = 'vmvga'
-        lv.volume_cache = 'none'
+        lv.video_type = "vmvga"
+        lv.volume_cache = "none"
     end
 
     config.vm.provider "virtualbox" do |vb, override|
@@ -48,5 +48,5 @@ Vagrant.configure(2) do |config|
             }
         })
     end
-    
+
 end
