@@ -52,6 +52,11 @@ Vagrant.configure(2) do |config|
         override.vm.box_url = "http://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-vagrant.box"
     end
 
+    config.vm.provision "shell", privileged:true, inline: <<-SHELL
+        # https://github.com/mitchellh/vagrant/issues/5673
+        hostnamectl set-hostname #{$server_name}
+    SHELL
+
     config.vm.provision :salt do |salt|
         salt.masterless = true
         salt.minion_config = "salt/minion"
