@@ -1,5 +1,6 @@
-{% if pillar file ecs-user-data.yml exists, parse that instead %}
-
+{% if salt['cmd.retcode']('test -e /app/env.yml') %}
+include:
+  - env
 {% else %}
 ecs:
   absolute_url_prefix: http://localhost

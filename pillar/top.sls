@@ -3,5 +3,4 @@ base:
     - common
     - builder
     - appliance
-    - ecs-default
-    
+    - default-env
