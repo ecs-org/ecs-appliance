@@ -18,7 +18,7 @@ openssh-server:
     - watch_in:
       - service: openssh-server
 
-{% from "ssh.lib.sls" import ssh_keys_update %}
+{% from "ssh/lib.sls" import ssh_keys_update %}
 
 {{ ssh_keys_update('root',
     pillar['adminkeys_present']|d(False),

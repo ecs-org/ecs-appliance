@@ -12,7 +12,3 @@ profile_packer:
       - sls: common
       - sls: qrcode
       - sls: packer
-
-final_stuff:
-  file.managed:
-    - name: cleanup.sh
