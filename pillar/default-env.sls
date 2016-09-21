@@ -1,4 +1,4 @@
-{% if salt['cmd.retcode']('test -e /app/env.yml') %}
+{% if salt['cmd.retcode']('test -e /app/env.yml') == 0 %}
 include:
   - env
 {% else %}
