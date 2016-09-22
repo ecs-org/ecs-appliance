@@ -4,7 +4,7 @@ include:
 default_kvm_settings:
   file.managed:
     - name: /etc/default/qemu-kvm
-    - content: |
+    - contents: |
         # To disable qemu-kvm's page merging feature, set KSM_ENABLED=0 and
         # sudo restart qemu-kvm
         KSM_ENABLED=1

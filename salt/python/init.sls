@@ -2,7 +2,9 @@ python:
   pkg.installed:
     - pkgs:
       - python
+      - python-setuptools
       - python3
+      - python3-setuptools
 {# refresh old "faulty" pip with version from pypi, as workaround for saltstack and probably others #}
 
 remove_faulty_pip:
