@@ -6,7 +6,7 @@ libvirt-grub-settings:
     - makedirs: true
     - contents: |
         GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX nohz=off transparent_hugepage=always"
-  cmd.run:
+  cmd.wait:
     - name: update-grub
     - watch:
       - file: libvirt-grub-settings
