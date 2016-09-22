@@ -1,7 +1,4 @@
-{% if salt['cmd.retcode']('test -e /app/env.yml') == 0 %}
-include:
-  - env
-{% else %}
+
 ecs:
   absolute_url_prefix: http://localhost
   authorative_domain: localhost
@@ -78,5 +75,3 @@ ecs:
 
   authorized_keys: |
       # insert your ssh-keys here
-
-{% endif %}
