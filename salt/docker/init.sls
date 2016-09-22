@@ -29,7 +29,7 @@ docker-grub-settings:
 
 docker:
   pkgrepo.managed:
-    - repo: 'deb http://apt.dockerproject.org/repo ubuntu-xenial main'
+    - name: 'deb http://apt.dockerproject.org/repo ubuntu-xenial main'
     - humanname: "Ubuntu docker Repository"
     - file: /etc/apt/sources.list.d/docker-xenial.list
     - keyid: 58118E89F3A912897C070ADBF76221572C52609D

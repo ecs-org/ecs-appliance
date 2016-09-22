@@ -3,5 +3,4 @@ backup:
     - pkgs:
       - duplicity
       - duply
-      - gpg
-      
+      - gnupg
