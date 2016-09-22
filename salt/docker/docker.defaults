@@ -14,38 +14,35 @@ export http_proxy="{{ salt['pillar.get']('http_proxy') }}"
 {%- set docker_opts=[] %}
 
 {%- if docker.network is defined %}
-
-  {%- if docker.network.dns.server is defined %}
-    {%- for s in docker.network.dns.server %}
-      {%- do docker_opts.append('--dns='+ s) %}
-    {%- endfor %}
-  {%- endif %}
-
-  {%- if docker.network.dns.search is defined  %}
-    {%- do docker_opts.append('--dns-search='+ docker.network.dns.search) %}
-  {%- endif %}
-
-  {%- if docker.network.bridge is defined %}
-    {%- do docker_opts.append('--bridge='+ docker.network.bridge) %}
-  {%- endif %}
-
-  {%- if docker.network.ipmasq is defined %}
-    {%- do docker_opts.append('--ip-masq='+ docker.network.ipmasq) %}
-  {%- endif %}
+    {%- if docker.network.dns.server is defined %}
+        {%- for s in docker.network.dns.server %}
+            {%- do docker_opts.append('--dns='+ s) %}
+        {%- endfor %}
+    {%- endif %}
+    {%- if docker.network.dns.search is defined  %}
+        {%- do docker_opts.append('--dns-search='+ docker.network.dns.search) %}
+    {%- endif %}
+    {%- if docker.network.bridge is defined %}
+        {%- do docker_opts.append('--bridge='+ docker.network.bridge) %}
+    {%- endif %}
+    {%- if docker.network.ipmasq is defined %}
+        {%- do docker_opts.append('--ip-masq='+ docker.network.ipmasq) %}
+    {%- endif %}
 {%- endif %}
 
-{%- if docker.storage.driver is defined %}
-  {%- do docker_opts.append('--storage-driver='+ docker.storage.driver) %}
-{%- endif %}
-
-{%- if docker.storage.dm is defined %}
-  {%- for o,d in docker.storage.dm.iteritems() %}
-    {%- do docker_opts.append('--storage-opt dm.'+ o+ '='+ d) %}
-  {%- endfor %}
+{%- if docker.storage is defined %}
+    {%- if docker.storage.driver is defined %}
+        {%- do docker_opts.append('--storage-driver='+ docker.storage.driver) %}
+    {%- endif %}
+    {%- if docker.storage.dm is defined %}
+        {%- for o,d in docker.storage.dm.iteritems() %}
+            {%- do docker_opts.append('--storage-opt dm.'+ o+ '='+ d) %}
+        {%- endfor %}
+    {%- endif %}
 {%- endif %}
 
 {%- if docker.extra is defined %}
-  {%- do docker_opts.append(docker.extra) %}
+    {%- do docker_opts.append(docker.extra) %}
 {%- endif %}
 
 # Use DOCKER_OPTS to modify the daemon startup options.
