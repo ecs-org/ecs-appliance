@@ -1,3 +1,6 @@
+include:
+  - python
+
 # we use only masterless salt, so no minion is needed
 salt-minion:
   service.dead:
@@ -56,3 +59,19 @@ set_locale:
     - name: locale-gen en_US.UTF-8
     - watch:
       - file: /etc/default/locale
+
+python3-yaml:
+  pkg.installed:
+    - require:
+      - sls: python
+
+/usr/local/bin/flatten_yaml.py:
+  file.managed:
+    - source: salt://common/flatten_yaml.py
+    - file_mode: "0755"
+    - require:
+      - pkg: python3-yaml
+
+/usr/local/etc/env.include:
+  file.managed:
+    - source: salt://common/env.include

@@ -1,6 +1,3 @@
-include:
-  - python
-
 application_user:
   group.present:
     - name: app
@@ -37,18 +34,3 @@ chown_app_app:
     - name: chown -R app:app /app
     - require:
       - user: application_user
-
-python3-yaml:
-  pkg.installed:
-    - require:
-      - sls: python
-
-copy_bin:
-  file.recurse:
-    - name: /app/bin
-    - source: salt://bin
-    - user: app
-    - group: app
-    - require:
-      - user: application_user
-      - pkg: python3-yaml
