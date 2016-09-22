@@ -9,7 +9,7 @@ encodes it in base32 and generates one alphanumeric qrcode,
 and put this qrcode inside a pdf,
 or if to large for one qrcode generates max 100 x Version 29 alphanumeric qrcodes
 and arranges them in a 2x2 matrix per page pdf
-writes it to ${datafile}.pdf
+writes it to \${datafile}.pdf
 
 Limits:
  * Single QRCode:
@@ -56,25 +56,6 @@ unittest() {
 }
 
 
-make_decode_manual() {
-    convert -family "Mono" text:- $1 <<"EOF"
-#!/bin/bash
-# decode example for debian/ubuntu
-# save and run this file under bash
-# replace input with your images (*.png or pdf)
-# replace output with your desired filename
-input="*.png"; output="file.data"
-export DEBIAN_FRONTEND=noninteractive
-apt-get update; apt-get install zbar-tools
-zbarimg --raw -q  "-S*.enable=0" "-Sqrcode.enable=1" $input |
-sort -n | cut -f 2 -d " " | tr -d "\n" |
-python -c "import sys, base64; \
-sys.stdout.write(base64.b32decode(sys.stdin.read()))" > $output
-EOF
-
-}
-
-
 data2pdf() {
     local a
     local fname=`readlink -f $1`
@@ -114,7 +95,8 @@ data2pdf() {
 
 
 if test "$1" = ""; then usage; fi
-if test "$1" = "--only-manual"; then make_decode_manual decode_manual.pdf; exit 0; fi
-if test "$1" = "--unittest"; then unittest; exit 0 ; fi
-options=""; if test "$1" = "--no-manual"; then options=$1; shift; fi
-data2pdf $1 $options
+if test "$1" = "--unittest"; then
+    unittest
+else
+    data2pdf $1
+fi
