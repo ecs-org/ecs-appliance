@@ -1,3 +1,3 @@
 include:
-  - common
-  - user
+  - .common
+  - .user
