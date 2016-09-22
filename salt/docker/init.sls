@@ -22,7 +22,7 @@ docker-grub-settings:
     - makedirs: true
     - contents: |
         GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX cgroup_enable=memory swapaccount=1"
-  cmd.run:
+  cmd.wait:
     - name: update-grub
     - watch:
       - file: docker-grub-settings
