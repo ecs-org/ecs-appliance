@@ -124,3 +124,30 @@ appliance gets build using packer
     + dos-mbr
     + p1 Boot ext4 label cloudimg-rootfs (10G)
     + used space ~ 900MB
+
+### ENV
+
+
++ FIXME in ecs.settings current: ecs_require_client_certs
+
+# set by builder
+# version:
+# git:
+#   rev:
+#   branch:
+
+# used by devserver
+# dev:
+#   autostart: true
+#   rebase_to: master
+#   pghero_install: false
+
+# only internal to settings.py
+# this list is incomplete
+# ca:
+#   root: "os.path.join(project_dir, '..', 'ecs-ca')"
+#   tracking:
+#     enabled: false
+#   download:
+#     cache:
+#       dir: "something"
