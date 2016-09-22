@@ -30,11 +30,11 @@ ecs:
     dump_filename: "" # if not empty, this file will be picked first
 
   local_settings: |
-      # imported from env.yml 
+      # imported from env.yml
       x=0
       z="jo"
 
-  secret:
+  secrets:
     common: 'ptn5xj+85fvd=d4u@i1-($z*otufbvlk%x1vflb&!5k94f$i3w'
     registration: '!brihi7#cxrd^twvj$r=398mdp4neo$xa-rm7b!8w1jfa@7zu_'
     password_reset: 'j2obdvrb-hm$$x949k*f5gk_2$1x%2etxhd!$+*^qs8$4ra3=a'
