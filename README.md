@@ -1,5 +1,11 @@
 # ECS-Appliance
 
+## fixme
++ FIXME in ecs.settings current: ecs_require_client_certs
+
+## knowhow
+salt-call --local state.highstate pillar='{"builder": {"enabled": true}, "appliance": {"enabled": true}}'
+
 ## Vagrant Appliance Builder
 
 "vagrant up" installs all packages needed for builder
@@ -128,7 +134,6 @@ appliance gets build using packer
 ### ENV
 
 
-+ FIXME in ecs.settings current: ecs_require_client_certs
 
 # set by builder
 # version:
