@@ -9,5 +9,6 @@
 *.swo
 
 # ecs
+.vagrant
 env.yml
 vagrant-include.rb
