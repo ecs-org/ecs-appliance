@@ -25,4 +25,4 @@ additional_builder_groups:
       - libvirtd
     - require:
       - sls: libvirt
-      - sls: user
+      - sls: common
