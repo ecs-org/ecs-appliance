@@ -1,6 +1,5 @@
 include:
   - common
-  - user
   - packer
   - libvirt
   - qrcode
@@ -12,7 +11,6 @@ profile_packer:
         export PACKER_CACHE_DIR=/tmp/packer_cache
     - require:
       - sls: common
-      - sls: user
       - sls: packer
 
 additional_builder_groups:

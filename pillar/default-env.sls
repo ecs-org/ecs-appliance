@@ -1,7 +1,7 @@
 ecs:
   absolute_url_prefix: https://localhost
   authorative_domain: localhost
-  allowed_hosts: ['localhost',]
+  allowed_hosts: "['localhost',]"
   secure_proxy_ssl: true
   client_certs_required: true
 

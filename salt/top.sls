@@ -3,7 +3,6 @@ base:
     - http_proxy
     - python
     - common
-    - user
     - guest-tools
     - ssh
     - extra

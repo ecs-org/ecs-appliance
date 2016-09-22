@@ -23,6 +23,7 @@ libvirt:
     - pkgs:
       - libvirt-bin
       - qemu-kvm
+      - qemu-utils
       - cgroup-bin
       - bridge-utils
   service.running:

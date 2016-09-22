@@ -2,10 +2,6 @@
 {% set source_hash="7d51fc5db19d02bbf32278a8116830fae33a3f9bd4440a58d23ad7c863e92e28" %}
 
 packer:
-  pkg.installed:
-    - pkgs:
-      - qemu-utils
-      - qemu-kvm
   file.directory:
     - name: /usr/local/share/packer-v{{ version }}-linux-amd64
     - makedirs: true
