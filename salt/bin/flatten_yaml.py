@@ -13,8 +13,7 @@ except ImportError as e:
 
 
 def usage():
-    print('''
-usage: {0} {root|.} [prefix] [postfix] < data.yml
+    print("usage: {0} ".format(sys.argv[0])+ '''{root|.} [prefix] [postfix] < data.yml
 
 reads (non array) yaml from stdin,
 select optional root to filter yaml or "." for all,
@@ -24,7 +23,7 @@ output {prefix}{KEY_NAME}='{shlex quoted value}'{postfix} to stdout
 
 program will exit with code 1 on error (empty parameter, missing library)
 
-  '''.format(sys.argv[0]))
+  ''')
     sys.exit(1)
 
 
