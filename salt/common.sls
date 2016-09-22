@@ -52,7 +52,7 @@ system_timezone:
         LC_MESSAGES=POSIX
 
 set_locale:
-  cmd.run:
-    - name: locale-gen en_US.UTF-8 && dpkg-reconfigure locales
-    - require:
+  cmd.wait:
+    - name: locale-gen en_US.UTF-8
+    - watch:
       - file: /etc/default/locale
