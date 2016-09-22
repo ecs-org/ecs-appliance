@@ -2,16 +2,14 @@
 
 usage() {
     cat <<EOF
-Usage: $0 [--no-manual] datafile
+Usage: $0 datafile
 
 takes (compressed) binary data,
 encodes it in base32 and generates one alphanumeric qrcode,
 and put this qrcode inside a pdf,
 or if to large for one qrcode generates max 100 x Version 29 alphanumeric qrcodes
 and arranges them in a 2x2 matrix per page pdf
-
-Option:
- * --no-manual : do NOT include a help page how to decode the qrcode PDF as last page of the pdf
+writes it to ${datafile}.pdf
 
 Limits:
  * Single QRCode:
@@ -36,6 +34,7 @@ EOF
 
 
 unittest() {
+    local a x
     for a in 2110 4200 19900 50000 114100; do
         x="test${a}"
         echo "a: $a x: $x"
@@ -48,14 +47,19 @@ unittest() {
         zbarimg --raw -q "-S*.enable=0" "-Sqrcode.enable=1" ${x}.pdf |
             sort -n | cut -f 2 -d " " | tr -d "\n" | python -c "import sys, base64; sys.stdout.write(base64.b32decode(sys.stdin.read()))" > ${x}.new
         diff $x ${x}.new
+        if test $? -eq 0; then
+            rm $x ${x}.new $x.pdf
+        else
+            echo "error: $x and $x.new differ, leaving $x $x.new and $x.pdf for analysis"
+        fi
     done
 }
 
 
 make_decode_manual() {
-    convert -font "DejaVu Sans Mono" text:- $1 <<"EOF"
+    convert -family "Mono" text:- $1 <<"EOF"
 #!/bin/bash
-# decode target: debian/ubuntu machine
+# decode example for debian/ubuntu
 # save and run this file under bash
 # replace input with your images (*.png or pdf)
 # replace output with your desired filename
@@ -72,9 +76,10 @@ EOF
 
 
 data2pdf() {
-    fname=`readlink -f $1`
-    fbase=`basename $fname`
-    fsize=`stat -c "%s" $fname`
+    local a
+    local fname=`readlink -f $1`
+    local fbase=`basename $fname`
+    local fsize=`stat -c "%s" $fname`
 
     if test ! -f $fname; then
         echo "ERROR: could not find datafile $fname; call $0 for usage information"
@@ -86,26 +91,20 @@ data2pdf() {
         exit 3
     fi
 
-    tempdir=`mktemp -d`
+    local tempdir=`mktemp -d`
     if test ! -d $tempdir; then echo "ERROR: creating tempdir"; exit 10; fi
-    if test "${tempdir:0:5}" != "/tmp/"; then echo "ERROR: creating tempdir"; exit 10; fi
+    if test "${tempdir:0:5}" != "/tmp/"; then echo "ERROR: creating tempdir (not inside /tmp: $tempdir)"; exit 10; fi
 
     if test $fsize -le 2110; then
         cat $fname | python -c "import sys, base64; sys.stdout.write(base64.b32encode(sys.stdin.read()))" | qrencode -o $tempdir/$fbase.png -l M -i
+        montage -label '%f' -page A4 -geometry +10 $tempdir/$fbase.png ${fbase}.pdf
     else
         cat $fname | python -c "import sys, base64; sys.stdout.write(base64.b32encode(sys.stdin.read()))" | split -a 2 -b 1826 -d - $tempdir/$fbase-
         for a in `ls $tempdir/$fbase-* | sort -n`; do
             echo -n "${a: -2:2} " | cat - $a | qrencode -o $tempdir/`basename $a`.png -l M -i
         done
-    fi
-    list=`ls $tempdir/$fbase*.png | sort -n`
-    montage -label '%f' -page A4 -tile 2x2 -geometry +10 $list $tempdir/${fbase}.pdf
-
-    if test "$2" = "--no-manual"; then
-        cp $tempdir/${fbase}.pdf ${fbase}.pdf
-    else
-        make_decode_manual $tempdir/decode_manual.pdf
-        pdftk $tempdir/${fbase}.pdf $tempdir/decode_manual.pdf cat output ${fbase}.pdf
+        list=`ls $tempdir/$fbase*.png | sort -n | tr "\n" " "`
+        montage -label '%f' -page A4 -tile 2x2 -geometry +10 $list ${fbase}.pdf
     fi
 
     if test -d $tempdir; then
@@ -115,6 +114,7 @@ data2pdf() {
 
 
 if test "$1" = ""; then usage; fi
+if test "$1" = "--only-manual"; then make_decode_manual decode_manual.pdf; exit 0; fi
 if test "$1" = "--unittest"; then unittest; exit 0 ; fi
 options=""; if test "$1" = "--no-manual"; then options=$1; shift; fi
 data2pdf $1 $options
