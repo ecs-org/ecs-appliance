@@ -30,4 +30,4 @@ libvirt:
     - enable: True
     - require:
       - pkg: libvirt
-      - sls: .kernel
+      - sls: libvirt.kernel

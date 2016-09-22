@@ -8,8 +8,6 @@ include:
 profile_packer:
   file.append:
     - name: /app/.profile
-    - user: app
-    - group: app
     - text: |
         export PACKER_CACHE_DIR=/tmp/packer_cache
     - require:
@@ -29,3 +27,4 @@ additional_builder_groups:
       - libvirtd
     - require:
       - sls: libvirt
+      - sls: user
