@@ -1,10 +1,10 @@
 {% if salt['pillar.get']('http_proxy', '') != '' %}
 
   {% if salt['grains.get']('os_family') == "Debian" %}
-/etc/apt/apt.conf.d/02proxy:
+/etc/apt/apt.conf.d/01proxy:
   file.managed:
     - contents: |
-        Acquire::http { Proxy "{{ salt['pillar.get']('http_proxy') }}"; };
+        Acquire::http::Proxy "{{ salt['pillar.get']('http_proxy') }}";
     - order: 5
   {% endif %}
 
