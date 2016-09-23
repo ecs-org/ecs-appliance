@@ -1,5 +1,4 @@
 include:
-  - common
   - python
 
 docker-defaults:
@@ -34,8 +33,6 @@ docker:
     - file: /etc/apt/sources.list.d/docker-xenial.list
     - keyid: 58118E89F3A912897C070ADBF76221572C52609D
     - keyserver: pgp.mit.edu
-    - require:
-      - pkg: ubuntu_ppa_support
 
   pkg.installed:
     - pkgs:
