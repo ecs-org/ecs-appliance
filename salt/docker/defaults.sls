@@ -1,6 +1,6 @@
 
 {% set docker_opts=[] %}
-{% for s in salt['pillar.get']('docker:network:dns:server', {}) %}
+{% for s in salt['pillar.get']('docker:network:dns:server', []) %}
     {% do docker_opts.append('--dns='+ s) %}
 {% endfor %}
 {% if salt['pillar.get']('docker:network:dns:search', None) %}
