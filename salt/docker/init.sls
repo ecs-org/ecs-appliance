@@ -1,13 +1,6 @@
 include:
   - python
-
-docker-defaults:
-  file.managed:
-    - name: /etc/default/docker
-    - template: jinja
-    - source: salt://docker/docker.defaults
-    - context:
-      docker: {{ salt['pillar.get']('docker', {}) }}
+  - .defaults
 
 docker-service:
   file.managed:
@@ -50,8 +43,9 @@ docker:
       - pkg: docker
       - cmd: docker-grub-settings
       - pip: docker-compose
+      - sls: docker.defaults
     - watch:
-      - file: docker-defaults
+      - file: /etc/default/docker
       - file: docker-service
 
 docker-compose:
