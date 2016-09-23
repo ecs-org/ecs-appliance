@@ -69,7 +69,7 @@ python3-yaml:
 /usr/local/bin/flatten_yaml.py:
   file.managed:
     - source: salt://common/flatten_yaml.py
-    - file_mode: "0755"
+    - mode: "0755"
     - require:
       - pkg: python3-yaml
 
