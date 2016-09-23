@@ -1,6 +1,8 @@
 # ECS-Appliance
 
 ## fixme
++ env.include does not work as nonroot if it tries to mount could-init iso's
+
 + FIXME in ecs.settings current: ecs_require_client_certs
 
 ## knowhow
