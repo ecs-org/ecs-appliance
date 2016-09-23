@@ -1,10 +1,10 @@
 base:
   '*':
     - http_proxy
-    - python
-    - common
     - guest-tools
     - ssh
+    - python
+    - common
     - extra
 
   'appliance:enabled:true':
