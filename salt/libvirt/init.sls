@@ -57,4 +57,3 @@ libvirt:
     - enable: True
     - require:
       - pkg: libvirt
-      - sls: libvirt.kernel
