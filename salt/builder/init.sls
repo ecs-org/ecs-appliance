@@ -18,7 +18,6 @@ additional_builder_groups:
     - name: app
     - gid: app
     - home: /app
-    - shell: /bin/bash
     - remove_groups: False
     - groups:
       - kvm
