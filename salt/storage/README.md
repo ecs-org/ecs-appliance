@@ -1,4 +1,4 @@
-# setup harddisk storage
+# setup storage
 
 Features:
  * parted:      (gpt/mbr) partition creation
@@ -37,7 +37,8 @@ storage:
   parted:
 {% for a in ["/dev/vdb", "/dev/vdc"] %}
     {{ a }}:
-      label: gpt
+      {# if you leave out type, no partition table will be recreated #}
+      type: gpt {# or "mbr" for [ms]dos type boot record #}
       parts:
         - name: bios_grub
           start: 1024kiB
@@ -63,9 +64,13 @@ storage:
 {% for a,b in [(0, 2), (1, 4)] %}
     "/dev/md{{ a }}":
       - level=1
-      - raid-devices=2
-      - /dev/vdb{{ b }}
-      - /dev/vdc{{ b }}
+      - devices:
+        - /dev/vdb{{ b }}
+        - /dev/vdc{{ b }}
+      {#
+      - optional kwargs passed to mdadm.
+      #}
+
 {% endfor %}
 
   crypt:
@@ -78,8 +83,11 @@ storage:
       - /dev/mapper/cryptlvm
     vg:
       vg0:
-        devices:
+        - devices:
           - /dev/mapper/cryptlvm
+        {#
+        - optional kwargs passed to lvm.
+        #}
     lv:
       host_root:
         vgname: vg0
@@ -99,22 +107,26 @@ storage:
       fstype: ext3
     /dev/mapper/vg0-host_root:
       fstype: ext4
+      options: {# passed to mkfs #}
+        - "-L my_root"
     /dev/mapper/vg0-host_swap:
       fstype: swap
     /dev/mapper/vg0-images:
       fstype: ext4
+      options:
+        - "-L images"
     /dev/mapper/vg0-cache:
       fstype: ext4
 
   mount:
     /mnt/images:
       device: /dev/mapper/vg0-images
-      mkmnt: true
       fstype: ext4
+      mkmnt: true {# additional args for mount.mounted #}
     /mnt/cache:
       device: /dev/mapper/vg0-cache
-      mkmnt: true
       fstype: ext4
+      mkmnt: true
 
   swap:
     - /dev/mapper/vg0-host_swap
@@ -126,7 +138,7 @@ storage:
         - "templates"
         - "iso"
         - "tmp"
-      options:
+      options: {# passed to file.directory #}
         - group: libvirtd
         - user: libvirt-qemu
         - dir_mode: 775
@@ -140,10 +152,33 @@ storage:
       watch_in: "service: apt-cacher-ng"
 ```
 
-## Options
+## Additional Parameter
+
+directory:
+  - "options" parameter: passed to file.directory
+mount:
+  - optional args for mount.mounted
+format:
+  - "options" parameter: passed to mkfs
+lvm vg:
+  - optional kwargs passed to lvm.vg_present
+lvm lv:
+  - optional kwargs passed to lvm.lv_present
+mdadm:
+  - optional kwargs passed to mdadm.raid_present
+
+Example:
+```
+  lvm:
+    lv:
+      test:
+        vgname: vg0
+        size: 10g
+        wipesignatures: yes
+```
 
 ### for "lvm: lv", "format", "directories", "relocate"
-  * option: watch_in/require_in/require/watch
+  * parameter: watch_in/require_in/require/watch
     if set will insert a "watch/require/_in" into the state
 
 Example:
@@ -156,7 +191,7 @@ Example:
 ```
 
 ### for "directories"
-  * option: onlyif/unless
+  * parameter: onlyif/unless
     * will insert a onlyif/unless state requirement
 
 Example:
@@ -176,7 +211,7 @@ Example:
 ```
 
 ### for "lvm:lv"
-  * option: expand
+  * parameter: expand
     * if set to true and volume exists,
       it will try to expand the existing lv to the desired size,
       ignoring any other parameters beside size and vgname.
@@ -192,17 +227,4 @@ Example:
         vgname: vg0
         size: 12g
         expand: true
-```
-
-### other additional options
-  * some (!list them) states try to expose additional arguments to the primary underlying state.
-
-Example:
-```
-  lvm:
-    lv:
-      test:
-        vgname: vg0
-        size: 10g
-        wipesignatures: y
 ```

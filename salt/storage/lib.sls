@@ -47,18 +47,29 @@
 {% macro storage_parted(input_data) %}
 
   {% for item, data in input_data.iteritems() %}
-    {% set part_label = 'gpt' if data.label|d('') else data.label %}
-    {% set blkid_label = 'dos' if part_label == 'msdos' else part_label %}
+    {% set part_type = 'msdos' if data.type|d('') == 'mbr' else data.type|d('') %}
+    {% set blkid_type = 'dos' if part_type == 'msdos' else part_type %}
 
 "parted-{{ item }}":
   pkg.installed:
     - name: parted
+
+    {% if part_type != '' %}
   cmd.run:
-    - name: parted --script {{ item }} mklabel {{ part_label }}
+    - name: parted --script {{ item }} mklabel {{ part_type }}
     - onlyif: 'test "$(blkid -p -s PTTYPE -o value {{ item }})" == ""'
-    - unless: 'test "$(blkid -p -s PTTYPE -o value {{ item }})" == "{{ blkid_label }}"'
+    - unless: 'test "$(blkid -p -s PTTYPE -o value {{ item }})" == "{{ blkid_type }}"'
     - require:
       - pkg: "parted-{{ item }}"
+      {%- if data.parts|d('') %}
+        {%- set x=1 %}
+    - require_in:
+        {%- for part in data.parts|d([]) %}
+      - cmd: "parted-{{ item }}-{{ x }}-{{ part.name }}"
+          {%- set x = x +1 %}
+        {%- endfor %}
+      {%- endif}
+    {% endif}
 
     {% if data.parts|d('') %}
       {% set x=1 %}
@@ -96,13 +107,18 @@
     - name: mdadm
   raid.present:
     - name: {{ item }}
-    - opts:
-    {%- for sub in data %}
-      - {{ sub }}
+    - level: {{ data['level'] }}
+    - devices:
+    {%- for device in data['devices'] %}
+      - {{ device }}
+    {%- endfor %}
+    {%- for sub, subvalue in data.iteritems() %}
+      {%- if sub not in ['level', 'devices'] %}
+    - {{ sub }}{% if subvalue|d('') %}: {{ subvalue }}{% endif %}
+      {%- endif %}
     {%- endfor %}
     - require:
       - pkg: "mdadm-raid-{{ item }}"
-
   {% endfor %}
 
 {% endmacro %}
@@ -160,12 +176,15 @@
     - name: lvm2
   lvm.vg_present:
     - name: {{ item }}
-    - devices: {% for device in input_data.vg[item]['devices'] %}{{ device }}{% endfor %}
-      {%- if input_data.vg[item]['options']|d({}) %}
-        {%- for option, optvalue in input_data.vg[item]['options'].iteritems() %}
+    - devices:
+      {%- for device in data['devices'] %}
+      - {{ device }}
+      {%- endfor %}
+      {%- for option, optvalue in data.iteritems() %}
+        {%- if option not in ['devices'] %}
     - {{ option }}{% if optvalue|d('') %}: {{ optvalue }}{% endif %}
-        {%- endfor %}
-      {%- endif %}
+        {%- endif %}
+      {%- endfor %}
     - require:
       - pkg: "lvm-vg-{{ item }}"
     {% endfor %}
@@ -237,10 +256,10 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
 
   {% for item, data in input_data.iteritems() %}
     {% set mkfs = 'mkswap' if data.fstype == 'swap' else 'mkfs.'+ data.fstype %}
-    {% set opts = data.opts if data.opts|d('') else "" %}
+    {% set options = data.options if data.options|d('') else "[]" %}
 "format-{{ item }}":
   cmd.run:
-    - name: '{{ mkfs }} {{ opts }} {{ item }}'
+    - name: '{{ mkfs }} {%- for option in options %}{{ option }} {%- endfor %} {{ item }}'
     - onlyif: 'test "$(blkid -p -s TYPE -o value {{ item }})" == ""'
     - unless: 'test "$(blkid -p -s TYPE -o value {{ item }})" == "{{ data.fstype }}"'
     {%- for a in ('watch_in', 'require_in', 'require', 'watch') %}
