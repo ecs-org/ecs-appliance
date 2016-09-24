@@ -2,7 +2,6 @@
 
 ## fixme
 + env.include does not work as nonroot if it tries to mount could-init iso's
-
 + FIXME in ecs.settings current: ecs_require_client_certs
 
 ## knowhow
@@ -12,20 +11,20 @@ salt-call --local state.highstate pillar='{"builder": {"enabled": true}, "applia
 
 "vagrant up" installs all packages needed for builder
 
-+ config new
++ config_new
     + creates a env.yml with all key material inside
     + see env.yml for Examples
 
-+ config build
++ config_build
     + creates several iso's with user-data and meta-data for cloud-init
     + creates a pdf to print with qrcodes of the config data for offline storage
 
-+ image build [provider]
++ image_build [provider]
     + calls packer to build a ecs machine
-+ image upload [provider]
-+ image deploy [provider]
++ image_upload [provider]
++ image_deploy [provider]
 
-+ deploy rescueshell_install user@host env.yml
++ rescueshell_install user@host env.yml
     + ssh into target user@host,
     + partition harddisk as stated in env.yml
     + copy image files to harddisk,
@@ -37,37 +36,6 @@ salt-call --local state.highstate pillar='{"builder": {"enabled": true}, "applia
 ## Appliance
 
 appliance gets build using packer
-
-
-### start appliance
-+ look for user-data, load env.yml, put into environment
-+ start local nginx
-+ update letsencrypt
-+ run salt-call appliance.storage
-  + look for storage, decide if need to partition storage
-+ look if postgres-data is found /data/postgres-ecs/*
-+ start local postgres
-+ no postgres-data or postgres-data but database is empty:
-    + ECS_RECOVER_FROM_BACKUP ?
-        + yes: duplicity restore to /data/ecs-files and /tmp/pgdump
-    + ECS_RECOVER_FROM_DUMP ?
-        + yes: pgimport from pgdump
-    + restored from somewhere ?
-        + premigrate (if old dump) and migrate
-    + not restored from dump ?
-        + yes: create new database
-+ compose start ecs.* container
-+ change nginx config, reload
-
-### start errors
-+ service mode: just display info and wait, start nothing
-    (get cert,self-sign if fail) display simple http&s page: Service not available
-    + startup ("Appliance starting")
-    + no user-data found ("no user-data found")
-    + no storage found ("no storage found")
-    + recover_from_backup but error while duplicity restore/connect ("recover from backup error")
-    + update in progress ("Update in progress")
-    + manual service ("Manual Service")
 
 ### update-appliance
 + clone neweset git ecs-appliance to workdir
@@ -134,8 +102,6 @@ appliance gets build using packer
     + used space ~ 900MB
 
 ### ENV
-
-
 
 # set by builder
 # version:
