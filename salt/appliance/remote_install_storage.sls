@@ -8,7 +8,7 @@
     {% load_yaml as custom_storage %}
   parted:
     /dev/vda:
-      label: mbr
+      type: mbr
       parts:
         - name root
           start: 1024kiB
@@ -27,7 +27,7 @@
   parted:
       {% for a in ["/dev/vdb", "/dev/vdc"] %}
     {{ a }}:
-      label: gpt
+      type: gpt
       parts:
         - name: bios_grub
           start: 1024kiB

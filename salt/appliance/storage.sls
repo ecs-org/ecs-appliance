@@ -1,17 +1,24 @@
 {% from 'storage/lib.sls' import storage_setup with context %}
 
 
-{% if not salt['files.exists']('/dev/disk/by-label/ecs-volatile') %}
-  {% load_yaml as custom_storage %}
-format:
-  /dev/{{ pillar.get('ecs:storage:volatile:device') }}:
-    fstype: ext4
-    opts: "-L ecs-volatile"
+{% if (not salt['pillar.get']("appliance:storage:ignore:volatile",false) and
+       not salt['files.exists']('/dev/disk/by-label/ecs-volatile')) or
+      (not salt['pillar.get']("appliance:storage:ignore:data",false) and
+       not salt['files.exists']('/dev/disk/by-label/ecs-data')) ) %}
+
+  {{ storage_setup(salt['pillar.get']("appliance:storage:setup")) }}
+{% endif %}
+
+
+{% load_yaml as volatile_prepare %}
+  {% if salt['pillar.get']("appliance:storage:ignore:volatile",false) %}
 mount:
   /volatile:
     device: /dev/disk/by-label/ecs-volatile
     mkmnt: true
     fstype: ext4
+  {% endif %}
+
 directories:
   /volatile:
     names:
@@ -29,7 +36,9 @@ directories:
       - user: app
       - dir_mode: 775
       - file_mode: 664
+{% if salt['pillar.get']("appliance:storage:ignore:volatile",false) %}
     onlyif: mountpoint -q /volatile
+{% endif %}
 relocate:
   /var/lib/docker:
     destination: /volatile/docker
@@ -48,43 +57,18 @@ relocate:
   #   destination: /volatile/tmp
   # /var/tmp:
   #  destination: /volatile/var/tmp
-  {% endload %}
-
-  {{ storage_setup(custom_storage) }}
-{% endif %}
+{% endload %}
+{{ storage_setup(volatile_prepare) }}
 
 
-{% if not salt['files.exists']('/dev/disk/by-label/ecs-data') %}
-  {% load_yaml as custom_storage %}
-    {% if pillar.get('ecs:storage:permanent:snapshot_type', 'unknown') == 'lvm' %}
-lvm:
-  pv:
-    - /dev/{{ pillar.get('ecs:storage:permanent:device') }}
-  vg:
-    vgdata:
-      devices:
-        - /dev/{{ pillar.get('ecs:storage:permanent:device') }}
-  lv:
-    lv_ecs:
-      vgname: vgdata
-      size: "80%"
-format:
-  /dev/mapper/vgdata-lvdata:
-    fstype: ext4
-    opts: "-L ecs-data"
-
-    {% else %}
-format:
-  /dev/{{ pillar.get('ecs:storage:permanent:device') }}:
-    fstype: ext4
-    opts: "-L ecs-data"
-    {% endif %}
-
+{% load_yaml as data_prepare %}
+  {% if salt['pillar.get']("appliance:storage:ignore:data",false) %}
 mount:
   /data:
     device: /dev/disk/by-label/ecs-data
     mkmnt: true
     fstype: ext4
+  {% endif %}
 directories:
   /data:
     names:
@@ -96,8 +80,8 @@ directories:
       - user: app
       - dir_mode: 775
       - file_mode: 664
+  {% if salt['pillar.get']("appliance:storage:ignore:data",false) %}
     onlyif: mountpoint -q /data
-
-  {% endload %}
-  {{ storage_setup(custom_storage) }}
-{% endif %}
+  {% endif %}
+{% endload %}
+{{ storage_setup(data_prepare) }}
