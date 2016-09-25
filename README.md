@@ -103,23 +103,25 @@ appliance gets build using packer
 
 ### ENV
 
+```
 # set by builder
-# version:
-# git:
-#   rev:
-#   branch:
+version:
+  git:
+    rev:
+    branch:
 
 # used by devserver
-# dev:
-#   autostart: true
-#   rebase_to: master
+dev:
+    autostart: true
+    rebase_to: master
 
 # only internal to settings.py
 # this list is incomplete
-# ca:
-#   root: "os.path.join(project_dir, '..', 'ecs-ca')"
-#   tracking:
-#     enabled: false
-#   download:
-#     cache:
-#       dir: "something"
+ca:
+    root: "os.path.join(project_dir, '..', 'ecs-ca')"
+tracking:
+    enabled: false
+download:
+    cache:
+        dir: "something"
+```
