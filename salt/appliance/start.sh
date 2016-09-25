@@ -1,18 +1,31 @@
 #!/bin/bash
 
+nginx_redirect_to_status () {
+    # call(Title, Text)
+    # or call("--disable")
+    if test "$1" = "--disable"; then
+        
+    else
+        echo "nginx redirect to: $1 $2"
+        cat /etc/nginx/system/template.html | sed -re /
+    fi
+}
+
+appliance_startup () {
+    nginx_redirect_to_status "Appliance Startup" "starting up, please wait"
+}
+
 # activate nginx, display "in startup"
-nginx_redirect_to starting.html
 systemctl start nginx
+appliance_startup
 
 
 # read userdata
 . /usr/local/etc/env.include
 userdata_yaml=$(get_userdata)
 if test $? -ne 0; then
-    echo -n "error reading userdata: "
-    printf "%s" "$userdata_yaml"| grep USERDATA_ERR
-    nginx_redirect_to no-userdata.html
-    systemctl reload nginx
+    err=$(printf "error reading userdata: %s" "$userdata_yaml"| grep USERDATA_ERR)
+    nginx_redirect_to_status "Appliance Error" "$err"
     exit 1
 fi
 # write to /app/active-env.yml
@@ -23,15 +36,15 @@ ENV_YML=/app/active-env.yml update_env_from_userdata
 
 # check if standby is true
 if test "$($APPLIANCE_STANDBY| tr A-Z a-z)" = "true"; then
-    nginx_redirect_to standby.html
+    nginx_redirect_to_status "Appliance Standby" "Appliance is in standby, please contact sysadmin"
     exit 1
 fi
 
 
 # update all packages
-nginx_redirect_to update-in-progress.html
+nginx_redirect_to_status "Appliance Update Packages" "system packages update, please wait"
 echo "fixme: update all packages"
-
+appliance_startup
 
 # storage setup
 volatile_mount=$(findmnt -S "LABEL=ecs-volatile" -f -l -n -o "TARGET")
@@ -41,22 +54,22 @@ ignore_data="$($APPLIANCE_STORAGE_IGNORE_DATA | tr A-Z a-z)"
 
 if test "$volatile_mount" = "" -a  "$ignore_volatile" != "true" -o "$data_mount" = "" -a "$ignore_data" != "true"; then
     if test "$volatile_mount" = "" -a "$ignore_volatile" != "true" then
-        echo "error finding mount for ecs-volatile filesystem"
+        echo "warning: could not find mount for ecs-volatile filesystem"
     fi
     if test "$data_mount" = "" -a "$ignore_data" != "true" then
-        echo "error finding mount for ecs-data filesystem"
+        echo "warning: could not find mount for ecs-data filesystem"
     fi
     if test -z "$storage_setup"; then
-        echo "error, empty or nonexisting ECS_STORAGE_SETUP, but storage is not ready"
-        nginx_redirect_to no-storage.html
+        errstr="Storage Setup: Error, empty or nonexisting ECS_STORAGE_SETUP, but storage is not ready"
+        nginx_redirect_to_status "Appliance Error" "$errstr"
         exit 1
     else
         echo "calling appliance.storage setup"
         salt-call state.sls appliance.storage
         err=$?
         if test "$err" -ne 0; then
-            echo "error, appliance.storage setup returned error: $err"
-            nginx_redirect_to no-storage.html
+            errstr="Storage Setup: Error, appliance.storage setup failed with error: $err"
+            nginx_redirect_to_status "Appliance Error" "$errstr"
             exit 1
         fi
     fi
@@ -97,4 +110,4 @@ fi
 + compose start ecs.* container
 + enable crontab entries (into container crontabs)
 + change nginx config, reload
-nginx_redirect_to --disable
+nginx_redirect_to_status --disable
