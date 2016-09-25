@@ -113,7 +113,6 @@ appliance gets build using packer
 # dev:
 #   autostart: true
 #   rebase_to: master
-#   pghero_install: false
 
 # only internal to settings.py
 # this list is incomplete
