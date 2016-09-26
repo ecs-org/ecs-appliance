@@ -1,0 +1,5 @@
+server_name localhost
+ssl_certificate /etc/nginx/app/snakeoil.cert.pem;
+ssl_certificate_key /etc/nginx/app/snakeoil.key.pem;
+# client certificate setup
+ssl_verify_client off;
