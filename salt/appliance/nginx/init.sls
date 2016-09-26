@@ -1,10 +1,17 @@
 nginx:
   pkg.installed:
-    - name: nginx
+    - pkgs:
+      - nginx
+      - ssl-cert
+  file.directory:
+    - name: /etc/nginx/app
+    - require:
+      - pkg: nginx
   service.running:
     - enable: true
     - require:
-      - pkg: nginx
+      - file: nginx
+      - file: /etc/nginx/app/server.identity
     - watch:
       - file: /etc/nginx/nginx.conf
       - file: /etc/nginx/app/server.identity
@@ -19,9 +26,18 @@ nginx:
   file.managed:
     - source: salt://appliance/nginx/nginx.conf
 
+generate_snakeoil:
+  cmd.run:
+    - name: make-ssl-cert generate-default-snakeoil --force-overwrite
+    - unless: test -f /etc/ssl/private/ssl-cert-snakeoil.key
+    - require:
+      - pkg: nginx
+
 /etc/nginx/app/server.identity:
   file.symlink:
     - source: /etc/nginx/app/snakeoil.identity
+    - require:
+      - cmd: generate_snakeoil
 
 /etc/nginx/app/server.cert.pem:
   file.symlink:
@@ -38,8 +54,3 @@ nginx:
 /etc/nginx/app/crl.pem:
   file.symlink:
     - source: /data/ecs-ca/crl.pem
-
-/etc/nginx/app/snakeoil.cert.pem:
-
-/etc/nginx/app/snakeoil.key.pem:
-  
