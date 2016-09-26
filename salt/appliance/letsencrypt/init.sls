@@ -1,4 +1,3 @@
-{% if salt['pillar.get']('letsencrypt:enabled', false) %}
 
 /usr/local/bin/dehydrated:
   file.managed:
@@ -28,19 +27,3 @@
         {%- for i in salt['pillar.get']('letsencrypt:domains', {}) %}
         {{ i }}
         {%- endfor %}
-
-  {% if salt['pillar.get']('letsencrypt:config:apache', true) %}
-/etc/apache2/conf-available/10-wellknown-acme.conf:
-  file.managed:
-    - source: salt://letsencrypt/apache.conf
-    - makedirs: true
-
-/etc/apache2/conf-enabled/10-wellknown-acme.conf:
-  file.symlink:
-    - target: /etc/apache2/conf-available/10-wellknown-acme.conf
-    - makedirs: true
-
-  {% endif %}
-
-
-{% endif %}
