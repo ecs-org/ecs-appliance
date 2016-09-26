@@ -73,6 +73,8 @@ directories:
   /data:
     names:
       - ecs-storage-vault
+      - ecs-ca
+      - ecs-letsencrypt
       - container/ecs-postgres
       - ecs-pgdump
     options:

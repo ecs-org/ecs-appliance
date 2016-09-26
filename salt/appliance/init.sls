@@ -1,7 +1,8 @@
 include:
   - docker
-  - backup
-  - letsencrypt
+  - .backup
+  - .letsencrypt
+  - .nginx
 
 {#
   - nginx

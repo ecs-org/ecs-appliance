@@ -38,9 +38,8 @@ salt-call --local state.highstate pillar='{"builder": {"enabled": true}, "applia
 appliance gets build using packer
 
 ### update-appliance
-+ clone neweset git ecs-appliance to workdir
-+ run update from there, update will move to /app
-+ run state.highstate
++ git fetch , git checkout in /app/appliance
++ run salt-call state.highstate
 
 ### update-ecs
 + build new ecs.* container
@@ -68,17 +67,17 @@ appliance gets build using packer
 + add a onetime cronjob to shutdown clone and delete CLONE snapshot after 3 days
 
 ### cron-jobs
-+ update letsencrypt
-+ update sessions in ecs container
-+ update packages (unattended-upgrades)
++ local: update letsencrypt
++ ecs-container: update/cleanup sessions
++ local: update packages (unattended-upgrades)
     + reboot machine if update-needs-restart and sunday
-+ update aux container
++ local: update aux container
     + download all updated container
     + stop ecs-*
     + for every updated container:
         + stop container, start container
     + start ecs.*
-+ backup
++ local: backup
     + assure non empty database
     + assure non empty ecs-files
     + pgdump to temp

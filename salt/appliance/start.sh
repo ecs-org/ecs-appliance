@@ -3,11 +3,20 @@
 nginx_redirect_to_status () {
     # call(Title, Text)
     # or call("--disable")
+    local templatefile=/etc/nginx/app/app-template.html
+    local resultfile=/var/www/html/app.html
+    local title text
     if test "$1" = "--disable"; then
-        
+        if test -e $resultfile; then
+            rm -f $resultfile
+        fi
     else
         echo "nginx redirect to: $1 $2"
-        cat /etc/nginx/system/template.html | sed -re /
+        title=$(echo "$1" | tr / \\/)
+        text=$(echo "$2" | tr / \\/)
+        cat $templatefile |
+            sed -re "s/\{\{ ?title ?\}\}/$title/g" |
+            sed -re "s/\{\{ ?text ?\}\}/$text/g" > $resultfile
     fi
 }
 
@@ -15,36 +24,29 @@ appliance_startup () {
     nginx_redirect_to_status "Appliance Startup" "starting up, please wait"
 }
 
+
 # activate nginx, display "in startup"
 systemctl start nginx
 appliance_startup
-
 
 # read userdata
 . /usr/local/etc/env.include
 userdata_yaml=$(get_userdata)
 if test $? -ne 0; then
-    err=$(printf "error reading userdata: %s" "$userdata_yaml"| grep USERDATA_ERR)
+    err=$(printf "error reading userdata: %s" `echo "$userdata_yaml"| grep USERDATA_ERR`)
     nginx_redirect_to_status "Appliance Error" "$err"
     exit 1
 fi
 # write to /app/active-env.yml
 printf "%s" "$userdata_yaml" > /app/active-env.yml
-# activate all yaml into environment
+# export yaml into environment
 ENV_YML=/app/active-env.yml update_env_from_userdata
-
 
 # check if standby is true
 if test "$($APPLIANCE_STANDBY| tr A-Z a-z)" = "true"; then
     nginx_redirect_to_status "Appliance Standby" "Appliance is in standby, please contact sysadmin"
     exit 1
 fi
-
-
-# update all packages
-nginx_redirect_to_status "Appliance Update Packages" "system packages update, please wait"
-echo "fixme: update all packages"
-appliance_startup
 
 # storage setup
 volatile_mount=$(findmnt -S "LABEL=ecs-volatile" -f -l -n -o "TARGET")
@@ -75,7 +77,6 @@ if test "$volatile_mount" = "" -a  "$ignore_volatile" != "true" -o "$data_mount"
     fi
 fi
 
-
 # generate certificates using letsencrypt (dehydrated client)
 domains_file=/usr/local/etc/dehydrated/domains.txt
 if test -e $domains_file; then rm $domains_file; fi
@@ -90,6 +91,16 @@ if test ! -e /etc/nginx/certs/dhparam.pem -o "$(stat -L -c %s /etc/nginx/certs/d
     echo "no, or to small dh.param found, regenerating with 2048 bit (takes a few minutes)"
     openssl dhparam 2048 -out /etc/nginx/certs/dhparam.pem
 fi
+
+# reload nginx with new identity
+cat /etc/nginx/app/template.identity |
+    sed -re "s/##domains##/$ECS_ALLOWED_HOSTS/g" > /etc/nginx/app/server.identity
+systemctl reload nginx
+
+# update all packages
+nginx_redirect_to_status "Appliance Update Packages" "system packages update, please wait"
+echo "fixme: update all packages"
+appliance_startup
 
 
 # postgres setup
