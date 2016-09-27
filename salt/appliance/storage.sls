@@ -6,7 +6,7 @@
       (not salt['pillar.get']("appliance:storage:ignore:data",false) and
        not salt['files.exists']('/dev/disk/by-label/ecs-data')) ) %}
 
-  {{ storage_setup(salt['pillar.get']("appliance:storage:setup")) }}
+  {{ storage_setup(salt['pillar.get']("appliance:storage:setup", {})) }}
 {% endif %}
 
 

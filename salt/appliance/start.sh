@@ -53,29 +53,50 @@ volatile_mount=$(findmnt -S "LABEL=ecs-volatile" -f -l -n -o "TARGET")
 data_mount=$(findmnt -S "LABEL=ecs-data" -f -l -n -o "TARGET")
 ignore_volatile="$($APPLIANCE_STORAGE_IGNORE_VOLATILE | tr A-Z a-z)"
 ignore_data="$($APPLIANCE_STORAGE_IGNORE_DATA | tr A-Z a-z)"
+need_storage_setup="false"
 
-if test "$volatile_mount" = "" -a  "$ignore_volatile" != "true" -o "$data_mount" = "" -a "$ignore_data" != "true"; then
-    if test "$volatile_mount" = "" -a "$ignore_volatile" != "true" then
+if test "$volatile_mount" = ""; then
+    if test "$ignore_volatile" != "true" then
         echo "warning: could not find mount for ecs-volatile filesystem"
+        need_storage_setup = "true"
     fi
-    if test "$data_mount" = "" -a "$ignore_data" != "true" then
+else
+    if test ! -d "/volatile/ecs-cache"; then
+        echo "warning: cloud not find ecs-cache on volatile filesystem"
+        need_storage_setup = "true"
+    fi
+fi
+
+if test "$data_mount" = ""; then
+    if test "$ignore_data" != "true" then
         echo "warning: could not find mount for ecs-data filesystem"
+        need_storage_setup = "true"
     fi
-    if test -z "$storage_setup"; then
-        errstr="Storage Setup: Error, empty or nonexisting ECS_STORAGE_SETUP, but storage is not ready"
-        nginx_redirect_to_status "Appliance Error" "$errstr"
-        exit 1
-    else
-        echo "calling appliance.storage setup"
-        salt-call state.sls appliance.storage
-        err=$?
-        if test "$err" -ne 0; then
-            errstr="Storage Setup: Error, appliance.storage setup failed with error: $err"
+else
+    if test ! -d "/data/ecs-storage-vault"; then
+        echo "warning: cloud not find ecs-storage-vault on data filesystem"
+        need_storage_setup = "true"
+    fi
+fi
+
+if test "$need_storage_setup" = "true"; then
+    if test -z "$APPLIANCE_STORAGE_SETUP"; then
+        if test "$ignore_volatile" != "true" -o "$ignore_data" != "true"; then
+            errstr="Storage Setup: Error, empty or nonexisting APPLIANCE_STORAGE_SETUP, but storage is not ready"
             nginx_redirect_to_status "Appliance Error" "$errstr"
             exit 1
         fi
     fi
+    echo "calling appliance.storage setup"
+    salt-call state.sls appliance.storage
+    err=$?
+    if test "$err" -ne 0; then
+        errstr="Storage Setup: Error, appliance.storage setup failed with error: $err"
+        nginx_redirect_to_status "Appliance Error" "$errstr"
+        exit 1
+    fi
 fi
+
 
 # generate certificates using letsencrypt (dehydrated client)
 domains_file=/usr/local/etc/dehydrated/domains.txt
@@ -103,19 +124,12 @@ echo "fixme: update all packages"
 appliance_startup
 
 
-# postgres setup
-+ look if postgres-data is found /data/postgres-ecs/*
-+ start local postgres
-+ no postgres-data or postgres-data but database is empty:
-    + ECS_RECOVER_FROM_BACKUP ?
-        + yes: duplicity restore to /data/ecs-files and /tmp/pgdump
-    + ECS_RECOVER_FROM_DUMP ?
-        + yes: pgimport from pgdump
-    + restored from somewhere ?
-        + premigrate (if old dump) and migrate
-    + not restored from dump ?
-        + yes: create new database
 
+# postgres setup
++ start local postgres
++ look if postgres-data is found /data/postgres-ecs/*
++ no postgres-data or postgres-data but database is not existing:
+    create_new_db
 
 # start ecs
 + compose start ecs.* container
