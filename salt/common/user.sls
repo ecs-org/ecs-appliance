@@ -23,7 +23,7 @@ application_skeleton_{{ i }}:
     - source: /etc/skel/{{ i }}
     - user: app
     - group: app
-    - unless: test -e /app/{{ i }}
+    - unless: test /app/{{ i }} -nt /etc/skel/{{ i }}
     - require:
       - user: application_user
 
