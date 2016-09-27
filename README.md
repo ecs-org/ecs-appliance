@@ -56,6 +56,13 @@ appliance gets build using packer
 + git fetch , git checkout in /app/appliance
 + run salt-call state.highstate
 
+### recover from backup
++ stop ecs.*
++ duplicity restore to /data/ecs*
++ pgimport /data/ecs-pgdump/ecs.pgdump
++ premigrate (if old dump) and migrate
++ call update-ecs
+
 ### update-ecs
 + build new ecs.* container
 + stop ecs.*
@@ -68,13 +75,6 @@ appliance gets build using packer
         + stop database
         + revert to PRE_migrate snapshot
     + start old-container ecs.*
-
-### recover from backup
-+ stop ecs.*
-+ duplicity restore to /data/ecs*
-+ pgimport /data/ecs-pgdump/ecs.pgdump
-+ premigrate (if old dump) and migrate
-+ call update-ecs
 
 #### database-migrate
 + if old PRE_MIGRATE snapshot exists, delete

@@ -25,8 +25,7 @@ appliance_startup () {
 }
 
 
-# activate nginx, display "in startup"
-systemctl start nginx
+# display "in startup"
 appliance_startup
 
 # read userdata
@@ -37,7 +36,7 @@ if test $? -ne 0; then
     nginx_redirect_to_status "Appliance Error" "$err"
     exit 1
 fi
-# write to /app/active-env.yml
+# write userdata to /app/active-env.yml
 printf "%s" "$userdata_yaml" > /app/active-env.yml
 # export yaml into environment
 ENV_YML=/app/active-env.yml update_env_from_userdata
@@ -66,7 +65,6 @@ else
         need_storage_setup = "true"
     fi
 fi
-
 if test "$data_mount" = ""; then
     if test "$ignore_data" != "true" then
         echo "warning: could not find mount for ecs-data filesystem"
@@ -74,11 +72,10 @@ if test "$data_mount" = ""; then
     fi
 else
     if test ! -d "/data/ecs-storage-vault"; then
-        echo "warning: cloud not find ecs-storage-vault on data filesystem"
+        echo "warning: could not find ecs-storage-vault on data filesystem"
         need_storage_setup = "true"
     fi
 fi
-
 if test "$need_storage_setup" = "true"; then
     if test -z "$APPLIANCE_STORAGE_SETUP"; then
         if test "$ignore_volatile" != "true" -o "$ignore_data" != "true"; then
@@ -97,7 +94,6 @@ if test "$need_storage_setup" = "true"; then
     fi
 fi
 
-
 # generate certificates using letsencrypt (dehydrated client)
 domains_file=/usr/local/etc/dehydrated/domains.txt
 if test -e $domains_file; then rm $domains_file; fi
@@ -107,11 +103,15 @@ done
 dehydrated -c
 
 # re-generate dhparam.pem if not found or less than 2048 bit
-if test ! -e /etc/nginx/certs/dhparam.pem -o "$(stat -L -c %s /etc/nginx/certs/dhparam.pem)" -lt 224; then
-    mkdir -p /etc/nginx/certs
+if test ! -e /etc/nginx/app/dhparam.pem -o "$(stat -L -c %s /etc/nginx/app/dhparam.pem)" -lt 224; then
+    mkdir -p /etc/nginx/app
     echo "no, or to small dh.param found, regenerating with 2048 bit (takes a few minutes)"
-    openssl dhparam 2048 -out /etc/nginx/certs/dhparam.pem
+    openssl dhparam 2048 -out /etc/nginx/app/dhparam.pem
 fi
+
+# compile gpg keys into usable format
++ storage-vault keys to a .gnupg directory
++ duplicity backup key to a .gnupg directory
 
 # reload nginx with new identity
 cat /etc/nginx/app/template.identity |
@@ -123,16 +123,27 @@ nginx_redirect_to_status "Appliance Update Packages" "system packages update, pl
 echo "fixme: update all packages"
 appliance_startup
 
-
+# smtp setup
++ rewrite authorative_domain, ssl certs
++ start postfix
 
 # postgres setup
 + start local postgres
 + look if postgres-data is found /data/postgres-ecs/*
-+ no postgres-data or postgres-data but database is not existing:
-    create_new_db
+    + no postgres-data or postgres-data but database is not existing: goto standby
+    nginx_redirect_to_status "Appliance Standby" "Appliance is in standby, no postgres-data"
+    exit 1
 
 # start ecs
++ look if we find old running ecs: get commit hash
++ look if database migration is needed diff current/expected branch of *migrations*
+    + yes: database-migrate
 + compose start ecs.* container
 + enable crontab entries (into container crontabs)
-+ change nginx config, reload
 nginx_redirect_to_status --disable
+
+### database-migrate
++ if old PRE_MIGRATE snapshot exists, delete
++ snapshot ecs-database to "PRE_MIGRATE" snapshot
++ start ecs.web with migrate
++ add a onetime cronjob to delete PRE_MIGRATE snapshot after 1 week (which can fail if removed in the meantime)
