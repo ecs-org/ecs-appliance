@@ -24,11 +24,17 @@ ecs_settings: |
         'authorative_domain': AUTHORATIVE_DOMAIN,
     }
 
+    STORAGE_VAULT_OVERWRITE = {
+      'encryption_key': os.path.join(PROJECT_DIR, '..', 'ecs-appliance', 'storagevault_encrypt.sec'),
+      'signature_key': os.path.join(PROJECT_DIR, '..', 'ecs-appliance', 'storagevault_sign.sec'),
+    }
+
     # # will be set in appliance for container
     # ECS_MIGRATE_AUTO= True
     # ECS_DUMP_FILENAME = ""
 
 appliance:
+  host_names: localhost
   # # optional, if set appliance will not activate
   # standby: true
   letsencrypt:
