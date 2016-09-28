@@ -1,38 +1,38 @@
-ecs:
-  absolute_url_prefix: https://localhost
-  authorative_domain: localhost
-  allowed_hosts: localhost
-  secure_proxy_ssl: true
-  client_certs_required: true
+ecs_settings: |
+    AUTHORATIVE_DOMAIN = localhost
+    ABSOLUTE_URL_PREFIX = https://localhost
+    ALLOWED_HOSTS = ['localhost',]
+    SECURE_PROXY_SSL = True
+    CLIENT_CERTS_REQUIRED = True
 
-  debug: false
-  debugtoolbar: false
-  # sentry_dsn:
-  logo_border_color: green
-  userswitcher:
-    enabled: true
-    parameter: -it
+    DEBUG = False
+    ECS_DEBUGTOOLBAR = False
+    ECS_USERSWITCHER_ENABLED = False
+    ECS_LOGO_BORDER_COLOR = 'green'
+    SENTRY_DSN = 'https://67ef2698d5ed402fb6e00e0cf13440a1:dfbb1ed17acf41ad82da31326d56c4b5@sentry.on.ep3.at/2'
 
-  email:
-    filter_outgoing_mail: true
-    backend: django.core.mail.backends.console.emailbackend
-    limited_backend: django.core.mail.backends.console.emailbackend
+    ETHICS_COMMISSION_UUID = '23d805c6b5f14d8b9196a12005fd2961'
 
-  secret:
-    common: 'ptn5xj+85fvd=d4u@i1-($z*otufbvlk%x1vflb&!5k94f$i3w'
-    registration: '!brihi7#cxrd^twvj$r=398mdp4neo$xa-rm7b!8w1jfa@7zu_'
-    password_reset: 'j2obdvrb-hm$$x949k*f5gk_2$1x%2etxhd!$+*^qs8$4ra3=a'
+    SECRET_KEY = 'ptn5xj+85fvd=d4u@i1-($z*otufbvlk%x1vflb&!5k94f$i3w'
+    REGISTRATION_SECRET = '!brihi7#cxrd^twvj$r=398mdp4neo$xa-rm7b!8w1jfa@7zu_'
+    PASSWORD_RESET_SECRET = 'j2obdvrb-hm$$x949k*f5gk_2$1x%2etxhd!$+*^qs8$4ra3=a'
 
-  # # will be set in appliance for container
-  # database:
-  #   migrate_auto: true
-  # recover:
-  #   from_dump: false
-  #   dump_filename: "" # if not empty, this file will be picked first
+    EMAIL_BACKEND = 'django.core.mail.backends.console.emailbackend'
+    LIMITED_EMAIL_BACKEND = 'django.core.mail.backends.console.emailbackend'
+    ECSMAIL_OVERRRIDE = {
+        'filter_outgoing_smtp': True,
+        'authorative_domain': AUTHORATIVE_DOMAIN,
+    }
+
+    # # will be set in appliance for container
+    # ECS_MIGRATE_AUTO= True
+    # ECS_DUMP_FILENAME = ""
 
 appliance:
   # # optional, if set appliance will not activate
   # standby: true
+  letsencrypt:
+    enabled: false # use snakeoil certs, because eg. 443 is behind ssh tunneling
   authorized_keys: |
       # insert your ssh keys here
   prometheus:
