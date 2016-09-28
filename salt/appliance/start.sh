@@ -3,7 +3,7 @@
 nginx_redirect_to_status () {
     # call(Title, Text)
     # or call("--disable")
-    local templatefile=/etc/nginx/app/app-template.html
+    local templatefile=/etc/appliance/app-template.html
     local resultfile=/var/www/html/app.html
     local title text
     if test "$1" = "--disable"; then
@@ -55,25 +55,25 @@ ignore_data="$($APPLIANCE_STORAGE_IGNORE_DATA | tr A-Z a-z)"
 need_storage_setup="false"
 
 if test "$volatile_mount" = ""; then
-    if test "$ignore_volatile" != "true" then
+    if test "$ignore_volatile" != "true"; then
         echo "warning: could not find mount for ecs-volatile filesystem"
-        need_storage_setup = "true"
+        need_storage_setup="true"
     fi
 else
     if test ! -d "/volatile/ecs-cache"; then
         echo "warning: cloud not find ecs-cache on volatile filesystem"
-        need_storage_setup = "true"
+        need_storage_setup="true"
     fi
 fi
 if test "$data_mount" = ""; then
-    if test "$ignore_data" != "true" then
+    if test "$ignore_data" != "true"; then
         echo "warning: could not find mount for ecs-data filesystem"
-        need_storage_setup = "true"
+        need_storage_setup="true"
     fi
 else
     if test ! -d "/data/ecs-storage-vault"; then
         echo "warning: could not find ecs-storage-vault on data filesystem"
-        need_storage_setup = "true"
+        need_storage_setup="true"
     fi
 fi
 if test "$need_storage_setup" = "true"; then
@@ -94,38 +94,55 @@ if test "$need_storage_setup" = "true"; then
     fi
 fi
 
-# generate certificates using letsencrypt (dehydrated client)
-domains_file=/usr/local/etc/dehydrated/domains.txt
-if test -e $domains_file; then rm $domains_file; fi
-for domain in $ECS_ALLOWED_HOSTS; do
-    printf "%s" "$domain" >> $domains_file
-done
-dehydrated -c
-
-# re-generate dhparam.pem if not found or less than 2048 bit
-if test ! -e /etc/nginx/app/dhparam.pem -o "$(stat -L -c %s /etc/nginx/app/dhparam.pem)" -lt 224; then
-    mkdir -p /etc/nginx/app
-    echo "no, or to small dh.param found, regenerating with 2048 bit (takes a few minutes)"
-    openssl dhparam 2048 -out /etc/nginx/app/dhparam.pem
+if test "$(${APPLIANCE_LETSENCRYPT_ENABLED:-true}|tr A-Z a-z)" = "true"; then
+    # generate certificates using letsencrypt (dehydrated client)
+    domains_file=/etc/appliance/dehydrated/domains.txt
+    if test -e $domains_file; then rm $domains_file; fi
+    for domain in $APPLIANCE_HOST_NAMES; do
+        printf "%s" "$domain" >> $domains_file
+    done
+    dehydrated -c
+    echo "FIXME: currently > 1 domains overwrites other domains, last wins"
+    for domain in $APPLIANCE_HOST_NAMES; do
+        ln -sf /etc/appliance/server.key.pem /etc/appliance/dehydrated/certs/$domain/privkey.pem
+        ln -sf /etc/appliance/server.cert.pem /etc/appliance/dehydrated/certs/$domain/fullchain.pem
+    done
+else
+    echo "warning: letsencrypt disabled, symlink snakeoil.* to appliance/server*"
+    ln -sf /etc/appliance/server.cert.pem /etc/ssl/certs/ssl-cert-snakeoil.pem
+    ln -sf /etc/appliance/server.key.pem /etc/ssl/private/ssl-cert-snakeoil.key
 fi
 
-# compile gpg keys into usable format
-+ storage-vault keys to a .gnupg directory
-+ duplicity backup key to a .gnupg directory
+# re-generate dhparam.pem if not found or less than 2048 bit
+if test ! -e /etc/appliance/dhparam.pem -o "$(stat -L -c %s /etc/appliance/dhparam.pem)" -lt 224; then
+    echo "no, or to small dh.param found, regenerating with 2048 bit (takes a few minutes)"
+    mkdir -p /etc/appliance
+    openssl dhparam 2048 -out /etc/appliance/dhparam.pem
+fi
+
+# export vault keys
+printf "%s" "$APPLIANCE_VAULT_ENCRYPT" > /etc/appliance/storagevault_encrypt.sec
+printf "%s" "$APPLIANCE_VAULT_SIGN" > /etc/appliance/storagevault_sign.sec
+
+# create ready to use /root/.gpg for duply
+if test -d /root/.gpg; then rm -r /root/.gpg; fi
+printf "%s" "$APPLIANCE_BACKUP_ENCRYPT" > /root/.gpg/backup_encrypt.sec
+chmod "0600" -r /root/.gpg/
+gpg --homedir /root/.gpg --batch --yes --import /root/.gpg/backup_encrypt.sec
 
 # reload nginx with new identity
-cat /etc/nginx/app/template.identity |
-    sed -re "s/##domains##/$ECS_ALLOWED_HOSTS/g" > /etc/nginx/app/server.identity
+cat /etc/appliance/template.identity |
+    sed -re "s/##domains##/$APPLIANCE_HOST_NAMES/g" > /etc/appliance/server.identity
 systemctl reload nginx
+
+# smtp setup
++ rewrite authorative_domain, ssl certs
++ start postfix
 
 # update all packages
 nginx_redirect_to_status "Appliance Update Packages" "system packages update, please wait"
 echo "fixme: update all packages"
 appliance_startup
-
-# smtp setup
-+ rewrite authorative_domain, ssl certs
-+ start postfix
 
 # postgres setup
 + start local postgres
@@ -135,9 +152,12 @@ appliance_startup
     exit 1
 
 # start ecs
-+ look if we find old running ecs: get commit hash
-+ look if database migration is needed diff current/expected branch of *migrations*
++ find last running ecs on appliance: get commit hash from /etc/appliance/ecs-commit-id
++ checkout ecs if not checked out to /app/ecs
++ find differences between last running and requested
+    + look if database migration is needed diff current/expected branch of *migrations*
     + yes: database-migrate
++ build requested 
 + compose start ecs.* container
 + enable crontab entries (into container crontabs)
 nginx_redirect_to_status --disable

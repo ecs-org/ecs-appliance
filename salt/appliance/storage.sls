@@ -74,9 +74,9 @@ directories:
     names:
       - ecs-storage-vault
       - ecs-ca
-      - ecs-letsencrypt
-      - container/ecs-postgres
+      - ecs-appliance
       - ecs-pgdump
+      - container/ecs-postgres
     options:
       - group: app
       - user: app
@@ -85,5 +85,12 @@ directories:
   {% if salt['pillar.get']("appliance:storage:ignore:data",false) %}
     onlyif: mountpoint -q /data
   {% endif %}
+relocate:
+  /app/ecs-storage-vault:
+    destination: /data/ecs-storage-vault
+  /app/ecs-ca:
+    destination: /data/ecs-ca
+  /etc/appliance:
+    destination: /data/ecs-appliance
 {% endload %}
 {{ storage_setup(data_prepare) }}

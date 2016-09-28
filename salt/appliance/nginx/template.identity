@@ -1,9 +1,9 @@
 server_name ##domains##
-ssl_certificate /etc/nginx/app/server.cert.pem;
-ssl_certificate_key /etc/nginx/app/server.key.pem;
+ssl_certificate /etc/appliance/server.cert.pem;
+ssl_certificate_key /etc/appliance/server.key.pem;
 # Diffie-Hellman parameter for DHE ciphersuites, recommended 2048 bits
-ssl_dhparam /etc/nginx/app/dhparam.pem;
+ssl_dhparam /etc/appliance/dhparam.pem;
 # client certificate setup
-ssl_client_certificate /etc/nginx/app/ca.cert.pem;
-ssl_crl /etc/nginx/app/crl.pem;
+ssl_client_certificate /etc/appliance/ca.cert.pem;
+ssl_crl /etc/appliance/crl.pem;
 ssl_verify_client optional;

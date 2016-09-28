@@ -4,20 +4,20 @@ nginx:
       - nginx
       - ssl-cert
   file.directory:
-    - name: /etc/nginx/app
+    - name: /etc/appliance
     - require:
       - pkg: nginx
   service.running:
     - enable: true
     - require:
       - file: nginx
-      - file: /etc/nginx/app/server.identity
+      - file: /etc/appliance/server.identity
     - watch:
       - file: /etc/nginx/nginx.conf
-      - file: /etc/nginx/app/server.identity
+      - file: /etc/appliance/server.identity
 
 {% for a in ['app-template.html', 'snakeoil.identity', 'template.identity'] %}
-/etc/nginx/app/{{ a }}:
+/etc/appliance/{{ a }}:
   file.managed:
     - source: salt://appliance/nginx/{{ a }}
 {% endfor %}
@@ -33,24 +33,24 @@ generate_snakeoil:
     - require:
       - pkg: nginx
 
-/etc/nginx/app/server.identity:
+/etc/appliance/server.identity:
   file.symlink:
-    - source: /etc/nginx/app/snakeoil.identity
+    - source: /etc/appliance/snakeoil.identity
     - require:
       - cmd: generate_snakeoil
 
-/etc/nginx/app/server.cert.pem:
+/etc/appliance/server.cert.pem:
   file.symlink:
-    - source: /data/ecs-letsencrypt/fullchain.pem
+    - source: /etc/ssl/certs/ssl-cert-snakeoil.pem
 
-/etc/nginx/app/server.key.pem:
+/etc/appliance/server.key.pem:
   file.symlink:
-    - source: /data/ecs-letsencrypt/privkey.pem
+    - source: /etc/ssl/private/ssl-cert-snakeoil.key
 
-/etc/nginx/app/ca.cert.pem:
+/etc/appliance/ca.cert.pem:
   file.symlink:
-    - source: /data/ecs-ca/ca.cert.pem
+    - source: /app/ecs-ca/ca.cert.pem
 
-/etc/nginx/app/crl.pem:
+/etc/appliance/crl.pem:
   file.symlink:
-    - source: /data/ecs-ca/crl.pem
+    - source: /app/ecs-ca/crl.pem
