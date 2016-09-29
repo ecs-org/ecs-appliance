@@ -1,5 +1,4 @@
 #
-/usr/bin/duply %(duplicity.duply_conf)s cleanup --force
-/usr/bin/duply %(duplicity.duply_conf)s backup
-/usr/bin/duply %(duplicity.duply_conf)s purge-full --force
-
+/usr/bin/duply /root/.duply/appliance cleanup --force
+/usr/bin/duply /root/.duply/appliance backup
+/usr/bin/duply /root/.duply/appliance purge-full --force

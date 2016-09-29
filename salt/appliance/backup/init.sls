@@ -1,6 +1,7 @@
 backup:
   pkg.installed:
     - pkgs:
-      - duplicity
       - duply
+      - duplicity
+      - lftp
       - gnupg
