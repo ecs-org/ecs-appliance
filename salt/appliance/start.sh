@@ -29,7 +29,7 @@ appliance_startup () {
 appliance_startup
 
 # read userdata
-. /usr/local/etc/env.include
+. /etc/appliance/env.include
 userdata_yaml=$(get_userdata)
 if test $? -ne 0; then
     err=$(printf "error reading userdata: %s" `echo "$userdata_yaml"| grep USERDATA_ERR`)
@@ -157,7 +157,7 @@ appliance_startup
 + find differences between last running and requested
     + look if database migration is needed diff current/expected branch of *migrations*
     + yes: database-migrate
-+ build requested 
++ build requested
 + compose start ecs.* container
 + enable crontab entries (into container crontabs)
 nginx_redirect_to_status --disable

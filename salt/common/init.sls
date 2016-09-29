@@ -73,6 +73,6 @@ python3-yaml:
     - require:
       - pkg: python3-yaml
 
-/usr/local/etc/env.include:
+/etc/appliance/env.include:
   file.managed:
     - source: salt://common/env.include

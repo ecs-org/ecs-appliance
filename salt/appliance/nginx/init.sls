@@ -3,14 +3,10 @@ nginx:
     - pkgs:
       - nginx
       - ssl-cert
-  file.directory:
-    - name: /etc/appliance
-    - require:
-      - pkg: nginx
   service.running:
     - enable: true
     - require:
-      - file: nginx
+      - pkg: nginx
       - file: /etc/appliance/server.identity
     - watch:
       - file: /etc/nginx/nginx.conf
@@ -20,6 +16,7 @@ nginx:
 /etc/appliance/{{ a }}:
   file.managed:
     - source: salt://appliance/nginx/{{ a }}
+    - makedirs: true
 {% endfor %}
 
 /etc/nginx/nginx.conf:
