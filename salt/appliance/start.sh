@@ -29,14 +29,16 @@ appliance_startup () {
 appliance_startup
 
 # read userdata
-. /etc/appliance/env.include
+. /usr/local/etc/env.include
 userdata_yaml=$(get_userdata)
 if test $? -ne 0; then
     err=$(printf "error reading userdata: %s" `echo "$userdata_yaml"| grep USERDATA_ERR`)
     nginx_redirect_to_status "Appliance Error" "$err"
     exit 1
 fi
-# write userdata to /app/active-env.yml
+echo -n "found user-data type: "
+printf '%s' "$userdata_yaml" | grep USERDATA_TYPE
+echo "write userdata to /app/active-env.yml"
 printf "%s" "$userdata_yaml" > /app/active-env.yml
 # export yaml into environment
 ENV_YML=/app/active-env.yml update_env_from_userdata
@@ -135,21 +137,20 @@ cat /etc/appliance/template.identity |
     sed -re "s/##domains##/$APPLIANCE_HOST_NAMES/g" > /etc/appliance/server.identity
 systemctl reload nginx
 
-# smtp setup
+# reload postfix with keys
 + rewrite authorative_domain, ssl certs
-+ start postfix
++ restart postfix
+
+# postgres data check
++ look if ecs databse is there and not empty
+    + no postgres-data or postgres-data but database is not existing: goto standby
+    nginx_redirect_to_status "Appliance Standby" "Appliance is in standby, no postgres-data"
+    exit 1
 
 # update all packages
 nginx_redirect_to_status "Appliance Update Packages" "system packages update, please wait"
 echo "fixme: update all packages"
 appliance_startup
-
-# postgres setup
-+ start local postgres
-+ look if postgres-data is found /data/postgres-ecs/*
-    + no postgres-data or postgres-data but database is not existing: goto standby
-    nginx_redirect_to_status "Appliance Standby" "Appliance is in standby, no postgres-data"
-    exit 1
 
 # start ecs
 + find last running ecs on appliance: get commit hash from /etc/appliance/ecs-commit-id
@@ -157,13 +158,15 @@ appliance_startup
 + find differences between last running and requested
     + look if database migration is needed diff current/expected branch of *migrations*
     + yes: database-migrate
-+ build requested
-+ compose start ecs.* container
++ compose build ecs.*
++ compose start ecs.*
 + enable crontab entries (into container crontabs)
 nginx_redirect_to_status --disable
 
 ### database-migrate
 + if old PRE_MIGRATE snapshot exists, delete
 + snapshot ecs-database to "PRE_MIGRATE" snapshot
++ stop ecs.*
++ build new ecs
 + start ecs.web with migrate
 + add a onetime cronjob to delete PRE_MIGRATE snapshot after 1 week (which can fail if removed in the meantime)

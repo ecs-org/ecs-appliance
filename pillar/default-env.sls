@@ -44,7 +44,7 @@ appliance:
   prometheus:
     enabled: true
   backup:
-    url: ssh://app@localhost/data/ecs-backup
+    url: ssh://app@localhost/volatile/ecs-backup-test/
     encrypt: PGP PRIVATE KEY BLOCK OF BACKUP HERE
   storage:
     # # optional, if set, will not look for ecs-volatile or ecs-data filesystem

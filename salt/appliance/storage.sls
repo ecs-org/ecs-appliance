@@ -25,6 +25,7 @@ directories:
       - docker
       - ecs-log
       - ecs-cache
+      - ecs-backup-test
       - container/redis
       - container/postfix
       - container/elasticsearch
