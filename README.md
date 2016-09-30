@@ -1,6 +1,9 @@
 # ECS-Appliance
 
 
+the ecs appliance is a selfservice production setup virtual machine builder and executor.
+it can be stacked with the developer vm, but is independend of it.
+
 ## where to start
 
 inside a developer vm:
@@ -16,16 +19,17 @@ sudo systemctl start appliance
 
 files of interest:
 
-/pillar/            environment
-/pillar/top.sls     defines the environment tree
-/salt/*.sls         states to be executed
-/salt/top.sls       defines the state tree
-/salt/common/init.sls       common install
-/salt/appliance/init.sls    install a ecs appliance
-/salt/appliance/start.sh    script started on ready to run appliance
+/pillar/                    | environment
+/pillar/top.sls             | defines the environment tree
+/pillar/default-env.sls     | the fallback env yaml (localhost ecs config)
+/salt/*.sls                 | states to be executed
+/salt/top.sls               | defines the state tree
+/salt/common/init.sls       | common install
+/salt/appliance/init.sls    | install a ecs appliance
+/salt/appliance/start.sh    | script started on ready to run appliance
 
 ## fixme
-+ env.include does not work as nonroot if it tries to mount could-init iso's
++ env.include does not work as nonroot if it tries to mount could-init iso's; should try sudo at mount umount
 
 ## Appliance
 
