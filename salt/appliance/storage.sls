@@ -1,9 +1,9 @@
 {% from 'storage/lib.sls' import storage_setup with context %}
 
 
-{% if (not salt['pillar.get']("appliance:storage:ignore:volatile",false) and
+{% if (not salt['pillar.get']("appliance:storage:ignore:volatile", false) and
        not salt['files.exists']('/dev/disk/by-label/ecs-volatile')) or
-      (not salt['pillar.get']("appliance:storage:ignore:data",false) and
+      (not salt['pillar.get']("appliance:storage:ignore:data", false) and
        not salt['files.exists']('/dev/disk/by-label/ecs-data')) ) %}
 
   {{ storage_setup(salt['pillar.get']("appliance:storage:setup", {})) }}
@@ -44,6 +44,8 @@ relocate:
   /var/lib/docker:
     destination: /volatile/docker
     copy_content: False
+    exec_before: "systemctl stop docker"
+    exec_after: "systemctl start docker"
     watch_in: "service: docker"
   /app/ecs-log:
     destination: /volatile/ecs-log
@@ -53,7 +55,7 @@ relocate:
     destination: /volatile/container/redis
   /app/container/postfix:
     destination: /volatile/container/postfix
-  # FIXME tmp and var/tmp have different dir_mode
+  # TODO tmp and var/tmp have different dir_mode
   # /tmp:
   #   destination: /volatile/tmp
   # /var/tmp:
@@ -76,8 +78,8 @@ directories:
       - ecs-storage-vault
       - ecs-ca
       - ecs-appliance
+      - ecs-postgres
       - ecs-pgdump
-      - container/ecs-postgres
     options:
       - group: app
       - user: app
@@ -93,5 +95,9 @@ relocate:
     destination: /data/ecs-ca
   /etc/appliance:
     destination: /data/ecs-appliance
+  /var/lib/postgresql:
+    destination: /data/ecs-postgres
+    exec_before: systemctl stop postgresql
+    exec_after: systemctl start postgresql
 {% endload %}
 {{ storage_setup(data_prepare) }}

@@ -25,8 +25,8 @@ appliance_startup () {
 }
 
 
-# display "in startup"
-appliance_startup
+## main
+appliance_startup  # display "in startup"
 
 # read userdata
 . /usr/local/etc/env.include
@@ -50,42 +50,28 @@ if test "$($APPLIANCE_STANDBY| tr A-Z a-z)" = "true"; then
 fi
 
 # storage setup
-volatile_mount=$(findmnt -S "LABEL=ecs-volatile" -f -l -n -o "TARGET")
-data_mount=$(findmnt -S "LABEL=ecs-data" -f -l -n -o "TARGET")
-ignore_volatile="$($APPLIANCE_STORAGE_IGNORE_VOLATILE | tr A-Z a-z)"
-ignore_data="$($APPLIANCE_STORAGE_IGNORE_DATA | tr A-Z a-z)"
-need_storage_setup="false"
-
-if test "$volatile_mount" = ""; then
-    if test "$ignore_volatile" != "true"; then
+need_storage_setup=false
+if test ! -d "/volatile/ecs-cache"; then
+    echo "warning: cloud not find directory ecs-cache on /volatile"
+    need_storage_setup=true
+fi
+if test ! -d "/data/ecs-storage-vault"; then
+    echo "warning: could not find directory ecs-storage-vault on /data"
+    need_storage_setup=true
+fi
+if test "$(findmnt -S "LABEL=ecs-volatile" -f -l -n -o "TARGET")" = ""; then
+    if test "$($APPLIANCE_STORAGE_IGNORE_VOLATILE | tr A-Z a-z)" != "true"; then
         echo "warning: could not find mount for ecs-volatile filesystem"
-        need_storage_setup="true"
-    fi
-else
-    if test ! -d "/volatile/ecs-cache"; then
-        echo "warning: cloud not find ecs-cache on volatile filesystem"
-        need_storage_setup="true"
+        need_storage_setup=true
     fi
 fi
-if test "$data_mount" = ""; then
-    if test "$ignore_data" != "true"; then
+if test "$(findmnt -S "LABEL=ecs-data" -f -l -n -o "TARGET")" = ""; then
+    if test "$($APPLIANCE_STORAGE_IGNORE_DATA | tr A-Z a-z)" != "true"; then
         echo "warning: could not find mount for ecs-data filesystem"
-        need_storage_setup="true"
-    fi
-else
-    if test ! -d "/data/ecs-storage-vault"; then
-        echo "warning: could not find ecs-storage-vault on data filesystem"
-        need_storage_setup="true"
+        need_storage_setup=true
     fi
 fi
-if test "$need_storage_setup" = "true"; then
-    if test -z "$APPLIANCE_STORAGE_SETUP"; then
-        if test "$ignore_volatile" != "true" -o "$ignore_data" != "true"; then
-            errstr="Storage Setup: Error, empty or nonexisting APPLIANCE_STORAGE_SETUP, but storage is not ready"
-            nginx_redirect_to_status "Appliance Error" "$errstr"
-            exit 1
-        fi
-    fi
+if $need_storage_setup; then
     echo "calling appliance.storage setup"
     salt-call state.sls appliance.storage
     err=$?
@@ -95,6 +81,12 @@ if test "$need_storage_setup" = "true"; then
         exit 1
     fi
 fi
+
+# postgres data check
++ look if ecs databse is there and not empty
+    + no postgres-data or postgres-data but database is not existing: goto standby
+    nginx_redirect_to_status "Appliance Standby" "Appliance is in standby, no postgres-data"
+    exit 1
 
 if test "$(${APPLIANCE_LETSENCRYPT_ENABLED:-true}|tr A-Z a-z)" = "true"; then
     # generate certificates using letsencrypt (dehydrated client)
@@ -140,12 +132,6 @@ systemctl reload nginx
 # reload postfix with keys
 + rewrite authorative_domain, ssl certs
 + restart postfix
-
-# postgres data check
-+ look if ecs databse is there and not empty
-    + no postgres-data or postgres-data but database is not existing: goto standby
-    nginx_redirect_to_status "Appliance Standby" "Appliance is in standby, no postgres-data"
-    exit 1
 
 # update all packages
 nginx_redirect_to_status "Appliance Update Packages" "system packages update, please wait"

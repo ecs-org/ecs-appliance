@@ -44,12 +44,11 @@ appliance gets build using packer
 
 + developer setup:
     + vagrantfile has grow-root baked into it, p1 will take all space, appliance will not create additional partitions
-    + storage setup will (if told so in env.yml)
-        + just create the directories but do not expect a mountpoint
+    + storage setup will (if told in env.yml) create the directories but do not expect a mountpoint
 
 + production setup:
-    + storage.setup will (if told so in env.yml):
-        + add p2 (all left space) as pv-lvm
+    + storage.setup will (if told in env.yml):
+        + add p2 (all usable space) as pv-lvm
         + add a vg and volumes ecs-data (60%) ecs-volatile (30%), rest is for snapshots
 
 ### start-appliance
@@ -61,6 +60,7 @@ appliance gets build using packer
 
 ### recover from backup
 + stop ecs.*
++ standby on
 + duplicity restore to /data/ecs*
 + pgimport /data/ecs-pgdump/ecs.pgdump
 + premigrate (if old dump) and migrate
