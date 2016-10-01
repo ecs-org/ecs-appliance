@@ -190,6 +190,10 @@ Example:
       watch_in: "service: apt-cacher-ng"
 ```
 
+### for "relocate"
+  * parameter: exec_before/exec_after
+    if set, will execute "exec_before" before relocation and "exec_after" after relocation
+    
 ### for "directories"
   * parameter: onlyif/unless
     * will insert a onlyif/unless state requirement

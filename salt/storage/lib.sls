@@ -350,6 +350,14 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
 
   {% for item, data in input_data.iteritems() %}
 
+    {% if data['exec_before'] is defined %}
+before-{{ item }}-{{ data['destination'] }}-relocate:
+  cmd.run:
+    - name: data['exec_before']
+    - require_in:
+      - cmd: {{ item }}-{{ data['destination'] }}-relocate
+    {% endif %}
+
 {{ item }}-{{ data['destination'] }}-relocate:
   cmd.run:
     {%- if data['copy_content']|d(true) %}
@@ -366,6 +374,15 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
       - {{ input_data[item][a] }}
       {%- endif %}
     {%- endfor %}
+
+    {% if data['exec_after'] is defined %}
+after-{{ item }}-{{ data['destination'] }}-relocate:
+  cmd.run:
+    - name: data['exec_after']
+    - require:
+      - cmd: {{ item }}-{{ data['destination'] }}-relocate
+    {% endif %}
+
   {% endfor %}
 
 {% endmacro %}
