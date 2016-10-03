@@ -57,7 +57,7 @@ system_timezone:
 
 set_locale:
   cmd.wait:
-    - name: locale-gen en_US.UTF-8
+    - name: locale-gen en_US.UTF-8 de_DE.UTF-8
     - watch:
       - file: /etc/default/locale
 
