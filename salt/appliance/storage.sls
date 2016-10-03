@@ -44,9 +44,8 @@ relocate:
   /var/lib/docker:
     destination: /volatile/docker
     copy_content: False
-    exec_before: "systemctl stop docker"
-    exec_after: "systemctl start docker"
-    watch_in: "service: docker"
+    exec_before: systemctl stop docker
+    exec_after: systemctl start docker
   /app/ecs-log:
     destination: /volatile/ecs-log
   /app/ecs-cache:

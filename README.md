@@ -1,12 +1,17 @@
 # ECS-Appliance
 
-
 the ecs appliance is a selfservice production setup virtual machine builder and executor.
 it can be stacked with the developer vm, but is independend of it.
 
 ## where to start
 
-inside a developer vm:
+insert your devserver name (eg. "testecs") into your /etc/hosts:
+`sudo -s 'printf "%s" "127.0.0.1 testecs" >> /etc/hosts'`
+
+connect to your developer vm with port 80 and 443:
+`sudo -E -P -u root ssh testecs -L 80:localhost:80 -L 443:localhost:443`
+
+inside the developer vm:
 ```
 git clone repositorypath /app/appliance
 sudo mkdir -p /etc/salt
@@ -17,7 +22,7 @@ sudo salt-call --local state.highstate pillar='{"builder": {"enabled": true}, "a
 sudo systemctl start appliance
 ```
 
-files of interest:
+### files of interest
 
 /pillar/                    | environment
 /pillar/top.sls             | defines the environment tree
@@ -58,6 +63,9 @@ appliance gets build using packer
 + git fetch , git checkout in /app/appliance
 + run salt-call state.highstate
 
+### update-ecs
++ systemctl restart appliance
+
 ### recover from backup
 + stop ecs.*
 + standby on
@@ -66,47 +74,11 @@ appliance gets build using packer
 + premigrate (if old dump) and migrate
 + call update-ecs
 
-### update-ecs
-+ build new ecs.* container
-+ stop ecs.*
-+ look if database migration is needed diff current/expected branch of *migrations*
-    + yes: database-migrate
-+ start ecs.*
-+ if not ok/started:
-    + stop ecs.*
-    + if was database-migrate
-        + stop database
-        + revert to PRE_migrate snapshot
-    + start old-container ecs.*
-
-#### database-migrate
-+ if old PRE_MIGRATE snapshot exists, delete
-+ snapshot ecs-database to "PRE_MIGRATE" snapshot
-+ start ecs.web with migrate
-+ add a onetime cronjob to delete PRE_MIGRATE snapshot after 1 week (which can fail if removed in the meantime)
-
 ### clone-ecs
 + snapshot ecs-files and ecs-database to CLONE R/W snapshot
 + start a clone compose with files and database from CLONE and modified settings
     (userswitcher, no emails)
 + add a onetime cronjob to shutdown clone and delete CLONE snapshot after 3 days
-
-### cron-jobs
-+ local: update letsencrypt
-+ ecs-container: update/cleanup sessions
-+ local: update packages (unattended-upgrades)
-    + reboot machine if update-needs-restart and sunday
-+ local: update aux container
-    + download all updated container
-    + stop ecs-*
-    + for every updated container:
-        + stop container, start container
-    + start ecs.*
-+ local: backup
-    + assure non empty database
-    + assure non empty ecs-files
-    + pgdump to temp
-    + duplicity to thirdparty of ecs-files, pgdump and envsettings
 
 ### production prepare
 + build new container
@@ -118,7 +90,6 @@ appliance gets build using packer
 ### if createfirstuser:
 + create user (group office) plus 1 Day certificate send to email address with transport password
     + useremail,user first,last,gender, transportpass (min 15chars)
-
 
 ### ENV
 ```

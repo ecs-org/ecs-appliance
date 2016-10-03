@@ -25,8 +25,10 @@ appliance_startup () {
 }
 
 
-## main
-appliance_startup  # display "in startup"
+# start nginx (may be disabled by devupate.sh if on the same machine)
+systemctl enable nginx
+systemctl start nginx
+appliance_startup
 
 # read userdata
 . /usr/local/etc/env.include
@@ -127,7 +129,7 @@ gpg --homedir /root/.gpg --batch --yes --import /root/.gpg/backup_encrypt.sec
 # reload nginx with new identity
 cat /etc/appliance/template.identity |
     sed -re "s/##domains##/$APPLIANCE_HOST_NAMES/g" > /etc/appliance/server.identity
-systemctl reload nginx
+systemctl reload-or-restart nginx
 
 # reload postfix with keys
 + rewrite authorative_domain, ssl certs
@@ -139,20 +141,26 @@ echo "fixme: update all packages"
 appliance_startup
 
 # start ecs
-+ find last running ecs on appliance: get commit hash from /etc/appliance/ecs-commit-id
-+ checkout ecs if not checked out to /app/ecs
-+ find differences between last running and requested
-    + look if database migration is needed diff current/expected branch of *migrations*
-    + yes: database-migrate
-+ compose build ecs.*
-+ compose start ecs.*
-+ enable crontab entries (into container crontabs)
-nginx_redirect_to_status --disable
++ find target release, either from requested or update from branch id (or leave alone if devserver)
++ find last running id on appliance, differences and needs:
+  + get commit hash from /etc/appliance/ecs-commit-id|d('invalid')
+  + if invalid: need-migrate=true
+  + if exists devserver traces: needs-migrate=false
+  + checkout ecs if not checked out to /app/ecs
+  + if not exists devserver traces:
+    + find differences between last running and requested and migration diff found:
+        + needs-migrate=true
 
-### database-migrate
-+ if old PRE_MIGRATE snapshot exists, delete
-+ snapshot ecs-database to "PRE_MIGRATE" snapshot
-+ stop ecs.*
-+ build new ecs
-+ start ecs.web with migrate
-+ add a onetime cronjob to delete PRE_MIGRATE snapshot after 1 week (which can fail if removed in the meantime)
++ compose build ecs.*
++ compose stop ecs.*
++ migration needed: yes: database-migrate
+    + if old PRE_MIGRATE snapshot exists, delete
+    + snapshot ecs-database to "PRE_MIGRATE" snapshot
+    + stop ecs.*
+    + build new ecs
+    + start ecs.web with migrate
+    + add a onetime cronjob to delete PRE_MIGRATE snapshot after 1 week (which can fail if removed in the meantime)
+
+
+systemd-run: compose start new ecs.*
+post_start: nginx_redirect_to_status --disable

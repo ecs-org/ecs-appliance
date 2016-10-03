@@ -1,0 +1,5 @@
+local: backup
+   + assure non empty database
+   + assure non empty ecs-files
+   + pgdump to temp
+   + duplicity to thirdparty of ecs-files, pgdump and envsettings
