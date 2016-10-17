@@ -7,6 +7,7 @@ services:
       context: ecs
       args:
         - http_proxy
+    image: ecs
     user: app
     volumes:
       - /data/ecs-storage-vault:/app/ecs-storage-vault
@@ -24,6 +25,7 @@ services:
       context: ecs
       args:
         - http_proxy
+    image: ecs
     user: app
     volumes:
       - /data/ecs-storage-vault:/app/ecs-storage-vault
@@ -39,6 +41,7 @@ services:
       context: ecs
       args:
         - http_proxy
+    image: ecs
     user: app
     env_file:
       - .env
@@ -49,19 +52,18 @@ services:
 
   memcache:
     image: memcached
-    expose:
-      - ""
 
   redis:
     image: redis:3.0
     volumes:
-      - /volatile/container/redis:
+      - /volatile/container/redis:/data
 
   mocca:
     build:
       context: mocca
       args:
         - http_proxy
+    image: mocca
     ports:
       - "127.0.0.1:5090:8080"
 
@@ -70,6 +72,7 @@ services:
       context: pdfas
       args:
         - http_proxy
+    image: pdfas
     ports:
       - "127.0.0.1:5095:8080"
 
@@ -80,10 +83,3 @@ services:
     ports:
       - "127.0.0.1:5080:8080"
     command: ["", "--housekeeping_interval=4s"]
-
-  {%- if pillar.get('ecs:prometheus:enabled') %}
-  prometheus:
-    image:
-    links:
-      - cadvisor
-  {%- endif %}

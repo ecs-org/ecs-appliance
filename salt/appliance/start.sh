@@ -111,7 +111,7 @@ fi
 
 # re-generate dhparam.pem if not found or less than 2048 bit
 if test ! -e /etc/appliance/dhparam.pem -o "$(stat -L -c %s /etc/appliance/dhparam.pem)" -lt 224; then
-    echo "no, or to small dh.param found, regenerating with 2048 bit (takes a few minutes)"
+    echo "no or to small dh.param found, regenerating with 2048 bit (takes a few minutes)"
     mkdir -p /etc/appliance
     openssl dhparam 2048 -out /etc/appliance/dhparam.pem
 fi
@@ -140,27 +140,4 @@ nginx_redirect_to_status "Appliance Update Packages" "system packages update, pl
 echo "fixme: update all packages"
 appliance_startup
 
-# start ecs
-+ find target release, either from requested or update from branch id (or leave alone if devserver)
-+ find last running id on appliance, differences and needs:
-  + get commit hash from /etc/appliance/ecs-commit-id|d('invalid')
-  + if invalid: need-migrate=true
-  + if exists devserver traces: needs-migrate=false
-  + checkout ecs if not checked out to /app/ecs
-  + if not exists devserver traces:
-    + find differences between last running and requested and migration diff found:
-        + needs-migrate=true
-
-+ compose build ecs.*
-+ compose stop ecs.*
-+ migration needed: yes: database-migrate
-    + if old PRE_MIGRATE snapshot exists, delete
-    + snapshot ecs-database to "PRE_MIGRATE" snapshot
-    + stop ecs.*
-    + build new ecs
-    + start ecs.web with migrate
-    + add a onetime cronjob to delete PRE_MIGRATE snapshot after 1 week (which can fail if removed in the meantime)
-
-
-systemd-run: compose start new ecs.*
-post_start: nginx_redirect_to_status --disable
+exec _start_ecs.sh

@@ -34,11 +34,16 @@ ecs_settings: |
     # ECS_DUMP_FILENAME = ""
 
 appliance:
-  host_names: localhost
   # # optional, if set appliance will not activate
   # standby: true
-  letsencrypt:
-    enabled: false # use snakeoil certs, because eg. 443 is behind ssh tunneling
+  host_names: localhost
+  ssl:
+    # # optional, if set ssl key for https host will be used
+    # key:
+    # cert:
+    letsencrypt:
+      enabled: false # use snakeoil certs, because eg. 443 is behind ssh tunneling
+    client_certs: mandatory # always need a client certificate
   authorized_keys: |
       # insert your ssh keys here
   prometheus:
@@ -47,13 +52,14 @@ appliance:
     url: ssh://app@localhost/volatile/ecs-backup-test/
     encrypt: PGP PRIVATE KEY BLOCK OF BACKUP HERE
   storage:
+    # # optional, will be executed if volatile or data can not be found
+    # setup: |
+
     # # optional, if set, will not look for ecs-volatile or ecs-data filesystem
     ignore:
       volatile: true
       data: true
-    # # optional, will be executed if volatile or data can not be found
-    # setup: |
-    #
+
   vault_encrypt: |
       -----BEGIN PGP PRIVATE KEY BLOCK-----
       Version: GnuPG v1.4.10
