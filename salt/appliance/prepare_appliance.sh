@@ -109,13 +109,6 @@ else
     ln -sf /etc/appliance/server.key.pem /etc/ssl/private/ssl-cert-snakeoil.key
 fi
 
-# re-generate dhparam.pem if not found or less than 2048 bit
-if test ! -e /etc/appliance/dhparam.pem -o "$(stat -L -c %s /etc/appliance/dhparam.pem)" -lt 224; then
-    echo "no or to small dh.param found, regenerating with 2048 bit (takes a few minutes)"
-    mkdir -p /etc/appliance
-    openssl dhparam 2048 -out /etc/appliance/dhparam.pem
-fi
-
 # export vault keys
 printf "%s" "$APPLIANCE_VAULT_ENCRYPT" > /etc/appliance/storagevault_encrypt.sec
 printf "%s" "$APPLIANCE_VAULT_SIGN" > /etc/appliance/storagevault_sign.sec
@@ -126,18 +119,24 @@ printf "%s" "$APPLIANCE_BACKUP_ENCRYPT" > /root/.gpg/backup_encrypt.sec
 chmod "0600" -r /root/.gpg/
 gpg --homedir /root/.gpg --batch --yes --import /root/.gpg/backup_encrypt.sec
 
+# reload postfix with keys
++ rewrite authorative_domain, ssl certs
++ restart postfix
+
+# re-generate dhparam.pem if not found or less than 2048 bit
+if test ! -e /etc/appliance/dhparam.pem -o "$(stat -L -c %s /etc/appliance/dhparam.pem)" -lt 224; then
+    echo "no or to small dh.param found, regenerating with 2048 bit (takes a few minutes)"
+    mkdir -p /etc/appliance
+    openssl dhparam 2048 -out /etc/appliance/dhparam.pem
+fi
+
 # reload nginx with new identity
 cat /etc/appliance/template.identity |
     sed -re "s/##domains##/$APPLIANCE_HOST_NAMES/g" > /etc/appliance/server.identity
 systemctl reload-or-restart nginx
 
-# reload postfix with keys
-+ rewrite authorative_domain, ssl certs
-+ restart postfix
 
 # update all packages
 nginx_redirect_to_status "Appliance Update Packages" "system packages update, please wait"
 echo "fixme: update all packages"
 appliance_startup
-
-exec _start_ecs.sh
