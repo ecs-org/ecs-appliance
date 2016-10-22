@@ -1,4 +1,10 @@
-ecs_settings: |
+ecs:
+  migrate:
+      auto: "true"
+  userswitcher:
+      enabled: "true"
+      parameter: "-it"
+  settings: |
     AUTHORATIVE_DOMAIN = localhost
     ABSOLUTE_URL_PREFIX = https://localhost
     ALLOWED_HOSTS = ['localhost',]
@@ -8,7 +14,7 @@ ecs_settings: |
     DEBUG = False
     ECS_DEBUGTOOLBAR = False
     ECS_USERSWITCHER_ENABLED = False
-    ECS_LOGO_BORDER_COLOR = 'green'
+
     SENTRY_DSN = 'https://67ef2698d5ed402fb6e00e0cf13440a1:dfbb1ed17acf41ad82da31326d56c4b5@sentry.on.ep3.at/2'
 
     ETHICS_COMMISSION_UUID = '23d805c6b5f14d8b9196a12005fd2961'
@@ -25,37 +31,31 @@ ecs_settings: |
     }
 
     STORAGE_VAULT_OVERWRITE = {
-      'encryption_key': os.path.join(PROJECT_DIR, '..', 'ecs-appliance', 'storagevault_encrypt.sec'),
-      'signature_key': os.path.join(PROJECT_DIR, '..', 'ecs-appliance', 'storagevault_sign.sec'),
+      'encryption_key': '/etc/appliance/storagevault_encrypt.sec',
+      'signature_key': '/etc/appliance/storagevault_sign.sec',
     }
 
-    # # will be set in appliance for container
-    # ECS_MIGRATE_AUTO= True
-    # ECS_DUMP_FILENAME = ""
+# # will be set in appliance for container
+# ECS_MIGRATE_AUTO= True
+# ECS_DUMP_FILENAME= ""
 
 appliance:
-  # # optional, if set appliance will not activate
-  # standby: true
+  # standby: true # optional, if set appliance will not activate
   host_names: localhost
   ssl:
-    # # optional, if set ssl key for https host will be used
-    # key:
-    # cert:
+    # key: # optional, if set ssl key for https host will be used
+    # cert: # optional, if set ssl key for https host will be used
     letsencrypt:
       enabled: false # use snakeoil certs, because eg. 443 is behind ssh tunneling
     client_certs: mandatory # always need a client certificate
   authorized_keys: |
       # insert your ssh keys here
-  prometheus:
-    enabled: true
   backup:
     url: ssh://app@localhost/volatile/ecs-backup-test/
     encrypt: PGP PRIVATE KEY BLOCK OF BACKUP HERE
   storage:
-    # # optional, will be executed if volatile or data can not be found
-    # setup: |
-
-    # # optional, if set, will not look for ecs-volatile or ecs-data filesystem
+    # setup: | # optional, will be executed if volatile or data can not be found
+    # ignore_(volatile|data) # optional, if set, will not look for ecs-volatile or ecs-data filesystem
     ignore:
       volatile: true
       data: true

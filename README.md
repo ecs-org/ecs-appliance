@@ -14,10 +14,10 @@ connect to your developer vm with port 80 and 443:
 inside the developer vm:
 ```
 git clone repositorypath /app/appliance
-sudo mkdir -p /etc/salt
-sudo cp /app/appliance/salt/minion /etc/salt/minon
-curl -o bootstrap_salt.sh -L https://bootstrap.saltstack.com
-sudo sh bootstrap_salt.sh
+cd /app/appliance
+sudo bash -c "mkdir -p /etc/salt; cp /app/appliance/salt/minion /etc/salt/minon"
+curl -o /app/bootstrap_salt.sh -L https://bootstrap.saltstack.com
+sudo sh /app/bootstrap_salt.sh
 sudo salt-call --local state.highstate pillar='{"builder": {"enabled": true}, "appliance": {"enabled": true}}'
 sudo systemctl start appliance
 ```
