@@ -8,7 +8,7 @@ include:
   - postgresql-server and client tools pgdump
 #}
 
-{% for i in ['prepare_appliance.sh', 'prepare-ecs.sh',] %}
+{% for i in ['prepare_appliance.sh', 'prepare_ecs.sh',] %}
 /usr/local/bin/{{ i }}:
   file.managed:
     - source: salt://appliance/{{ i }}
@@ -27,4 +27,3 @@ include:
   file.recurse:
     - source: salt://appliance/compose
     - keep_symlink: true
-    

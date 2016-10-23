@@ -32,22 +32,22 @@ generate_snakeoil:
 
 /etc/appliance/server.identity:
   file.symlink:
-    - source: /etc/appliance/snakeoil.identity
+    - target: /etc/appliance/snakeoil.identity
     - require:
       - cmd: generate_snakeoil
 
 /etc/appliance/server.cert.pem:
   file.symlink:
-    - source: /etc/ssl/certs/ssl-cert-snakeoil.pem
+    - target: /etc/ssl/certs/ssl-cert-snakeoil.pem
 
 /etc/appliance/server.key.pem:
   file.symlink:
-    - source: /etc/ssl/private/ssl-cert-snakeoil.key
+    - target: /etc/ssl/private/ssl-cert-snakeoil.key
 
 /etc/appliance/ca.cert.pem:
   file.symlink:
-    - source: /app/ecs-ca/ca.cert.pem
+    - target: /app/ecs-ca/ca.cert.pem
 
 /etc/appliance/crl.pem:
   file.symlink:
-    - source: /app/ecs-ca/crl.pem
+    - target: /app/ecs-ca/crl.pem
