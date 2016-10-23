@@ -3,10 +3,8 @@ include:
   - .dehydrated
   - .nginx
   - .backup
-
-{#
-  - postgresql-server and client tools pgdump
-#}
+  # - .postgresql
+  # - .postfix
 
 {% for i in ['prepare_appliance.sh', 'prepare_ecs.sh',] %}
 /usr/local/bin/{{ i }}:

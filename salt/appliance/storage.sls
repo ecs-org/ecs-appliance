@@ -33,7 +33,7 @@ directories:
       - user: app
       - dir_mode: 775
       - file_mode: 664
-{% if salt['pillar.get']("appliance:storage:ignore:volatile",false) %}
+{% if not salt['pillar.get']("appliance:storage:ignore:volatile",false) %}
     onlyif: mountpoint -q /volatile
 {% endif %}
 relocate:
@@ -75,7 +75,7 @@ directories:
       - user: app
       - dir_mode: 775
       - file_mode: 664
-  {% if salt['pillar.get']("appliance:storage:ignore:data",false) %}
+  {% if not salt['pillar.get']("appliance:storage:ignore:data",false) %}
     onlyif: mountpoint -q /data
   {% endif %}
 relocate:
