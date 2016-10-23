@@ -6,6 +6,11 @@ Requires=docker.service
 [Service]
 ExecStartPre=/usr/local/bin/prepare-appliance.sh
 ExecStartPre=/usr/local/bin/prepare-ecs.sh
-ExecStart=docker-compose start
+ExecStart=docker-compose up -f /etc/appliance/compose/docker-compose.yml --abort-on-container-exit
 ExecStartPost=bash -c "fname=/var/www/html/app.html; if test -e $fname; then rm -f $fname; fi"
-ExecStop=docker-compose stop
+ExecStop=docker-compose stop -f /etc/appliance/compose/docker-compose.yml
+WorkingDirectory=/app
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

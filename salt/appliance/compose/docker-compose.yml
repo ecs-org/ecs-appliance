@@ -14,7 +14,7 @@ services:
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
     env_file:
-      - .service_urls
+      - service_urls.env
     ports:
       - "127.0.0.1:5000:5000"
     links:
@@ -34,7 +34,7 @@ services:
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
     env_file:
-      - .service_urls
+      - service_urls.env
     links:
       - redis
       - memcached
@@ -50,7 +50,7 @@ services:
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
     env_file:
-      - .service_urls
+      - service_urls.env
     links:
       - redis
       - memcached
@@ -60,7 +60,7 @@ services:
     image: memcached
 
   redis:
-    image: redis:3.0
+    image: redis:3
     volumes:
       - /volatile/container/redis:/data
 
@@ -78,7 +78,7 @@ services:
       context: pdfas
       args:
         - http_proxy
-    image: pdfas
+    image: ecs/pdfas
     ports:
       - "127.0.0.1:5095:8080"
 

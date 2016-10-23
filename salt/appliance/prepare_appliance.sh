@@ -1,29 +1,7 @@
 #!/bin/bash
 
-nginx_redirect_to_status () {
-    # call(Title, Text)
-    # or call("--disable")
-    local templatefile=/etc/appliance/app-template.html
-    local resultfile=/var/www/html/app.html
-    local title text
-    if test "$1" = "--disable"; then
-        if test -e $resultfile; then
-            rm -f $resultfile
-        fi
-    else
-        echo "nginx redirect to: $1 $2"
-        title=$(echo "$1" | tr / \\/)
-        text=$(echo "$2" | tr / \\/)
-        cat $templatefile |
-            sed -re "s/\{\{ ?title ?\}\}/$title/g" |
-            sed -re "s/\{\{ ?text ?\}\}/$text/g" > $resultfile
-    fi
-}
-
-appliance_startup () {
-    nginx_redirect_to_status "Appliance Startup" "starting up, please wait"
-}
-
+. /usr/local/etc/env.include
+. /usr/local/etc/appliance.include
 
 # start nginx (may be disabled by devupate.sh if on the same machine)
 systemctl enable nginx
@@ -31,7 +9,6 @@ systemctl start nginx
 appliance_startup
 
 # read userdata
-. /usr/local/etc/env.include
 userdata_yaml=$(get_userdata)
 if test $? -ne 0; then
     err=$(printf "error reading userdata: %s" `echo "$userdata_yaml"| grep USERDATA_ERR`)

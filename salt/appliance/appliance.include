@@ -1,0 +1,25 @@
+#!/bin/bash
+
+nginx_redirect_to_status () {
+    # call(Title, Text)
+    # or call("--disable")
+    local templatefile=/etc/appliance/app-template.html
+    local resultfile=/var/www/html/app.html
+    local title text
+    if test "$1" = "--disable"; then
+        if test -e $resultfile; then
+            rm -f $resultfile
+        fi
+    else
+        echo "nginx redirect to: $1 $2"
+        title=$(echo "$1" | tr / \\/)
+        text=$(echo "$2" | tr / \\/)
+        cat $templatefile |
+            sed -re "s/\{\{ ?title ?\}\}/$title/g" |
+            sed -re "s/\{\{ ?text ?\}\}/$text/g" > $resultfile
+    fi
+}
+
+appliance_startup () {
+    nginx_redirect_to_status "Appliance Startup" "starting up, please wait"
+}

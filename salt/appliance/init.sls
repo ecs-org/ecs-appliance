@@ -5,6 +5,5 @@ include:
   - .backup
 
 {#
-  - nginx
   - postgresql-server and client tools pgdump
 #}
