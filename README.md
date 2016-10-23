@@ -24,16 +24,16 @@ sudo systemctl start appliance
 
 ### files of interest
 
-| Path | Description |
-|-|-|
-| /pillar/                    | environment |
-| /pillar/top.sls             | defines the environment tree |
-| /pillar/default-env.sls     | the fallback env yaml (localhost ecs config) |
-| /salt/*.sls                 | states to be executed |
-| /salt/top.sls               | defines the state tree |
-| /salt/common/init.sls       | common install |
-| /salt/appliance/init.sls    | install a ecs appliance |
-| /salt/appliance/start.sh    | script started on ready to run appliance |
+Path | Description
+--- | ---
+/pillar/                    | environment
+/pillar/top.sls             | defines the environment tree
+/pillar/default-env.sls     | the fallback env yaml (localhost ecs config)
+/salt/*.sls                 | states to be executed
+/salt/top.sls               | defines the state tree
+/salt/common/init.sls       | common install
+/salt/appliance/init.sls    | install a ecs appliance
+/salt/appliance/start.sh    | script started on ready to run appliance
 
 ## fixme
 + env.include does not work as nonroot if it tries to mount could-init iso's; should try sudo at mount umount
