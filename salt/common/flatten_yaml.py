@@ -13,10 +13,10 @@ except ImportError as e:
 
 
 def usage():
-    print("usage: {0} ".format(sys.argv[0])+ '''{root|.} [prefix] [postfix] < data.yml
+    print("usage: {0} ".format(sys.argv[0])+ '''(root[,root]*)|.} [prefix] [postfix] < data.yml
 
 reads (non array) yaml from stdin,
-select optional root to filter yaml or "." for all,
+select optional roots (seperated by ",") to filter yaml or "." for all,
 flatten (concatinate with "_") & upper case key names,
 strip and shlex.quote values,
 output {prefix}{KEY_NAME}='{shlex quoted value}'{postfix} to stdout
@@ -54,12 +54,21 @@ def main():
 
     with sys.stdin as f:
         data = yaml.safe_load(f)
-    if sys.argv[1] != ".":
-        data = data[sys.argv[1]]
-        keyroot = sys.argv[1].upper()+ "_"
 
-    for key, value in flatten(data).items():
-        print("{prefix}{key}={value}{postfix}".format(prefix=prefix, key=keyroot+key.upper(), value=value, postfix=postfix))
+    if sys.argv[1] != ".":
+        for i in sys.argv[1].split(','):
+            keyroot = i.upper()+ "_"
+            if i in data:
+                rootdata = data[i]
+                for key, value in flatten(rootdata).items():
+                    print("{prefix}{key}={value}{postfix}".format(
+                        prefix=prefix, key=keyroot+key.upper(),
+                        value=value, postfix=postfix))
+    else:
+        for key, value in flatten(data).items():
+            print("{prefix}{key}={value}{postfix}".format(
+                prefix=prefix, key=key.upper(),
+                value=value, postfix=postfix))
 
 
 if __name__ == '__main__':

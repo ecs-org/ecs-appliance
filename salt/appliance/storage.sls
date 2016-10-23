@@ -1,6 +1,5 @@
 {% from 'storage/lib.sls' import storage_setup with context %}
 
-
 {% if (not salt['pillar.get']("appliance:storage:ignore:volatile", false) and
        not salt['file.file_exists']('/dev/disk/by-label/ecs-volatile')) or
       (not salt['pillar.get']("appliance:storage:ignore:data", false) and
@@ -11,7 +10,7 @@
 
 
 {% load_yaml as volatile_prepare %}
-  {% if salt['pillar.get']("appliance:storage:ignore:volatile",false) %}
+  {% if not salt['pillar.get']("appliance:storage:ignore:volatile",false) %}
 mount:
   /volatile:
     device: /dev/disk/by-label/ecs-volatile
@@ -56,7 +55,7 @@ relocate:
 
 
 {% load_yaml as data_prepare %}
-  {% if salt['pillar.get']("appliance:storage:ignore:data",false) %}
+  {% if not salt['pillar.get']("appliance:storage:ignore:data",false) %}
 mount:
   /data:
     device: /dev/disk/by-label/ecs-data

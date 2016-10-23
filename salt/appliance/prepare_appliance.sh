@@ -19,8 +19,13 @@ echo -n "found user-data type: "
 printf '%s' "$userdata_yaml" | grep USERDATA_TYPE
 echo "write userdata to /app/active-env.yml"
 printf "%s" "$userdata_yaml" > /app/active-env.yml
-# export yaml into environment
-ENV_YML=/app/active-env.yml update_env_from_userdata
+
+# export active yaml into environment
+ENV_YML=/app/active-env.yml update_env_from_userdata ecs,appliance
+if test $? -ne 0; then
+    nginx_redirect_to_status "Appliance Error" "could not activate userdata environment"
+    exit 1
+fi
 
 # check if standby is true
 if test "$($APPLIANCE_STANDBY| tr A-Z a-z)" = "true"; then

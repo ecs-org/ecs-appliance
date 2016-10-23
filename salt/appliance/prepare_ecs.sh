@@ -15,7 +15,11 @@ if test ! -e /app/active-env.yml; then
     nginx_redirect_to_status "Appliance Error" "no /app/active-env.yml, did you run prepare_appliance ?"
     exit 1
 fi
-ENV_YML=/app/active-env.yml update_env_from_userdata
+ENV_YML=/app/active-env.yml update_env_from_userdata ecs,appliance
+if test $? -ne 0; then
+    nginx_redirect_to_status "Appliance Error" "could not activate userdata environment"
+    exit 1
+fi
 
 # check if standby is true
 if test "$($APPLIANCE_STANDBY| tr A-Z a-z)" = "true"; then

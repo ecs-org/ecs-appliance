@@ -356,6 +356,8 @@ before-{{ item }}-{{ data['destination'] }}-relocate:
     - name: {{ data['exec_before'] }}
     - require_in:
       - cmd: {{ item }}-{{ data['destination'] }}-relocate
+    - unless: test -L {{ item }}
+    - onlyif: test -d {{ data['destination'] }}
     {% endif %}
 
 {{ item }}-{{ data['destination'] }}-relocate:
@@ -381,6 +383,8 @@ after-{{ item }}-{{ data['destination'] }}-relocate:
     - name: {{ data['exec_after'] }}
     - require:
       - cmd: {{ item }}-{{ data['destination'] }}-relocate
+    - unless: test -L {{ item }}
+    - onlyif: test -d {{ data['destination'] }}
     {% endif %}
 
   {% endfor %}
