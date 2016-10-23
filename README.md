@@ -15,7 +15,9 @@ inside the developer vm:
 ```
 git clone ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs-appliance.git /app/appliance
 curl -o /app/bootstrap_salt.sh -L https://bootstrap.saltstack.com
-sudo bash -c "mkdir -p /etc/salt; cp /app/appliance/salt/minion /etc/salt/minion; chmod +x /app/bootstrap_salt.sh; /app/bootstrap_salt.sh -X; systemctl stop salt-minion; systemctl disable salt-minion"
+sudo bash -c "mkdir -p /etc/salt; cp /app/appliance/salt/minion /etc/salt/minion; \
+    chmod +x /app/bootstrap_salt.sh; /app/bootstrap_salt.sh -X; \
+    systemctl stop salt-minion; systemctl disable salt-minion"
 sudo salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance": {"enabled": true}}'
 sudo systemctl start appliance
 ```
