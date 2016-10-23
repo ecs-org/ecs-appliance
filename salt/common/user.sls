@@ -28,9 +28,3 @@ application_skeleton_{{ i }}:
       - user: application_user
 
 {% endfor %}
-
-chown_app_app:
-  cmd.run:
-    - name: chown -R app:app /app
-    - require:
-      - user: application_user
