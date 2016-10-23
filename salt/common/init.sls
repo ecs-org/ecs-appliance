@@ -34,6 +34,7 @@ base_packages:
       - wget
       - curl
       - tmux
+      - socat
       - haveged
 
 system_timezone:
