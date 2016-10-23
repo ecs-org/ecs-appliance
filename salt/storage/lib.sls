@@ -68,8 +68,8 @@
       - cmd: "parted-{{ item }}-{{ x }}-{{ part.name }}"
           {%- set x = x +1 %}
         {%- endfor %}
-      {%- endif}
-    {% endif}
+      {%- endif %}
+    {% endif %}
 
     {% if data.parts|d('') %}
       {% set x=1 %}
