@@ -4,7 +4,7 @@
 {% if (not salt['pillar.get']("appliance:storage:ignore:volatile", false) and
        not salt['files.exists']('/dev/disk/by-label/ecs-volatile')) or
       (not salt['pillar.get']("appliance:storage:ignore:data", false) and
-       not salt['files.exists']('/dev/disk/by-label/ecs-data')) ) %}
+       not salt['files.exists']('/dev/disk/by-label/ecs-data')) %}
 
   {{ storage_setup(salt['pillar.get']("appliance:storage:setup", {})) }}
 {% endif %}
