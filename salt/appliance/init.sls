@@ -26,4 +26,4 @@ include:
 /etc/appliance/compose:
   file.recurse:
     - source: salt://appliance/compose
-    - keep_symlink: true
+    - keep_symlinks: true
