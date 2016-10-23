@@ -1,9 +1,9 @@
 # ECS-Appliance
 
 the ecs appliance is a selfservice production setup virtual machine builder and executor.
-it can be stacked with the developer vm, but is independend of it.
+it can be stacked on top of the developer vm, but is independend of it.
 
-## where to start
+## upgrade your developer-vm
 
 insert your devserver name (eg. "testecs") into your /etc/hosts:
 `sudo -s 'printf "%s" "127.0.0.1 testecs" >> /etc/hosts'`
@@ -13,12 +13,10 @@ connect to your developer vm with port 80 and 443:
 
 inside the developer vm:
 ```
-git clone repositorypath /app/appliance
-cd /app/appliance
-sudo bash -c "mkdir -p /etc/salt; cp /app/appliance/salt/minion /etc/salt/minon"
+git clone ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs-appliance.git /app/appliance
 curl -o /app/bootstrap_salt.sh -L https://bootstrap.saltstack.com
-sudo sh /app/bootstrap_salt.sh
-sudo salt-call --local state.highstate pillar='{"builder": {"enabled": true}, "appliance": {"enabled": true}}'
+sudo bash -c "mkdir -p /etc/salt; cp /app/appliance/salt/minion /etc/salt/minion; chmod +x /app/bootstrap_salt.sh; /app/bootstrap_salt.sh -X; systemctl stop salt-minion; systemctl disable salt-minion"
+sudo salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance": {"enabled": true}}'
 sudo systemctl start appliance
 ```
 

@@ -7,4 +7,4 @@ backup:
       - gnupg
 
 
-https://sourceforge.net/projects/pgbarman/
+# https://sourceforge.net/projects/pgbarman/
