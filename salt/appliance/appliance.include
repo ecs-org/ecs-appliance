@@ -4,7 +4,7 @@ nginx_redirect_to_status () {
     # call(Title, Text)
     # or call("--disable")
     local templatefile=/etc/appliance/app-template.html
-    local resultfile=/var/www/html/app.html
+    local resultfile=/var/www/html/503.html
     local title text
     if test "$1" = "--disable"; then
         if test -e $resultfile; then
