@@ -33,7 +33,9 @@ Path | Description
 /salt/top.sls               | defines the state tree
 /salt/common/init.sls       | common install
 /salt/appliance/init.sls    | install a ecs appliance
-/salt/appliance/start.sh    | script started on ready to run appliance
+/salt/appliance/appliance.service    | systemd appliance service (starts prepare and docker-compose)
+/salt/appliance/prepare_appliance.sh | script started on ready to run appliance
+/salt/appliance/prepare_ecs.sh       | script startet after prepare_appliance
 
 ## fixme
 + env.include does not work as nonroot if it tries to mount could-init iso's; should try sudo at mount umount
