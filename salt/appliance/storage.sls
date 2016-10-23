@@ -2,9 +2,9 @@
 
 
 {% if (not salt['pillar.get']("appliance:storage:ignore:volatile", false) and
-       not salt['files.exists']('/dev/disk/by-label/ecs-volatile')) or
+       not salt['file.file_exists']('/dev/disk/by-label/ecs-volatile')) or
       (not salt['pillar.get']("appliance:storage:ignore:data", false) and
-       not salt['files.exists']('/dev/disk/by-label/ecs-data')) %}
+       not salt['file.file_exists']('/dev/disk/by-label/ecs-data')) %}
 
   {{ storage_setup(salt['pillar.get']("appliance:storage:setup", {})) }}
 {% endif %}
@@ -26,9 +26,6 @@ directories:
       - ecs-log
       - ecs-cache
       - ecs-backup-test
-      - container/redis
-      - container/postfix
-      - container/elasticsearch
       # FIXME tmp and var/tmp have different dir_mode
       # - tmp
       # - var/tmp
@@ -42,18 +39,13 @@ directories:
 {% endif %}
 relocate:
   /var/lib/docker:
-    destination: /volatile/docker
-    copy_content: False
+    destination: /volatile
     exec_before: systemctl stop docker
     exec_after: systemctl start docker
   /app/ecs-log:
-    destination: /volatile/ecs-log
+    destination: /volatile
   /app/ecs-cache:
-    destination: /volatile/ecs-cache
-  /app/container/redis:
-    destination: /volatile/container/redis
-  /app/container/postfix:
-    destination: /volatile/container/postfix
+    destination: /volatile
   # TODO tmp and var/tmp have different dir_mode
   # /tmp:
   #   destination: /volatile/tmp
@@ -74,11 +66,11 @@ mount:
 directories:
   /data:
     names:
+      - appliance
       - ecs-storage-vault
       - ecs-ca
-      - ecs-appliance
-      - ecs-postgres
       - ecs-pgdump
+      - postgresql
     options:
       - group: app
       - user: app
@@ -89,13 +81,13 @@ directories:
   {% endif %}
 relocate:
   /app/ecs-storage-vault:
-    destination: /data/ecs-storage-vault
+    destination: /data/
   /app/ecs-ca:
-    destination: /data/ecs-ca
+    destination: /data/
   /etc/appliance:
-    destination: /data/ecs-appliance
+    destination: /data/
   /var/lib/postgresql:
-    destination: /data/ecs-postgres
+    destination: /data/
     exec_before: systemctl stop postgresql
     exec_after: systemctl start postgresql
 {% endload %}

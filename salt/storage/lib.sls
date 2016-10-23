@@ -353,7 +353,7 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
     {% if data['exec_before'] is defined %}
 before-{{ item }}-{{ data['destination'] }}-relocate:
   cmd.run:
-    - name: data['exec_before']
+    - name: {{ data['exec_before'] }}
     - require_in:
       - cmd: {{ item }}-{{ data['destination'] }}-relocate
     {% endif %}
@@ -378,7 +378,7 @@ before-{{ item }}-{{ data['destination'] }}-relocate:
     {% if data['exec_after'] is defined %}
 after-{{ item }}-{{ data['destination'] }}-relocate:
   cmd.run:
-    - name: data['exec_after']
+    - name: {{ data['exec_after'] }}
     - require:
       - cmd: {{ item }}-{{ data['destination'] }}-relocate
     {% endif %}
