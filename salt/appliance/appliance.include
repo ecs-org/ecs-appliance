@@ -24,7 +24,6 @@ appliance_status_starting () {
     appliance_status "Appliance Startup" "starting up"
 }
 
-
 appliance_exit()
 {
     appliance_status "$1" "$2"
