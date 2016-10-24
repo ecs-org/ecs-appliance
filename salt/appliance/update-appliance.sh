@@ -17,7 +17,17 @@ target=$(gosu app git -C /app/appliance rev-parse origin/$APPLIANCE_GIT_BRANCH)
 last_running=$(gosu app git -C /app/appliance rev-parse HEAD)
 
 appliance_status "Appliance Update" "Updating appliance from $last_running to $target"
-salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance": {"enabled": true}}'
+
+abort_ifnot_cleanrepo /app/appliance
+ret=$?
+if $ret; then
+    git checkout -f $APPLIANCE_GIT_BRANCH
+    git reset --hard origin/$APPLIANCE_GIT_BRANCH
+else
+    appliance_exit "Appliance Update" "Error, /app/appliance not clean, can not update"
+fi
+
+salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
 
 appliance_status "Appliance Update" "Restarting appliance"
 systemctl restart appliance
