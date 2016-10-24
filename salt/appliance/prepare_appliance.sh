@@ -26,7 +26,7 @@ if test $? -ne 0; then
 fi
 
 # check if standby is true
-if test "$($APPLIANCE_STANDBY| tr A-Z a-z)" = "true"; then
+if is_truestr "$APPLIANCE_STANDBY"; then
     appliance_exit_standby
 fi
 
@@ -41,13 +41,13 @@ if test ! -d "/data/ecs-storage-vault"; then
     need_storage_setup=true
 fi
 if test "$(findmnt -S "LABEL=ecs-volatile" -f -l -n -o "TARGET")" = ""; then
-    if test "$($APPLIANCE_STORAGE_IGNORE_VOLATILE | tr A-Z a-z)" != "true"; then
+    if is_falsestr "$APPLIANCE_STORAGE_IGNORE_VOLATILE"; then
         echo "warning: could not find mount for ecs-volatile filesystem"
         need_storage_setup=true
     fi
 fi
 if test "$(findmnt -S "LABEL=ecs-data" -f -l -n -o "TARGET")" = ""; then
-    if test "$($APPLIANCE_STORAGE_IGNORE_DATA | tr A-Z a-z)" != "true"; then
+    if is_falsestr "$APPLIANCE_STORAGE_IGNORE_DATA"; then
         echo "warning: could not find mount for ecs-data filesystem"
         need_storage_setup=true
     fi
@@ -68,7 +68,7 @@ fi
     appliance_exit "Appliance Standby" "Appliance is in standby, no postgres-data"
 
 # https certificate setup
-if test "$(${APPLIANCE_LETSENCRYPT_ENABLED:-true}|tr A-Z a-z)" = "true"; then
+if is_truestr "${APPLIANCE_SSL_LETSENCRYPT_ENABLED:-true}"; then
     # generate certificates using letsencrypt (dehydrated client)
     domains_file=/etc/appliance/dehydrated/domains.txt
     if test -e $domains_file; then rm $domains_file; fi

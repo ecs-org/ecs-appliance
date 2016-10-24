@@ -34,3 +34,11 @@ appliance_exit()
 appliance_exit_standby () {
     appliance_exit "Appliance Standby" "Appliance is in standby"
 }
+
+is_truestr () {
+    test "$(printf "%s" "$1" | tr A-Z a-z)" = "true"
+}
+
+is_falsestr () {
+    test "$(printf "%s" "$1" | tr A-Z a-z)" != "true"
+}
