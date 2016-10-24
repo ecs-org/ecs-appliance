@@ -7,7 +7,7 @@ include:
   # - .postfix
 
 {% for i in ['prepare_appliance.sh', 'prepare_ecs.sh', 'appliance_update.sh', 'ecs_update.sh'] %}
-/usr/local/bin/{{ i }}:
+/usr/local/sbin/{{ i }}:
   file.managed:
     - source: salt://appliance/{{ i }}
     - mode: "0755"

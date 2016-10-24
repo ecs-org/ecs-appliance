@@ -4,8 +4,8 @@ After=docker.service
 Requires=docker.service postgresql.service
 
 [Service]
-ExecStartPre=/usr/local/bin/prepare-appliance.sh
-ExecStartPre=/usr/local/bin/prepare-ecs.sh
+ExecStartPre=/usr/local/sbin/prepare-appliance.sh
+ExecStartPre=/usr/local/sbin/prepare-ecs.sh
 ExecStart=bash -c ". /usr/local/etc/env.include; ENV_YML=/app/active-env.yml update_env_from_userdata ecs; exec docker-compose up -f /etc/appliance/compose/docker-compose.yml --abort-on-container-exit"
 ExecStartPost=bash -c ". /usr/local/etc/appliance.include; appliance_status --disable"
 ExecStop=docker-compose stop -f /etc/appliance/compose/docker-compose.yml
