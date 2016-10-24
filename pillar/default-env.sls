@@ -5,8 +5,8 @@ ecs:
       enabled: "true"
       parameter: "-it"
   settings: |
-    AUTHORATIVE_DOMAIN = localhost
-    ABSOLUTE_URL_PREFIX = https://localhost
+    AUTHORATIVE_DOMAIN = 'localhost'
+    ABSOLUTE_URL_PREFIX = 'https://localhost'
     ALLOWED_HOSTS = ['localhost',]
     SECURE_PROXY_SSL = True
     CLIENT_CERTS_REQUIRED = True
@@ -25,7 +25,7 @@ ecs:
 
     EMAIL_BACKEND = 'django.core.mail.backends.console.emailbackend'
     LIMITED_EMAIL_BACKEND = 'django.core.mail.backends.console.emailbackend'
-    ECSMAIL_OVERRRIDE = {
+    ECSMAIL_OVERRIDE = {
         'filter_outgoing_smtp': True,
         'authorative_domain': AUTHORATIVE_DOMAIN,
     }
