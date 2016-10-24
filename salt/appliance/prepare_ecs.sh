@@ -38,7 +38,7 @@ if test $? -ne 0; then
 fi
 
 # check if standby is true
-if test "$($APPLIANCE_STANDBY| tr A-Z a-z)" = "true"; then
+if is_truestr "$APPLIANCE_STANDBY"; then
     noupdate_exit_standby
 fi
 

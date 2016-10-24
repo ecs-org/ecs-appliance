@@ -62,10 +62,11 @@ if $need_storage_setup; then
     fi
 fi
 
-# postgres data check
-+ look if ecs databse is there and not empty
-    + no postgres-data or postgres-data but database is not existing: goto standby
-    appliance_exit "Appliance Standby" "Appliance is in standby, no postgres-data"
+# postgres database check
+gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw ecs
+if test $? -ne 0; then
+    appliance_exit "Appliance Standby" "Appliance is in standby, no postgresql database named ecs"
+fi
 
 # https certificate setup
 if is_truestr "${APPLIANCE_SSL_LETSENCRYPT_ENABLED:-true}"; then
@@ -98,8 +99,7 @@ chmod "0600" -r /root/.gpg/
 gpg --homedir /root/.gpg --batch --yes --import /root/.gpg/backup_encrypt.sec
 
 # reload postfix with keys
-+ rewrite authorative_domain, ssl certs
-+ restart postfix
+echo "fixme: postfix: rewrite authorative_domain, ssl certs, restart postfix"
 
 # re-generate dhparam.pem if not found or less than 2048 bit
 if test ! -e /etc/appliance/dhparam.pem -o "$(stat -L -c %s /etc/appliance/dhparam.pem)" -lt 224; then
