@@ -11,8 +11,7 @@ systemctl start nginx
 # read userdata
 userdata_yaml=$(get_userdata)
 if test $? -ne 0; then
-    err=$(printf "error reading userdata: %s" `echo "$userdata_yaml"| grep USERDATA_ERR`)
-    appliance_exit "Appliance Error" "$err"
+    appliance_exit "Appliance Error" "$(printf "Error reading userdata: %s" `echo "$userdata_yaml"| grep USERDATA_ERR`)"
 fi
 echo -n "found user-data type: "
 printf '%s' "$userdata_yaml" | grep USERDATA_TYPE
@@ -22,7 +21,7 @@ printf "%s" "$userdata_yaml" > /app/active-env.yml
 # export active yaml into environment
 ENV_YML=/app/active-env.yml update_env_from_userdata ecs,appliance
 if test $? -ne 0; then
-    appliance_exit "Appliance Error" "could not activate userdata environment"
+    appliance_exit "Appliance Error" "Could not activate userdata environment"
 fi
 
 # check if standby is true
@@ -57,8 +56,7 @@ if $need_storage_setup; then
     salt-call state.sls appliance.storage
     err=$?
     if test "$err" -ne 0; then
-        errstr="Storage Setup: Error, appliance.storage setup failed with error: $err"
-        appliance_exit "Appliance Error" "$errstr"
+        appliance_exit "Appliance Error" "Storage Setup: Error, appliance.storage setup failed with error: $err"
     fi
 fi
 
@@ -119,6 +117,6 @@ cat /etc/appliance/template.identity |
 systemctl reload-or-restart nginx
 
 # update all packages
-appliance_status "Appliance Update Packages" "system packages update, please wait"
+appliance_status "Appliance Update" "Update system packages"
 echo "fixme: update all packages"
 appliance_status_starting

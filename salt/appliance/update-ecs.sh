@@ -4,5 +4,5 @@
 
 /usr/local/sbin/prepare-ecs.sh --update
 
-appliance_status "Appliance Update" "restarting ecs"
+appliance_status "Appliance Update" "Restarting ecs"
 systemctl restart appliance

@@ -17,9 +17,14 @@ include:
   file.managed:
     - source: salt://appliance/appliance.include
 
-/etc/systemd/system/appliance.service:
+appliance_service:
   file.managed:
+    - name: /etc/systemd/system/appliance.service
     - source: salt://appliance/appliance.service
+  cmd.wait:
+    - name: systemctl daemon-reload
+    - watch:
+      - file: appliance_service
 
 /etc/appliance/compose:
   file.recurse:

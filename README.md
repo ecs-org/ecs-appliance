@@ -33,19 +33,29 @@ open your browser and go to: http://testecs
 
 Path | Description
 --- | ---
-/pillar/                    | environment
-/pillar/top.sls             | defines the environment tree
+/pillar/                    | salt environment
+/pillar/top.sls             | defines the root of the environment tree
 /pillar/default-env.sls     | the fallback env yaml (localhost ecs config)
-/salt/*.sls                 | states to be executed
-/salt/top.sls               | defines the state tree
+/salt/*.sls                 | states (to be executed)
+/salt/top.sls               | defines the root of the state tree
 /salt/common/init.sls       | common install
 /salt/appliance/init.sls    | ecs appliance install
 /salt/appliance/appliance.service    | systemd appliance service (starts prepare and docker-compose)
 /salt/appliance/prepare-appliance.sh | script started on ready to run appliance
 /salt/appliance/prepare-ecs.sh       | script startet after prepare_appliance
 
++ look at all appliance http status pages:
+```
+git grep "\(noupdate\|appliance\)_\(exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort
+```
+
+### unsorted commands of interest
++ reInstall appliance `sudo salt-call state.highstate pillar='{"appliance": "enabled": true}}'`
++ update appliance `sudo update-appliance`
++ update ecs `sudo update-ecs`
+
 ## fixme
-+ env.include does not work as nonroot if it tries to mount could-init iso's; should try sudo at mount umount
++ known-issue: env.include does not work as nonroot if it tries to mount could-init iso's; should try sudo at mount umount
 
 ## Appliance
 
@@ -67,15 +77,6 @@ appliance gets build using packer
         + add p2 (all usable space) as pv-lvm
         + add a vg and volumes ecs-data (60%) ecs-volatile (30%), rest is for snapshots
 
-### start-appliance
-+ see salt/appliance/appliance.service
-
-### update-appliance
-+ git fetch , git checkout in /app/appliance
-+ run salt-call state.highstate
-
-### update-ecs
-+ systemctl restart appliance
 
 ### recover from backup
 + stop ecs.*

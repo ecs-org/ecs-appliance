@@ -12,7 +12,11 @@ ECS_DATABASE=ecs
 
 noupdate_status()
 {
-    if $update; then appliance_status "$1" "$2"; fi
+    if $update; then
+        appliance_status "$1" "$2"
+    else
+        echo "INFO: muted (did not update) appliance status: $1 : $2"
+    fi
 }
 noupdate_exit()
 {
@@ -23,15 +27,19 @@ noupdate_exit_standby()
     if $update; then appliance_exit_standby; else exit 1; fi
 }
 
-noupdate_status "Appliance Startup" "starting up ecs"
+if $update; then
+    noupdate_status "Appliance Update" "Starting ecs update"
+else
+    noupdate_status "Appliance Startup" "Starting ecs"
+fi
 
 # export active yaml into environment
 if test ! -e /app/active-env.yml; then
-    noupdate_exit "Appliance Error" "no /app/active-env.yml, did you run prepare_appliance ?"
+    noupdate_exit "Appliance Error" "No /app/active-env.yml, did you run prepare_appliance ?"
 fi
 ENV_YML=/app/active-env.yml update_env_from_userdata ecs,appliance
 if test $? -ne 0; then
-    noupdate_exit "Appliance Error" "could not activate userdata environment"
+    noupdate_exit "Appliance Error" "Could not activate userdata environment"
 fi
 
 # check if standby is true
@@ -53,12 +61,12 @@ fi
 
 # fetch all updates from origin, except if devserver
 if test "$target" != "devserver"; then
-    gosu app git fetch -a -p -C /app/ecs
+    gosu app git -C /app/ecs fetch -a -p
 fi
 
 # if target still invalid, set target to latest branch commit
 if test "$target" = "invalid"; then
-    target=$(gosu app git rev-parse origin/$ECS_GIT_BRANCH -C /app/ecs)
+    target=$(gosu app git -C /app/ecs rev-parse origin/$ECS_GIT_BRANCH)
 fi
 
 # get last_running commit hash
@@ -74,26 +82,28 @@ else
     if test "$last_running" = "invalid"; then
         need_migration=true
     else
-        need_migration=$(gosu app git diff --name-status $last_running..origin/$target -C /app/ecs |
+        need_migration=$(gosu app git -C /app/ecs diff --name-status $last_running..origin/$target |
             grep -q "^A.*/migrations/" && echo true || echo false)
     fi
 fi
 
 cd /etc/appliance/compose
-appliance_status "Appliance Update" "building ecs"
+appliance_status "Appliance Update" "Building ecs"
 docker-compose pull --ignore-pull-failures
 docker-compose build --pull
 
-appliance_status "Appliance Update" "updating ecs"
+appliance_status "Appliance Update" "Updating ecs"
 docker-compose stop
 
 if $need_migration; then
+
     dbdump=/data/ecs-pgdump/${ECS_DATABASE}-migrate.pgdump
     if gosu app pg_dump --encoding="utf-8" --format=custom -Z6 -f ${dbdump}.new -d $ECS_DATABASE; then
         mv ${dbdump}.new ${dbdump}
     else
         appliance_exit "Appliance Error" "Could not pgdump database $ECS_DATABASE before starting migration"
     fi
+    appliance_status "Appliance Update" "Migrating ecs database"
     docker-compose run ecs.web --name ecs.migration --no-deps migrate
     err=$?
     if test $err -ne 0; then
