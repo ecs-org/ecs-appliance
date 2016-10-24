@@ -1,7 +1,7 @@
 [Unit]
 Description=Appliance
 After=docker.service
-Requires=docker.service
+Requires=docker.service postgresql.service
 
 [Service]
 ExecStartPre=/usr/local/bin/prepare-appliance.sh

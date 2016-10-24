@@ -65,8 +65,8 @@ if test "$target" = "invalid"; then
 fi
 
 # get last_running commit hash
-if test -e /etc/appliance/ECS_COMMIT_ID; then
-    last_running=$(cat /etc/appliance/ECS_GIT_COMMITID || echo "invalid")
+if test -e /etc/appliance/last_running_commitid; then
+    last_running=$(cat /etc/appliance/last_running_commitid || echo "invalid")
 else
     last_running="invalid"
 fi
@@ -83,7 +83,7 @@ else
 fi
 
 cd /etc/appliance/compose
-# build new images
+appliance_status "Appliance Update" "building ecs"
 docker-compose build --pull
 
 appliance_status "Appliance Update" "updating ecs"
@@ -103,4 +103,5 @@ if need_migration; then
     fi
 fi
 
-printf "%s" "$target" > /etc/appliance/ECS_COMMIT_ID
+# save next about to be executed commitid
+printf "%s" "$target" > /etc/appliance/last_running_commitid

@@ -6,10 +6,10 @@ it can be stacked on top of the developer vm, but is independend of it.
 ## upgrade your developer-vm
 
 insert your devserver name (eg. "testecs") into your /etc/hosts:
-    `sudo -s 'printf "%s" "127.0.0.1 testecs" >> /etc/hosts'`
+    ```sudo -s 'printf "%s" "127.0.0.1 testecs" >> /etc/hosts'```
 
 connect to your developer vm with port 80 and 443:
-    `sudo -E -P -u root ssh testecs -L 80:localhost:80 -L 443:localhost:443`
+    ```sudo -E -P -u root ssh testecs -L 80:localhost:80 -L 443:localhost:443```
 
 inside the developer vm:
 ```

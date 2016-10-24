@@ -361,10 +361,11 @@ before-{{ item }}-{{ data['destination'] }}-relocate:
     {% endif %}
 
 {{ item }}-{{ data['destination'] }}-relocate:
-  cmd.run:
     {%- if data['copy_content']|d(true) %}
+  cmd.run:
     - name: x={{ item }}; y=`basename $x`; if test -d $x; then cp -a -t {{ data['destination'] }} $x && rm -r $x; fi; ln -s -T {{ data['destination'] }}/$y {{ item }}
     {%- else %}
+  cmd.run:
     - name: rm -r {{ item }}; ln -s -T {{ data['destination'] }}/`basename {{ item }}` {{ item }}
     {%- endif %}
     - unless: test -L {{ item }}
