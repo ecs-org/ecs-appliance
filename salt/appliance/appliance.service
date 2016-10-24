@@ -7,8 +7,9 @@ Requires=docker.service
 ExecStartPre=/usr/local/bin/prepare-appliance.sh
 ExecStartPre=/usr/local/bin/prepare-ecs.sh
 ExecStart=bash -c ". /usr/local/etc/env.include; ENV_YML=/app/active-env.yml update_env_from_userdata ecs; exec docker-compose up -f /etc/appliance/compose/docker-compose.yml --abort-on-container-exit"
-ExecStartPost=bash -c "fname=/var/www/html/app.html; if test -e $fname; then rm -f $fname; fi"
+ExecStartPost=bash -c ". /usr/local/etc/appliance.include; appliance_status --disable"
 ExecStop=docker-compose stop -f /etc/appliance/compose/docker-compose.yml
+ExecStopPre=bash -c ". /usr/local/etc/appliance.include; appliance_exit_standby"
 WorkingDirectory=/app
 Restart=on-failure
 

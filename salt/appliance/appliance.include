@@ -1,6 +1,6 @@
 #!/bin/bash
 
-nginx_redirect_to_status () {
+appliance_status () {
     # call(Title, Text)
     # or call("--disable")
     local templatefile=/etc/appliance/app-template.html
@@ -11,7 +11,7 @@ nginx_redirect_to_status () {
             rm -f $resultfile
         fi
     else
-        echo "nginx redirect to: $1 $2"
+        echo "INFO: appliance status: $1 : $2"
         title=$(echo "$1" | tr / \\/)
         text=$(echo "$2" | tr / \\/)
         cat $templatefile |
@@ -20,6 +20,17 @@ nginx_redirect_to_status () {
     fi
 }
 
-appliance_startup () {
-    nginx_redirect_to_status "Appliance Startup" "starting up, please wait"
+appliance_status_starting () {
+    appliance_status "Appliance Startup" "starting up"
+}
+
+
+appliance_exit()
+{
+    appliance_status "$1" "$2"
+    exit 1
+}
+
+appliance_exit_standby () {
+    appliance_exit "Appliance Standby" "Appliance is in standby"
 }

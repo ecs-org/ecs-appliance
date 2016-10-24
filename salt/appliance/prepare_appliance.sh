@@ -3,17 +3,16 @@
 . /usr/local/etc/env.include
 . /usr/local/etc/appliance.include
 
-# start nginx (may be disabled by devupate.sh if on the same machine)
+appliance_status_starting
+# enable and start nginx (may be disabled by devupate.sh if on the same machine)
 systemctl enable nginx
 systemctl start nginx
-appliance_startup
 
 # read userdata
 userdata_yaml=$(get_userdata)
 if test $? -ne 0; then
     err=$(printf "error reading userdata: %s" `echo "$userdata_yaml"| grep USERDATA_ERR`)
-    nginx_redirect_to_status "Appliance Error" "$err"
-    exit 1
+    appliance_exit "Appliance Error" "$err"
 fi
 echo -n "found user-data type: "
 printf '%s' "$userdata_yaml" | grep USERDATA_TYPE
@@ -23,14 +22,12 @@ printf "%s" "$userdata_yaml" > /app/active-env.yml
 # export active yaml into environment
 ENV_YML=/app/active-env.yml update_env_from_userdata ecs,appliance
 if test $? -ne 0; then
-    nginx_redirect_to_status "Appliance Error" "could not activate userdata environment"
-    exit 1
+    appliance_exit "Appliance Error" "could not activate userdata environment"
 fi
 
 # check if standby is true
 if test "$($APPLIANCE_STANDBY| tr A-Z a-z)" = "true"; then
-    nginx_redirect_to_status "Appliance Standby" "Appliance is in standby, please contact sysadmin"
-    exit 1
+    appliance_exit_standby
 fi
 
 # storage setup
@@ -61,17 +58,16 @@ if $need_storage_setup; then
     err=$?
     if test "$err" -ne 0; then
         errstr="Storage Setup: Error, appliance.storage setup failed with error: $err"
-        nginx_redirect_to_status "Appliance Error" "$errstr"
-        exit 1
+        appliance_exit "Appliance Error" "$errstr"
     fi
 fi
 
 # postgres data check
 + look if ecs databse is there and not empty
     + no postgres-data or postgres-data but database is not existing: goto standby
-    nginx_redirect_to_status "Appliance Standby" "Appliance is in standby, no postgres-data"
-    exit 1
+    appliance_exit "Appliance Standby" "Appliance is in standby, no postgres-data"
 
+# https certificate setup
 if test "$(${APPLIANCE_LETSENCRYPT_ENABLED:-true}|tr A-Z a-z)" = "true"; then
     # generate certificates using letsencrypt (dehydrated client)
     domains_file=/etc/appliance/dehydrated/domains.txt
@@ -117,8 +113,7 @@ cat /etc/appliance/template.identity |
     sed -re "s/##domains##/$APPLIANCE_HOST_NAMES/g" > /etc/appliance/server.identity
 systemctl reload-or-restart nginx
 
-
 # update all packages
-nginx_redirect_to_status "Appliance Update Packages" "system packages update, please wait"
+appliance_status "Appliance Update Packages" "system packages update, please wait"
 echo "fixme: update all packages"
-appliance_startup
+appliance_status_starting

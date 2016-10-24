@@ -1,30 +1,45 @@
 #!/bin/bash
 
+update=false
 target="invalid"
 ECS_GIT_BRANCH=$(ECS_GIT_BRANCH:-master)
 ECS_GIT_SOURCE=$(ECS_GIT_SOURCE:-https://github.com/ethikkom/ecs.git)
 ECS_DATABASE=ecs
+if test "$1" = "--update"; then
+    update=true
+fi
 
 . /usr/local/etc/appliance.include
 . /usr/local/etc/env.include
 
-nginx_redirect_to_status "Appliance Startup" "starting up ecs"
+noupdate_status()
+{
+    if test $update -ne 0; then appliance_status "$1" "$2"; else exit 1; fi
+}
+noupdate_exit()
+{
+    if test $update -ne 0; then appliance_exit "$1" "$2"; else exit 1; fi
+}
+noupdate_exit_standby()
+{
+    if test $update -ne 0; then appliance_exit_standby; else exit 1; fi
+}
+
+
+noupdate_status "Appliance Startup" "starting up ecs"
 
 # export active yaml into environment
 if test ! -e /app/active-env.yml; then
-    nginx_redirect_to_status "Appliance Error" "no /app/active-env.yml, did you run prepare_appliance ?"
-    exit 1
+    noupdate_exit "Appliance Error" "no /app/active-env.yml, did you run prepare_appliance ?"
 fi
 ENV_YML=/app/active-env.yml update_env_from_userdata ecs,appliance
 if test $? -ne 0; then
-    nginx_redirect_to_status "Appliance Error" "could not activate userdata environment"
-    exit 1
+    noupdate_exit "Appliance Error" "could not activate userdata environment"
 fi
 
 # check if standby is true
 if test "$($APPLIANCE_STANDBY| tr A-Z a-z)" = "true"; then
-    nginx_redirect_to_status "Appliance Standby" "Appliance is in standby, please contact sysadmin"
-    exit 1
+    noupdate_exit_standby
 fi
 
 #get target commit hash
@@ -68,16 +83,24 @@ else
 fi
 
 cd /etc/appliance/compose
+# build new images
 docker-compose build --pull
+
+appliance_status "Appliance Update" "updating ecs"
 docker-compose stop
 
 if need_migration; then
-    dbdump=/data/ecs-pgdump/$ECS_DATABASE.pgdump
+    dbdump=/data/ecs-pgdump/${ECS_DATABASE}-migrate.pgdump
     if gosu app pg_dump --encoding="utf-8" --format=custom -Z6 -f ${dbdump}.new -d $ECS_DATABASE; then
         mv ${dbdump}.new ${dbdump}
     else
-        nginx_redirect_to_status "Appliance Error" "Could not pgdump database $ECS_DATABASE before starting migration"
-        exit 1
+        appliance_exit "Appliance Error" "Could not pgdump database $ECS_DATABASE before starting migration"
     fi
     docker-compose run ecs.web --name ecs.migration --no-deps migrate
+    err=$?
+    if test $err -ne 0; then
+        appliance_exit "Appliance Error" "Migration Error"
+    fi
 fi
+
+printf "%s" "$target" > /etc/appliance/ECS_COMMIT_ID
