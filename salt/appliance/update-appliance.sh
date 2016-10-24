@@ -17,7 +17,7 @@ target=$(gosu app git rev-parse origin/$APPLIANCE_GIT_BRANCH -C /app/appliance)
 last_running=$(gosu app git rev-parse HEAD -C /app/appliance)
 
 appliance_status "Appliance Update" "updating appliance from $last_running to $target"
-sudo salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance": {"enabled": true}}'
+salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance": {"enabled": true}}'
 
 appliance_status "Appliance Update" "starting appliance"
-sudo systemctl restart appliance 
+systemctl restart appliance 

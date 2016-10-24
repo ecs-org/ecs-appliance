@@ -39,7 +39,7 @@ if is_truestr "$APPLIANCE_STANDBY"; then
     noupdate_exit_standby
 fi
 
-#get target commit hash
+# get target commit hash
 if test -e /app/bin/devupdate.sh; then
     target="devserver"
 elif test "$ECS_GIT_COMMITID" != ""; then

@@ -6,11 +6,11 @@ Requires=docker.service postgresql.service
 [Service]
 TimeoutStartSec=10m
 # prepare_appliance & prepare_ecs should be ready in 10m maximum
-ExecStartPre=/usr/local/sbin/prepare_appliance.sh
-ExecStartPre=/usr/local/sbin/prepare_ecs.sh
+ExecStartPre=/usr/local/sbin/prepare-appliance.sh
+ExecStartPre=/usr/local/sbin/prepare-ecs.sh
 ExecStart=/bin/bash -c ". /usr/local/etc/env.include; ENV_YML=/app/active-env.yml update_env_from_userdata ecs; exec /usr/local/bin/docker-compose -f /etc/appliance/compose/docker-compose.yml up --abort-on-container-exit"
 ExecStartPost=/bin/bash -c ". /usr/local/etc/appliance.include; appliance_status --disable"
-ExecStop=/usr/local/bin/docker-compose -f /etc/appliance/compose/docker-compose.yml stop 
+ExecStop=/usr/local/bin/docker-compose -f /etc/appliance/compose/docker-compose.yml stop
 ExecStopPost=/bin/bash -c ". /usr/local/etc/appliance.include; appliance_exit_standby"
 WorkingDirectory=/app
 Restart=on-failure

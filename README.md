@@ -12,7 +12,7 @@ sudo -s 'printf "%s" "127.0.0.1 testecs" >> /etc/hosts'
 
 connect to your developer vm with port 80 and 443:
 ```
-sudo -E ssh -F ~/.ssh/config -l $USER testecs -L 80:localhost:80 -L 443:localhost:443
+sudo -E ssh -F ~/.ssh/config testecs -L 80:localhost:80 -L 443:localhost:443
 ```
 
 inside the developer vm:
@@ -26,6 +26,9 @@ sudo salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance
 sudo systemctl start appliance
 ```
 
+open your browser and go to: http://testecs
+
+
 ### files of interest
 
 Path | Description
@@ -38,8 +41,8 @@ Path | Description
 /salt/common/init.sls       | common install
 /salt/appliance/init.sls    | ecs appliance install
 /salt/appliance/appliance.service    | systemd appliance service (starts prepare and docker-compose)
-/salt/appliance/prepare_appliance.sh | script started on ready to run appliance
-/salt/appliance/prepare_ecs.sh       | script startet after prepare_appliance
+/salt/appliance/prepare-appliance.sh | script started on ready to run appliance
+/salt/appliance/prepare-ecs.sh       | script startet after prepare_appliance
 
 ## fixme
 + env.include does not work as nonroot if it tries to mount could-init iso's; should try sudo at mount umount
