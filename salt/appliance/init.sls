@@ -6,7 +6,7 @@ include:
   # - .postgresql
   # - .postfix
 
-{% for i in ['prepare_appliance.sh', 'prepare_ecs.sh',] %}
+{% for i in ['prepare_appliance.sh', 'prepare_ecs.sh', 'appliance_update.sh', 'ecs_update.sh'] %}
 /usr/local/bin/{{ i }}:
   file.managed:
     - source: salt://appliance/{{ i }}

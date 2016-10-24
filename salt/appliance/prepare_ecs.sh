@@ -1,30 +1,27 @@
 #!/bin/bash
 
 update=false
+if test "$1" = "--update"; then update=true; fi
 target="invalid"
-ECS_GIT_BRANCH=$(ECS_GIT_BRANCH:-master)
-ECS_GIT_SOURCE=$(ECS_GIT_SOURCE:-https://github.com/ethikkom/ecs.git)
+ECS_GIT_BRANCH=${ECS_GIT_BRANCH:-master}
+ECS_GIT_SOURCE=${ECS_GIT_SOURCE:-https://github.com/ethikkom/ecs.git}
 ECS_DATABASE=ecs
-if test "$1" = "--update"; then
-    update=true
-fi
 
 . /usr/local/etc/appliance.include
 . /usr/local/etc/env.include
 
 noupdate_status()
 {
-    if test $update -ne 0; then appliance_status "$1" "$2"; else exit 1; fi
+    if $update; then appliance_status "$1" "$2"; fi
 }
 noupdate_exit()
 {
-    if test $update -ne 0; then appliance_exit "$1" "$2"; else exit 1; fi
+    if $update; then appliance_exit "$1" "$2"; else exit 1; fi
 }
 noupdate_exit_standby()
 {
-    if test $update -ne 0; then appliance_exit_standby; else exit 1; fi
+    if $update; then appliance_exit_standby; else exit 1; fi
 }
-
 
 noupdate_status "Appliance Startup" "starting up ecs"
 
