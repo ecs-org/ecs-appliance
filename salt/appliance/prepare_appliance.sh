@@ -96,16 +96,16 @@ printf "%s" "$APPLIANCE_VAULT_SIGN" > /etc/appliance/storagevault_sign.sec
 if test -d /root/.gpg; then rm -r /root/.gpg; fi
 mkdir -p /root/.gpg
 printf "%s" "$APPLIANCE_BACKUP_ENCRYPT" > /root/.gpg/backup_encrypt.sec
-chmod "0600" -r /root/.gpg/
+chmod -R 0600 /root/.gpg/
 gpg --homedir /root/.gpg --batch --yes --import /root/.gpg/backup_encrypt.sec
 
 # reload postfix with keys
 echo "fixme: postfix: rewrite authorative_domain, ssl certs, restart postfix"
 
 # re-generate dhparam.pem if not found or less than 2048 bit
-recreate_dhparam=$(test ! -e /etc/appliance/dhparam.pem && echo "0" || echo "1")
-if test $recreate_dhparam -ne 0; then
-    recreate_dhparam=$(test "$(stat -L -c %s /etc/appliance/dhparam.pem)" -lt 224)
+recreate_dhparam=$(test ! -e /etc/appliance/dhparam.pem && echo "true" || echo "false")
+if ! $recreate_dhparam; then
+    recreate_dhparam=$(test "$(stat -L -c %s /etc/appliance/dhparam.pem)" -lt 224 && echo "true" || echo "false")
 fi
 if $recreate_dhparam; then
     echo "no or to small dh.param found, regenerating with 2048 bit (takes a few minutes)"
