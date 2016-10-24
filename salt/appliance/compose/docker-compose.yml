@@ -11,6 +11,7 @@ services:
     user: app
     volumes:
       - /data/ecs-storage-vault:/app/ecs-storage-vault
+      - /var/run/postgresql:/var/run/postgresql
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
     env_file:
@@ -31,6 +32,7 @@ services:
     user: app
     volumes:
       - /data/ecs-storage-vault:/app/ecs-storage-vault
+      - /var/run/postgresql:/var/run/postgresql
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
     env_file:
@@ -61,8 +63,6 @@ services:
 
   redis:
     image: redis:3
-    volumes:
-      - /volatile/container/redis:/data
 
   mocca:
     build:
@@ -86,4 +86,9 @@ services:
     image: google/cadvisor
     ports:
       - "127.0.0.1:5080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
     command: ["", "--housekeeping_interval=5s"]
