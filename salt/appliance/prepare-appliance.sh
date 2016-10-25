@@ -76,13 +76,16 @@ gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw "$ECS_DATABASE"
 if test $? -ne 0; then
     appliance_exit "Appliance Standby" "Appliance is in standby, no postgresql database named $ECS_DATABASE"
 fi
-# create postgres user app if not exists, set password, set ownership of database, add extension pg_stat_statements
-sudo -u postgres psql -c "\dg;" | grep app -q
-if test $? -ne 0; then sudo -u postgres createuser app; fi
+if ! $(sudo -u postgres psql -c "\dg;" | grep app -q); then
+    sudo -u postgres createuser app # create role app if not existing
+fi
 pg_pass=$(openssl rand -hex 8)
-sudo -u postgres psql -c "ALTER ROLE app WITH PASSWORD '${PG_PASS}';"
+sudo -u postgres psql -c "ALTER ROLE app WITH PASSWORD "${PG_PASS}";"
 sudo -u postgres psql -c "ALTER DATABASE ${ECS_DATABASE} OWNER TO app;"
-sudo -u postgres psql ${ECS_DATABASE} -c "CREATE extension pg_stat_statements;"
+if ! $(sudo -u postgres psql ${ECS_DATABASE} -qtc "\dx" | grep -q pg_stat_statements); then
+    # create extension if not existing
+    sudo -u postgres psql ${ECS_DATABASE} -c "CREATE extension pg_stat_statements;"
+fi
 
 # write out service_urls for docker-compose
 cat > /etc/appliance/compose/service_urls.env << EOF
