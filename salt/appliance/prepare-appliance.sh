@@ -77,7 +77,7 @@ if ! grep -q "^[ \t]*listen_addresses[ \t]*=.*$dockerip" $pgconf; then
     echo "listen_addresses = 'localhost,"$dockerip"'" >> $pgconf
     pgrestart=true
 fi
-if $pgrestart; then systemctl reload-or-restart postgresql; fi
+if $pgrestart; then systemctl restart postgresql; fi
 
 # database check
 gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw "$ECS_DATABASE"
