@@ -85,7 +85,7 @@ sudo -u postgres psql -c "ALTER DATABASE ${ECS_DATABASE} OWNER TO app;"
 sudo -u postgres psql ${ECS_DATABASE} -c "CREATE extension pg_stat_statements;"
 
 # write out service_urls for docker-compose
-cat > /etc/appliance/service_urls.env << EOF
+cat > /etc/appliance/compose/service_urls.env << EOF
 REDIS_URL=redis://localhost:6379/0
 MEMCACHED_URL=memcached://localhost:11211
 DATABASE_URL=postgres://app:${PG_PASS}@$dockerip:5432/${ECS_DATABASE}
