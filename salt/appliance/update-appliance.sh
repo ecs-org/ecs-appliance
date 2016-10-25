@@ -21,7 +21,7 @@ appliance_status "Appliance Update" "Updating appliance from $last_running to $t
 
 abort_ifnot_cleanrepo
 ret=$?
-if $ret; then
+if $ret -eq 0; then
     git checkout -f $APPLIANCE_GIT_BRANCH
     git reset --hard origin/$APPLIANCE_GIT_BRANCH
 else
