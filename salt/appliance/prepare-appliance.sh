@@ -70,7 +70,7 @@ pghba=/etc/postgresql/9.5/main/pg_hba.conf
 pgconf=/etc/postgresql/9.5/main/postgresql.conf
 pgrestart=false
 if ! grep -q "$dockernet.*md5" $pghba; then
-    echo "host     all             all             $dockernet           md5" >> $pghba
+    echo "host     $ECS_DATABASE             app             $dockernet           md5" >> $pghba
     pgrestart=true
 fi
 if ! grep -q "^[ \t]*listen_addresses[ \t]*=.*$dockerip" $pgconf; then
@@ -88,7 +88,7 @@ if ! $(sudo -u postgres psql -c "\dg;" | grep app -q); then
     sudo -u postgres createuser app # create role app if not existing
 fi
 pgpass=$(HOME=/root openssl rand -hex 8)
-sudo -u postgres psql -c "ALTER ROLE app WITH PASSWORD '"${pgpass}"';"
+sudo -u postgres psql -c "ALTER ROLE app WITH ENCRYPTED PASSWORD '"${pgpass}"';"
 sudo -u postgres psql -c "ALTER DATABASE ${ECS_DATABASE} OWNER TO app;"
 if ! $(sudo -u postgres psql ${ECS_DATABASE} -qtc "\dx" | grep -q pg_stat_statements); then
     # create extension if not existing
