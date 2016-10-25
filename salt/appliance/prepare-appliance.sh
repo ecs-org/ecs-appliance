@@ -79,7 +79,7 @@ fi
 if ! $(sudo -u postgres psql -c "\dg;" | grep app -q); then
     sudo -u postgres createuser app # create role app if not existing
 fi
-pg_pass=$(openssl rand -hex 8)
+pg_pass=$(HOME=/root openssl rand -hex 8)
 sudo -u postgres psql -c "ALTER ROLE app WITH PASSWORD '"${PG_PASS}"';"
 sudo -u postgres psql -c "ALTER DATABASE ${ECS_DATABASE} OWNER TO app;"
 if ! $(sudo -u postgres psql ${ECS_DATABASE} -qtc "\dx" | grep -q pg_stat_statements); then
