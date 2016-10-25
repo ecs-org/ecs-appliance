@@ -32,9 +32,9 @@ sudo salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
 
 ## start appliance
 
-start appliance: `sudo systemctl start appliance`
-open your browser and go to: http://testecs or http://localhost
-stop appliance: `sudo systemctl stop appliance`
++ start appliance: `sudo systemctl start appliance`
++ open your browser and go to: http://testecs or http://localhost
++ stop appliance: `sudo systemctl stop appliance`
 
 ### files of interest
 
