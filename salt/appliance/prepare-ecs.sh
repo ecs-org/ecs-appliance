@@ -13,9 +13,9 @@ ECS_DATABASE=ecs
 noupdate_status()
 {
     if $update; then
-        appliance_status "$1" "$2"
-    else
         echo "INFO: muted (did not update) appliance status: $1 : $2"
+    else
+        appliance_status "$1" "$2"
     fi
 }
 noupdate_exit()
@@ -59,14 +59,16 @@ if test ! -e /app/ecs/ecs/settings.py; then
     gosu app git clone --branch $ECS_GIT_BRANCH $ECS_GIT_SOURCE /app/ecs
 fi
 
+cd /app/ecs
+
 # fetch all updates from origin, except if devserver
 if test "$target" != "devserver"; then
-    gosu app git -C /app/ecs fetch -a -p
+    gosu app git fetch -a -p
 fi
 
 # if target still invalid, set target to latest branch commit
 if test "$target" = "invalid"; then
-    target=$(gosu app git -C /app/ecs rev-parse origin/$ECS_GIT_BRANCH)
+    target=$(gosu app git rev-parse origin/$ECS_GIT_BRANCH)
 fi
 
 # get last_running commit hash
@@ -82,7 +84,7 @@ else
     if test "$last_running" = "invalid"; then
         need_migration=true
     else
-        need_migration=$(gosu app git -C /app/ecs diff --name-status $last_running..origin/$target |
+        need_migration=$(gosu app git diff --name-status $last_running..origin/$target |
             grep -q "^A.*/migrations/" && echo true || echo false)
     fi
 fi
@@ -96,7 +98,7 @@ appliance_status "Appliance Update" "Updating ecs"
 docker-compose stop
 
 if $need_migration; then
-
+    appliance_status "Appliance Update" "Pgdump ecs database"
     dbdump=/data/ecs-pgdump/${ECS_DATABASE}-migrate.pgdump
     if gosu app pg_dump --encoding="utf-8" --format=custom -Z6 -f ${dbdump}.new -d $ECS_DATABASE; then
         mv ${dbdump}.new ${dbdump}

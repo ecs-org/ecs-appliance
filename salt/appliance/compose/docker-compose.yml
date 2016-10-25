@@ -11,7 +11,6 @@ services:
     user: app
     volumes:
       - /data/ecs-storage-vault:/app/ecs-storage-vault
-      - /var/run/postgresql:/var/run/postgresql
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
     env_file:
@@ -32,7 +31,6 @@ services:
     user: app
     volumes:
       - /data/ecs-storage-vault:/app/ecs-storage-vault
-      - /var/run/postgresql:/var/run/postgresql
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
     env_file:

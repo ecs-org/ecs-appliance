@@ -17,6 +17,11 @@ include:
   file.managed:
     - source: salt://appliance/appliance.include
 
+/etc/appliance/compose:
+  file.recurse:
+    - source: salt://appliance/compose
+    - keep_symlinks: true
+
 appliance_service:
   file.managed:
     - name: /etc/systemd/system/appliance.service
@@ -25,8 +30,4 @@ appliance_service:
     - name: systemctl daemon-reload
     - watch:
       - file: appliance_service
-
-/etc/appliance/compose:
-  file.recurse:
-    - source: salt://appliance/compose
-    - keep_symlinks: true
+    - order: last

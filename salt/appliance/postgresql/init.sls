@@ -11,4 +11,5 @@ postgresql:
       - file: /etc/postgresql/9.5/main/postgresql.conf
 
 /etc/postgresql/9.5/main/postgresql.conf:
-  
+  file.replace:
+    -

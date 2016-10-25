@@ -3,6 +3,8 @@
 . /usr/local/etc/env.include
 . /usr/local/etc/appliance.include
 
+ECS_DATABASE=${ECS_DATABASE:-ecs}
+
 appliance_status_starting
 # enable and start nginx (may be disabled by devupate.sh if on the same machine)
 systemctl enable nginx
@@ -60,11 +62,34 @@ if $need_storage_setup; then
     fi
 fi
 
-# postgres database check
-gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw ecs
-if test $? -ne 0; then
-    appliance_exit "Appliance Standby" "Appliance is in standby, no postgresql database named ecs"
+# postgres setup
+# add docker0 listening support to postgresql
+dockernet=$(ip -o -4 a show dev docker0 | sed -re "s/.*inet[ \t]+([0-9\.]+\/[0-9]+)[ \t]+.*/\1/")
+dockerip="${dockernet%%/*}"
+pghba=/etc/postgresql/9.5/main/pg_hba.conf
+if ! grep -q "$dockernet.*md5" $pghba; then
+    echo "host    all             all             $dockernet            md5" >> $pghba
+    systemctl reload-or-restart postgresql
 fi
+# database check
+gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw "$ECS_DATABASE"
+if test $? -ne 0; then
+    appliance_exit "Appliance Standby" "Appliance is in standby, no postgresql database named $ECS_DATABASE"
+fi
+# create postgres user app if not exists, set password, set ownership of database, add extension pg_stat_statements
+sudo -u postgres psql -c "\dg;" | grep app -q
+if $? -ne 0; then sudo -u postgres createuser app; fi
+pg_pass=$(openssl rand -hex 8)
+sudo -u postgres psql -c "ALTER ROLE app WITH PASSWORD \'${PG_PASS}\';"
+sudo -u postgres psql -c "ALTER DATABASE ${ECS_DATABASE} OWNER TO app;"
+sudo -u postgres psql ${ECS_DATABASE} -c "CREATE extension pg_stat_statements;"
+
+# write out service_urls for docker-compose
+cat > /etc/appliance/service_urls.env << EOF
+REDIS_URL=redis://localhost:6379/0
+MEMCACHED_URL=memcached://localhost:11211
+DATABASE_URL=postgres://app:${PG_PASS}@$dockerip:5432/${ECS_DATABASE}
+EOF
 
 # https certificate setup
 if is_truestr "${APPLIANCE_SSL_LETSENCRYPT_ENABLED:-true}"; then
