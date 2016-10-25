@@ -5,29 +5,36 @@ it can be stacked on top of the developer vm, but is independend of it.
 
 ## upgrade your developer-vm
 
-insert your devserver name (eg. "testecs") into your /etc/hosts:
+on your local machine:
+    + insert your devserver name (eg. "testecs") into your /etc/hosts
 ```
 sudo -s 'printf "%s" "127.0.0.1 testecs" >> /etc/hosts'
 ```
-
-connect to your developer vm with port 80 and 443:
+    + connect to your developer vm with port 80 and 443:
 ```
-sudo -E ssh -F ~/.ssh/config testecs -L 80:localhost:80 -L 443:localhost:443
+sudo -E ssh -F ~/.ssh/config testecs -L 80:localhost:80 -L 443:localhost:443 -L 8050:localhost:8050
 ```
 
 inside the developer vm:
 ```
+# clone appliance code
 git clone ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs-appliance.git /app/appliance
+# install saltstack
 curl -o /app/bootstrap_salt.sh -L https://bootstrap.saltstack.com
 sudo bash -c "mkdir -p /etc/salt; cp /app/appliance/salt/minion /etc/salt/minion; \
     chmod +x /app/bootstrap_salt.sh; /app/bootstrap_salt.sh -X; \
     systemctl stop salt-minion; systemctl disable salt-minion"
-sudo salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance": {"enabled": true}}'
-sudo systemctl start appliance
+# execute appliance install
+sudo salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
+# or if you also want the builder (for building the appliance image) installed:
+# sudo salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance": {"enabled": true}}'
 ```
 
-open your browser and go to: http://testecs
+## start appliance
 
+start appliance: `sudo systemctl start appliance`
+open your browser and go to: http://testecs or http://localhost
+stop appliance: `sudo systemctl stop appliance`
 
 ### files of interest
 
@@ -44,16 +51,14 @@ Path | Description
 /salt/appliance/prepare-appliance.sh | script started on ready to run appliance
 /salt/appliance/prepare-ecs.sh       | script startet after prepare_appliance
 
-+ look at all appliance http status pages:
-```
-git grep "\(noupdate\|appliance\)_\(exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort
-```
 
 ### unsorted commands of interest
 + reInstall appliance `sudo salt-call state.highstate pillar='{"appliance": "enabled": true}}'`
 + update appliance `sudo update-appliance`
 + update ecs `sudo update-ecs`
 + read container details in yaml `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
++ run a django shell `docker-compose run --no-deps ecs.web run ./manage.py shell_plus`
++ look at all appliance http status pages: `git grep "\(noupdate\|appliance\)_\(exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort`
 
 ## fixme
 + known-issue: env.include does not work as nonroot if it tries to mount could-init iso's; should try sudo at mount umount
@@ -71,7 +76,7 @@ appliance gets build using packer
 
 + developer setup:
     + vagrantfile has grow-root baked into it, p1 will take all space, appliance will not create additional partitions
-    + storage setup will (if told in env.yml) create the directories but do not expect a mountpoint
+    + storage setup will create the directories but do not expect a mountpoint
 
 + production setup:
     + storage.setup will (if told in env.yml):
