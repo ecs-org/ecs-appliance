@@ -60,9 +60,6 @@ Path | Description
 + run a django shell `docker-compose run --no-deps ecs.web run ./manage.py shell_plus`
 + look at all appliance http status pages: `git grep "\(noupdate\|appliance\)_\(exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort`
 
-## fixme
-+ known-issue: env.include does not work as nonroot if it tries to mount could-init iso's; should try sudo at mount umount
-
 ## Appliance
 
 appliance gets build using packer

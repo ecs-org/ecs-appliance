@@ -1,5 +1,4 @@
 postfix:
-
   pkg.installed:
     - pkgs:
       - postfix
@@ -20,4 +19,3 @@ postfix:
     - repl: smtpd_tls_key_file=/etc/appliance/server.key.pem
 
     myhostname
-  

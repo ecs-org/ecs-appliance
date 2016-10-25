@@ -96,9 +96,9 @@ if ! $(sudo -u postgres psql ${ECS_DATABASE} -qtc "\dx" | grep -q pg_stat_statem
 fi
 
 # write out service_urls for docker-compose
-cat > /etc/appliance/compose/service_urls.env << EOF
-REDIS_URL=redis://compose_redis_1:6379/0
-MEMCACHED_URL=memcached://compose_memcached_1:11211
+cat > /etc/appliance/ecs/service_urls.env << EOF
+REDIS_URL=redis://ecs_redis_1:6379/0
+MEMCACHED_URL=memcached://ecs_memcached_1:11211
 DATABASE_URL=postgres://app:${pgpass}@${dockerip}:5432/${ECS_DATABASE}
 EOF
 

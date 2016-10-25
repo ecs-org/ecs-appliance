@@ -17,9 +17,9 @@ include:
   file.managed:
     - source: salt://appliance/appliance.include
 
-/etc/appliance/compose:
+/etc/appliance/ecs:
   file.recurse:
-    - source: salt://appliance/compose
+    - source: salt://appliance/ecs
     - keep_symlinks: true
 
 appliance_service:

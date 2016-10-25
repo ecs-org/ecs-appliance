@@ -89,7 +89,7 @@ else
     fi
 fi
 
-cd /etc/appliance/compose
+cd /etc/appliance/ecs
 appliance_status "Appliance Update" "Building ecs"
 docker-compose pull --ignore-pull-failures
 docker-compose build --pull
@@ -98,7 +98,7 @@ appliance_status "Appliance Update" "Updating ecs"
 docker-compose stop
 
 if $need_migration; then
-    appliance_status "Appliance Update" "Pgdump ecs database"
+    appliance_status "Appliance Update" "Pgdump ${ECS_DATABASE} database"
     dbdump=/data/ecs-pgdump/${ECS_DATABASE}-migrate.pgdump
     if gosu app pg_dump --encoding="utf-8" --format=custom -Z6 -f ${dbdump}.new -d $ECS_DATABASE; then
         mv ${dbdump}.new ${dbdump}
