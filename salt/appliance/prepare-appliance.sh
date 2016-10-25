@@ -97,8 +97,8 @@ fi
 
 # write out service_urls for docker-compose
 cat > /etc/appliance/compose/service_urls.env << EOF
-REDIS_URL=redis://localhost:6379/0
-MEMCACHED_URL=memcached://localhost:11211
+REDIS_URL=redis://compose_redis_1:6379/0
+MEMCACHED_URL=memcached://compose_memcached_1:11211
 DATABASE_URL=postgres://app:${pgpass}@${dockerip}:5432/${ECS_DATABASE}
 EOF
 
