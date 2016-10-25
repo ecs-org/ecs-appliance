@@ -20,6 +20,7 @@ services:
     links:
       - redis
       - memcached
+    network_mode: "bridge"
     command: web
 
   ecs.worker:
@@ -38,6 +39,7 @@ services:
     links:
       - redis
       - memcached
+    network_mode: "bridge"
     command: worker
 
   ecs.beat:
@@ -54,13 +56,16 @@ services:
     links:
       - redis
       - memcached
+    network_mode: "bridge"
     command: beat
 
   memcached:
     image: memcached
+    network_mode: "bridge"
 
   redis:
     image: redis:3
+    network_mode: "bridge"
 
   mocca:
     build:
@@ -70,6 +75,7 @@ services:
     image: ecs/mocca
     ports:
       - "127.0.0.1:5090:8080"
+    network_mode: "bridge"
 
   pdfas:
     build:
@@ -79,6 +85,7 @@ services:
     image: ecs/pdfas
     ports:
       - "127.0.0.1:5095:8080"
+    network_mode: "bridge"
 
   cadvisor:
     image: google/cadvisor
@@ -89,4 +96,5 @@ services:
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+    network_mode: "bridge"
     command: ["", "--housekeeping_interval=5s"]
