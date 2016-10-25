@@ -78,7 +78,7 @@ if test $? -ne 0; then
 fi
 # create postgres user app if not exists, set password, set ownership of database, add extension pg_stat_statements
 sudo -u postgres psql -c "\dg;" | grep app -q
-if $? -ne 0; then sudo -u postgres createuser app; fi
+if test $? -ne 0; then sudo -u postgres createuser app; fi
 pg_pass=$(openssl rand -hex 8)
 sudo -u postgres psql -c "ALTER ROLE app WITH PASSWORD '${PG_PASS}';"
 sudo -u postgres psql -c "ALTER DATABASE ${ECS_DATABASE} OWNER TO app;"
