@@ -13,27 +13,17 @@ ecs:
 
     DEBUG = False
     ECS_DEBUGTOOLBAR = False
-    ECS_USERSWITCHER_ENABLED = False
 
-    SENTRY_DSN = 'https://67ef2698d5ed402fb6e00e0cf13440a1:dfbb1ed17acf41ad82da31326d56c4b5@sentry.on.ep3.at/2'
-
-    ETHICS_COMMISSION_UUID = '23d805c6b5f14d8b9196a12005fd2961'
-
+    ETHICS_COMMISSION_UUID = 'ecececececececececececececececec'
     SECRET_KEY = 'ptn5xj+85fvd=d4u@i1-($z*otufbvlk%x1vflb&!5k94f$i3w'
     REGISTRATION_SECRET = '!brihi7#cxrd^twvj$r=398mdp4neo$xa-rm7b!8w1jfa@7zu_'
     PASSWORD_RESET_SECRET = 'j2obdvrb-hm$$x949k*f5gk_2$1x%2etxhd!$+*^qs8$4ra3=a'
 
     EMAIL_BACKEND = 'django.core.mail.backends.console.emailbackend'
-    LIMITED_EMAIL_BACKEND = 'django.core.mail.backends.console.emailbackend'
-    ECSMAIL_OVERRIDE = {
-        'filter_outgoing_smtp': True,
-        'authorative_domain': AUTHORATIVE_DOMAIN,
-    }
+    EMAIL_BACKEND_FILTERED = 'django.core.mail.backends.console.emailbackend'
 
-    STORAGE_VAULT_OVERWRITE = {
-      'encryption_key': '/etc/appliance/storagevault_encrypt.sec',
-      'signature_key': '/etc/appliance/storagevault_sign.sec',
-    }
+    STORAGE_VAULT['encryption_key'] = '/etc/appliance/storagevault_encrypt.sec'
+    STORAGE_VAULT['signature_key'] = '/etc/appliance/storagevault_sign.sec'
 
 # # will be set in appliance for container
 # ECS_MIGRATE_AUTO= True
@@ -47,7 +37,7 @@ appliance:
     # cert: # optional, if set ssl key for https host will be used
     letsencrypt:
       enabled: false # use snakeoil certs, because eg. 443 is behind ssh tunneling
-    client_certs: mandatory # always need a client certificate
+    mandatory_client_certs: true # always need a client certificate
   authorized_keys: |
       # insert your ssh keys here
   backup:
