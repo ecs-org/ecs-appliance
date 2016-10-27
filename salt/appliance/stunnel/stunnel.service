@@ -1,6 +1,7 @@
 [Unit]
 Description=SSL tunnel for network daemons
 After=syslog.target
+After=network.target
 
 [Service]
 ExecStart=/usr/bin/stunnel4 /etc/stunnel/stunnel.conf
