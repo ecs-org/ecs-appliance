@@ -27,15 +27,6 @@ CACHES = {
     },
 }
 
-# ecsmail settings
-ECSMAIL['authoritative_domain'] = '%(host)s'
-if %(debug.filter_smtp)s:
-    ECSMAIL['filter_outgoing_smtp'] = True
-
-import sys
-if not any(word in sys.argv for word in set(['test', 'runserver'])):
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
 
 #PDFAS_SERVICE = 'http://%(host)s:4780/pdf-as/'
 PDFAS_SERVICE = 'https://%(host)s/pdf-as-web/'

@@ -3,7 +3,7 @@
 the ecs appliance is a selfservice production setup virtual machine builder and executor.
 it can be stacked on top of the developer vm, but is independend of it.
 
-## upgrade your developer-vm
+## upgrade your developer-vm, install appliance
 
 on your local machine:
 + insert your devserver name (eg. "testecs") into your /etc/hosts
@@ -26,12 +26,17 @@ sudo bash -c "mkdir -p /etc/salt; cp /app/appliance/salt/minion /etc/salt/minion
     systemctl stop salt-minion; systemctl disable salt-minion"
 # execute appliance install
 sudo salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
-# or if you also want the builder (for building the appliance image) installed:
-# sudo salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance": {"enabled": true}}'
 ```
 
-## start appliance
+if you also want the builder (for building the appliance image) installed:
+```
+sudo salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance": {"enabled": true}}'
+```
 
+## configure  appliance
++ make env.yml
+
+## start appliance
 + start appliance: `sudo systemctl start appliance`
 + open your browser and go to: http://testecs or http://localhost
 + stop appliance: `sudo systemctl stop appliance`
@@ -54,7 +59,7 @@ Path | Description
 
 ### unsorted commands of interest
 + reInstall appliance `sudo salt-call state.highstate pillar='{"appliance": "enabled": true}}'`
-+ update appliance `sudo update-appliance`
++ update appliance `sudo update-appliance` (more or less like git pull with state.highstate)
 + update ecs `sudo update-ecs`
 + read container details in yaml `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
 + run a django shell `docker-compose run --no-deps ecs.web run ./manage.py shell_plus`
@@ -80,48 +85,9 @@ appliance gets build using packer
         + add p2 (all usable space) as pv-lvm
         + add a vg and volumes ecs-data (60%) ecs-volatile (30%), rest is for snapshots
 
+### still to be implemented
 
-### recover from backup
-+ stop ecs.*
-+ standby on
-+ duplicity restore to /data/ecs*
-+ pgimport /data/ecs-pgdump/ecs.pgdump
-+ premigrate (if old dump) and migrate
-+ call update-ecs
-
-### clone-ecs
-+ snapshot ecs-files and ecs-database to CLONE R/W snapshot
-+ start a clone compose with files and database from CLONE and modified settings
-    (userswitcher, no emails)
-+ add a onetime cronjob to shutdown clone and delete CLONE snapshot after 3 days
-
-### production prepare
-+ build new container
-+ make clone
-+ migrate clone with new container
-+ run hitchtest
-+ if ok: set flag update_ready
-
-### if createfirstuser:
-+ create user (group office) plus 1 Day certificate send to email address with transport password
-    + useremail,user first,last,gender, transportpass (min 15chars)
-
-### ENV
-```
-# set by builder
-version:
-  git:
-    rev:
-    branch:
-
-# used by devserver
-dev:
-    autostart: true
-    rebase_to: master
-
-```
-
-## Vagrant Appliance Builder
+#### Vagrant Appliance Builder
 
 `vagrant up` installs all packages needed for builder
 
@@ -146,3 +112,43 @@ add on top of developer-vm or appliance update:
 
 + builder image_build [provider]
     + calls packer to build a ecs machine
+
+#### Appliance: recover from backup
++ stop ecs.*
++ standby on
++ duplicity restore to /data/ecs*
++ pgimport /data/ecs-pgdump/ecs.pgdump
++ premigrate (if old dump) and migrate
++ call update-ecs
+
+#### Appliance: clone-ecs
++ snapshot ecs-files and ecs-database to CLONE R/W snapshot
++ start a clone compose with files and database from CLONE and modified settings
+    (userswitcher, no emails)
++ add a onetime cronjob to shutdown clone and delete CLONE snapshot after 3 days
+
+#### Appliance: production prepare
++ build new container
++ make clone
++ migrate clone with new container
++ run hitchtest
++ if ok: set flag update_ready
+
+#### if createfirstuser:
++ create user (group office) plus 1 Day certificate send to email address with transport password
+    + useremail,user first,last,gender, transportpass (min 15chars)
+
+### ENV
+```
+# set by builder
+version:
+  git:
+    rev:
+    branch:
+
+# used by devserver
+dev:
+    autostart: true
+    rebase_to: master
+
+```
