@@ -102,7 +102,7 @@ MEMCACHED_URL=memcached://ecs_memcached_1:11211
 DATABASE_URL=postgres://app:${pgpass}@${dockerip}:5432/${ECS_DATABASE}
 EOF
 
-# https certificate setup
+# ssl certificate setup
 if is_truestr "${APPLIANCE_SSL_LETSENCRYPT_ENABLED:-true}"; then
     # generate certificates using letsencrypt (dehydrated client)
     domains_file=/etc/appliance/dehydrated/domains.txt
@@ -121,6 +121,18 @@ else
     ln -sf /etc/appliance/server.cert.pem /etc/ssl/certs/ssl-cert-snakeoil.pem
     ln -sf /etc/appliance/server.key.pem /etc/ssl/private/ssl-cert-snakeoil.key
 fi
+# re-generate dhparam.pem if not found or less than 2048 bit
+recreate_dhparam=$(test ! -e /etc/appliance/dhparam.pem && echo "true" || echo "false")
+if ! $recreate_dhparam; then
+    recreate_dhparam=$(test "$(stat -L -c %s /etc/appliance/dhparam.pem)" -lt 224 && echo "true" || echo "false")
+fi
+if $recreate_dhparam; then
+    echo "no or to small dh.param found, regenerating with 2048 bit (takes a few minutes)"
+    mkdir -p /etc/appliance
+    openssl dhparam 2048 -out /etc/appliance/dhparam.pem
+fi
+cat /etc/appliance/server.cert.pem /etc/appliance/dhparam.pem > /etc/appliance/server.cert.dhparam.pem
+
 
 # export vault keys
 printf "%s" "$APPLIANCE_VAULT_ENCRYPT" > /etc/appliance/storagevault_encrypt.sec
@@ -135,17 +147,6 @@ gpg --homedir /root/.gpg --batch --yes --import /root/.gpg/backup_encrypt.sec
 
 # reload postfix with keys
 echo "fixme: postfix: rewrite authorative_domain, ssl certs, restart postfix"
-
-# re-generate dhparam.pem if not found or less than 2048 bit
-recreate_dhparam=$(test ! -e /etc/appliance/dhparam.pem && echo "true" || echo "false")
-if ! $recreate_dhparam; then
-    recreate_dhparam=$(test "$(stat -L -c %s /etc/appliance/dhparam.pem)" -lt 224 && echo "true" || echo "false")
-fi
-if $recreate_dhparam; then
-    echo "no or to small dh.param found, regenerating with 2048 bit (takes a few minutes)"
-    mkdir -p /etc/appliance
-    openssl dhparam 2048 -out /etc/appliance/dhparam.pem
-fi
 
 # reload nginx with new identity
 cat /etc/appliance/template.identity |

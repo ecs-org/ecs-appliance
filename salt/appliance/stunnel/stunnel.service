@@ -1,0 +1,11 @@
+[Unit]
+Description=SSL tunnel for network daemons
+After=syslog.target
+
+[Service]
+ExecStart=/usr/bin/stunnel4 /etc/stunnel/stunnel.conf
+User=stunnel4
+Type=forking
+
+[Install]
+WantedBy=multi-user.target

@@ -1,10 +1,12 @@
 include:
   - docker
+  - .ssl
   - .dehydrated
   - .nginx
-  - .backup
-  # - .postgresql
   # - .postfix
+  - .stunnel
+  # - .postgresql
+  - .backup
 
 {% for i in ['prepare-appliance.sh', 'prepare-ecs.sh', 'update-appliance.sh', 'update-ecs.sh'] %}
 /usr/local/sbin/{{ i }}:

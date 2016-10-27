@@ -23,11 +23,24 @@ services:
     network_mode: "bridge"
     command: web
 
+  ecs.smtpd:
+    image: ecs/ecs
+    user: app
+    volumes:
+      - /data/ecs-storage-vault:/app/ecs-storage-vault
+    environment:
+      - ECS_SETTINGS=${ECS_SETTINGS}
+    env_file:
+      - service_urls.env
+    ports:
+      - "127.0.0.1:8025:8025"
+    links:
+      - redis
+      - memcached
+    network_mode: "bridge"
+    command: smtpd
+
   ecs.worker:
-    build:
-      context: ecs
-      args:
-        - http_proxy
     image: ecs/ecs
     user: app
     volumes:
@@ -43,10 +56,6 @@ services:
     command: worker
 
   ecs.beat:
-    build:
-      context: ecs
-      args:
-        - http_proxy
     image: ecs/ecs
     user: app
     environment:
