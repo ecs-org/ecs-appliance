@@ -5,7 +5,7 @@ ecs:
       enabled: "true"
       parameter: "-it"
   settings: |
-    AUTHORATIVE_DOMAIN = 'localhost'
+    MAIN_DOMAIN = 'localhost'
     ABSOLUTE_URL_PREFIX = 'https://localhost'
     ALLOWED_HOSTS = ['localhost',]
     SECURE_PROXY_SSL = True
@@ -20,7 +20,7 @@ ecs:
     PASSWORD_RESET_SECRET = 'j2obdvrb-hm$$x949k*f5gk_2$1x%2etxhd!$+*^qs8$4ra3=a'
 
     EMAIL_BACKEND = 'django.core.mail.backends.console.emailbackend'
-    EMAIL_BACKEND_FILTERED = 'django.core.mail.backends.console.emailbackend'
+    EMAIL_BACKEND_UNFILTERED = 'django.core.mail.backends.console.EmailBackend'
 
     STORAGE_VAULT['encryption_key'] = '/etc/appliance/storagevault_encrypt.sec'
     STORAGE_VAULT['signature_key'] = '/etc/appliance/storagevault_sign.sec'
