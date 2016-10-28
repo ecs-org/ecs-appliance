@@ -18,7 +18,8 @@ def usage():
 reads (non array) yaml from stdin,
 select optional roots (seperated by ",") to filter yaml or "." for all,
 flatten (concatinate with "_") & upper case key names,
-strip and shlex.quote values,
+strip and shlex.quote values if string,
+convert bool to repr(value).lower(),
 output {prefix}{KEY_NAME}='{shlex quoted value}'{postfix} to stdout
 
 program will exit with code 1 on error (empty parameter, missing library)
@@ -38,6 +39,8 @@ def flatten(d, parent_key='', sep='_'):
                 v = ""
             elif isinstance(v, str):
                 v = quote(v.strip())
+            elif isinstance(v, bool)
+                v = repr(v).lower()
             items.append((new_key, v))
     return dict(items)
 

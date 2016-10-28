@@ -1,18 +1,17 @@
 ecs:
   migrate:
-      auto: "true"
+      auto: true
   userswitcher:
-      enabled: "true"
-      parameter: "-it"
+      enabled: true
+      parameter: -it
   settings: |
     MAIN_DOMAIN = 'localhost'
-    ABSOLUTE_URL_PREFIX = 'https://localhost'
-    ALLOWED_HOSTS = ['localhost',]
+    ABSOLUTE_URL_PREFIX = 'https://{}'.format(MAIN_DOMAIN)
+    ALLOWED_HOSTS = [MAIN_DOMAIN,]
     SECURE_PROXY_SSL = True
     CLIENT_CERTS_REQUIRED = True
 
     DEBUG = False
-    ECS_DEBUGTOOLBAR = False
 
     ETHICS_COMMISSION_UUID = 'ecececececececececececececececec'
     SECRET_KEY = 'ptn5xj+85fvd=d4u@i1-($z*otufbvlk%x1vflb&!5k94f$i3w'
@@ -25,19 +24,16 @@ ecs:
     STORAGE_VAULT['encryption_key'] = '/etc/appliance/storagevault_encrypt.sec'
     STORAGE_VAULT['signature_key'] = '/etc/appliance/storagevault_sign.sec'
 
-# # will be set in appliance for container
-# ECS_MIGRATE_AUTO= True
-# ECS_DUMP_FILENAME= ""
-
 appliance:
   # standby: true # optional, if set appliance will not activate
   host_names: localhost
   ssl:
+    letsencrypt_enabled: false
+    # use snakeoil certs, because eg. 443 is behind ssh tunneling
+    client_certs_mandatory: true
+    # always need a client certificate
     # key: # optional, if set ssl key for https host will be used
     # cert: # optional, if set ssl key for https host will be used
-    letsencrypt:
-      enabled: false # use snakeoil certs, because eg. 443 is behind ssh tunneling
-    mandatory_client_certs: true # always need a client certificate
   authorized_keys: |
       # insert your ssh keys here
   backup:
