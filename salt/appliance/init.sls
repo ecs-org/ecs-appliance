@@ -1,7 +1,6 @@
 include:
   - docker
   - .ssl
-  - .dehydrated
   - .nginx
   # - .postfix
   - .stunnel

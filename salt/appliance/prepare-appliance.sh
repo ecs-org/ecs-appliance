@@ -146,7 +146,7 @@ chmod -R 0600 /root/.gpg/
 gpg --homedir /root/.gpg --batch --yes --import /root/.gpg/backup_encrypt.sec
 
 # reload postfix with keys
-echo "fixme: postfix: rewrite authorative_domain, ssl certs, restart postfix"
+echo "fixme: postfix: rewrite main_domain, ssl certs, restart postfix"
 
 # reload nginx with new identity
 cat /etc/appliance/template.identity |

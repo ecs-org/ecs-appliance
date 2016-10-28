@@ -6,4 +6,4 @@ ssl_dhparam /etc/appliance/dhparam.pem;
 # client certificate setup
 ssl_client_certificate /etc/appliance/ca.cert.pem;
 ssl_crl /etc/appliance/crl.pem;
-ssl_verify_client optional;
+ssl_verify_client ##verifyclient##;

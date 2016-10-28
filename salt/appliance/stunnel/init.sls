@@ -9,9 +9,9 @@ stunnel:
     - require:
       - pkg: stunnel
       - sls: appliance.ssl
-      - file: /etc/stunnel/stunnel.conf
+      - file: /etc/appliance/stunnel.conf
     - watch:
-      - file: /etc/stunnel/stunnel.conf
+      - file: /etc/appliance/stunnel.conf
       - file: /etc/appliance/server.cert.dhparam.pem
       - file: /etc/appliance/server.key.pem
 
