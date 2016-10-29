@@ -62,22 +62,6 @@ if $need_storage_setup; then
     fi
 fi
 
-# postgres setup
-# add docker0 listening support to postgresql
-dockernet=$(ip -o -4 a show dev docker0 | sed -re "s/.*inet[ \t]+([0-9\.]+\/[0-9]+)[ \t]+.*/\1/")
-dockerip="${dockernet%%/*}"
-pghba=/etc/postgresql/9.5/main/pg_hba.conf
-pgconf=/etc/postgresql/9.5/main/postgresql.conf
-pgrestart=false
-if ! grep -q "$dockernet.*md5" $pghba; then
-    echo "host     $ECS_DATABASE             app             $dockernet           md5" >> $pghba
-    pgrestart=true
-fi
-if ! grep -q "^[ \t]*listen_addresses[ \t]*=.*$dockerip" $pgconf; then
-    echo "listen_addresses = 'localhost,"$dockerip"'" >> $pgconf
-    pgrestart=true
-fi
-if $pgrestart; then systemctl restart postgresql; sleep 2; fi
 
 # database check
 gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw "$ECS_DATABASE"
@@ -89,6 +73,7 @@ if ! $(sudo -u postgres psql -c "\dg;" | grep app -q); then
 fi
 pgpass=$(HOME=/root openssl rand -hex 8)
 sudo -u postgres psql -c "ALTER ROLE app WITH ENCRYPTED PASSWORD '"${pgpass}"';"
+# TODO: only execute if app not already owner of database ecs
 sudo -u postgres psql -c "ALTER DATABASE ${ECS_DATABASE} OWNER TO app;"
 if ! $(sudo -u postgres psql ${ECS_DATABASE} -qtc "\dx" | grep -q pg_stat_statements); then
     # create extension if not existing
@@ -102,20 +87,30 @@ MEMCACHED_URL=memcached://ecs_memcached_1:11211
 DATABASE_URL=postgres://app:${pgpass}@${dockerip}:5432/${ECS_DATABASE}
 EOF
 
+# export vault keys from env to /etc/appliance
+printf "%s" "$APPLIANCE_VAULT_ENCRYPT" > /etc/appliance/storagevault_encrypt.sec
+printf "%s" "$APPLIANCE_VAULT_SIGN" > /etc/appliance/storagevault_sign.sec
+
+# create ready to use /root/.gpg for backup being done using duplicity
+if test -d /root/.gpg; then rm -r /root/.gpg; fi
+mkdir -p /root/.gpg
+printf "%s" "$APPLIANCE_BACKUP_ENCRYPT" > /root/.gpg/backup_encrypt.sec
+chmod -R 0600 /root/.gpg/
+gpg --homedir /root/.gpg --batch --yes --import /root/.gpg/backup_encrypt.sec
+
 # ssl certificate setup
 if is_truestr "${APPLIANCE_SSL_LETSENCRYPT_ENABLED:-true}"; then
     # generate certificates using letsencrypt (dehydrated client)
     domains_file=/etc/appliance/dehydrated/domains.txt
     if test -e $domains_file; then rm $domains_file; fi
-    for domain in $APPLIANCE_HOST_NAMES; do
-        printf "%s" "$domain" >> $domains_file
-    done
+    printf "%s" "$APPLIANCE_DOMAIN" >> $domains_file
     dehydrated -c
-    echo "FIXME: currently > 1 domains overwrites other domains, last wins"
-    for domain in $APPLIANCE_HOST_NAMES; do
-        ln -sf /etc/appliance/server.key.pem /etc/appliance/dehydrated/certs/$domain/privkey.pem
-        ln -sf /etc/appliance/server.cert.pem /etc/appliance/dehydrated/certs/$domain/fullchain.pem
-    done
+    if test "$?" -ne 0; then
+        fallback to snakeoil
+
+    fi
+    ln -sf /etc/appliance/server.key.pem /etc/appliance/dehydrated/certs/$APPLIANCE_DOMAIN/privkey.pem
+    ln -sf /etc/appliance/server.cert.pem /etc/appliance/dehydrated/certs/$APPLIANCE_DOMAIN/fullchain.pem
 else
     echo "warning: letsencrypt disabled, symlink snakeoil.* to appliance/server*"
     ln -sf /etc/appliance/server.cert.pem /etc/ssl/certs/ssl-cert-snakeoil.pem
@@ -133,24 +128,21 @@ if $recreate_dhparam; then
 fi
 cat /etc/appliance/server.cert.pem /etc/appliance/dhparam.pem > /etc/appliance/server.cert.dhparam.pem
 
-
-# export vault keys
-printf "%s" "$APPLIANCE_VAULT_ENCRYPT" > /etc/appliance/storagevault_encrypt.sec
-printf "%s" "$APPLIANCE_VAULT_SIGN" > /etc/appliance/storagevault_sign.sec
-
-# create ready to use /root/.gpg for duply
-if test -d /root/.gpg; then rm -r /root/.gpg; fi
-mkdir -p /root/.gpg
-printf "%s" "$APPLIANCE_BACKUP_ENCRYPT" > /root/.gpg/backup_encrypt.sec
-chmod -R 0600 /root/.gpg/
-gpg --homedir /root/.gpg --batch --yes --import /root/.gpg/backup_encrypt.sec
-
 # reload postfix with keys
-echo "fixme: postfix: rewrite main_domain, ssl certs, restart postfix"
+echo "fixme: postfix: rewrite domain, ssl certs, restart"
 
-# reload nginx with new identity
+# reload stunnel with keys
+echo "fixme: stunnel: rewrite domain, ssl certs, restart"
+
+# reload nginx with new identity and client cert config
+if is_truestr "${APPLIANCE_SSL_CLIENT_CERTS_MANDATORY:-false}"; then
+    client_certs="on"
+else
+    client_certs="optional"
+fi
 cat /etc/appliance/template.identity |
-    sed -re "s/##domains##/$APPLIANCE_HOST_NAMES/g" > /etc/appliance/server.identity
+    sed -re "s/##ALLOWED_HOSTS##/$APPLIANCE_ALLOWED_HOSTS/g" |
+    sed -re "s/##VERIFY_CLIENT##/$client_certs/g"> /etc/appliance/server.identity
 systemctl reload-or-restart nginx
 
 # update all packages

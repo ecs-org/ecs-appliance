@@ -1,3 +1,6 @@
+include:
+  - .network
+
 postgresql:
   pkg.installed:
     - pkgs:
@@ -7,9 +10,29 @@ postgresql:
     - enable: true
     - require:
       - pkg: postgresql
-    - watch:
+      - sls: network
+      - file: /etc/postgresql/9.5/main/pg_hba.conf
       - file: /etc/postgresql/9.5/main/postgresql.conf
+    - watch:
+      - file: /etc/postgresql/9.5/main/pg_hba.conf
+      - file: /etc/postgresql/9.5/main/postgresql.conf
+      
+/etc/postgresql/9.5/main/pg_hba.conf:
+  file.replace:
+    - pattern: |
+        ^host.*{{ dockernet }}.*
+    - repl: |
+        host    ecs             app             {{ dockernet }}           md5
+    - append_if_not_found: true
+    - require:
+      - pkg: postgresql
 
 /etc/postgresql/9.5/main/postgresql.conf:
   file.replace:
-    -
+    - pattern: |
+        ^.*listen_addresses.*
+    - repl: |
+        listen_addresses = 'localhost,{{ dockerip }}'
+    - append_if_not_found: true
+    - require:
+      - pkg: postgresql

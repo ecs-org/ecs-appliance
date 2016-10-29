@@ -1,4 +1,4 @@
-server_name ##domains##;
+server_name ##ALLOWED_HOSTS##;
 ssl_certificate /etc/appliance/server.cert.pem;
 ssl_certificate_key /etc/appliance/server.key.pem;
 # Diffie-Hellman parameter for DHE ciphersuites, recommended 2048 bits
@@ -6,4 +6,4 @@ ssl_dhparam /etc/appliance/dhparam.pem;
 # client certificate setup
 ssl_client_certificate /etc/appliance/ca.cert.pem;
 ssl_crl /etc/appliance/crl.pem;
-ssl_verify_client ##verifyclient##;
+ssl_verify_client ##VERIFY_CLIENT##;

@@ -1,5 +1,5 @@
 appliance:
 
 docker:
-  storage:
-    driver: overlay2
+  daemon:
+    options: --storage-driver=overlay2 --bridge="docker0"

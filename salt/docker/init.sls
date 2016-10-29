@@ -19,6 +19,30 @@ docker-grub-settings:
     - watch:
       - file: docker-grub-settings
 
+docker-defaults:
+  file.replace:
+    - name: /etc/default/docker
+    - pattern: |
+        ^#?DOCKER_OPTIONS=.*
+    - repl: |
+        DOCKER_OPTIONS="{{ salt['pillar.get']('docker:options', '') }}"
+    - backup: False
+    - append_if_not_found: True
+
+{% if salt['pillar.get']('http_proxy', '') != '' %}
+  {% for a in ['http_proxy', 'HTTP_PROXY'] %}
+docker-defaults-{{ a }}:
+  file.replace:
+    - name: /etc/default/docker
+    - pattern: |
+        ^#?export {{ a }}=.*
+    - repl: |
+        export {{ a }}="{{ salt['pillar.get']('http_proxy') }}"
+    - backup: False
+    - append_if_not_found: True
+  {% endfor %}
+{% endif %}
+
 docker:
   pkgrepo.managed:
     - name: 'deb http://apt.dockerproject.org/repo ubuntu-xenial main'
@@ -43,7 +67,7 @@ docker:
       - pkg: docker
       - cmd: docker-grub-settings
       - pip: docker-compose
-      - sls: docker.defaults
+      - file: /etc/default/docker
     - watch:
       - file: /etc/default/docker
       - file: docker-service

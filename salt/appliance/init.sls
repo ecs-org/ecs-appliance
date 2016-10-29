@@ -1,4 +1,5 @@
 include:
+  - .network
   - docker
   - .ssl
   - .nginx

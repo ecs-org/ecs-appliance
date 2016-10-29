@@ -9,6 +9,8 @@ nginx:
     - require:
       - pkg: nginx
       - sls: appliance.ssl
+      - file: /etc/nginx/nginx.conf
+      - file: /etc/appliance/server.identity
     - watch:
       - file: /etc/nginx/nginx.conf
       - file: /etc/appliance/server.identity

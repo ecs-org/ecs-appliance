@@ -5,12 +5,11 @@ ecs:
       enabled: true
       parameter: -it
   settings: |
-    MAIN_DOMAIN = 'localhost'
-    ABSOLUTE_URL_PREFIX = 'https://{}'.format(MAIN_DOMAIN)
-    ALLOWED_HOSTS = [MAIN_DOMAIN,]
+    DOMAIN = 'localhost'
+    ABSOLUTE_URL_PREFIX = 'https://{}'.format(DOMAIN)
+    ALLOWED_HOSTS = [DOMAIN, 'testecs']
     SECURE_PROXY_SSL = True
     CLIENT_CERTS_REQUIRED = True
-
     DEBUG = False
 
     ETHICS_COMMISSION_UUID = 'ecececececececececececececececec'
@@ -26,26 +25,28 @@ ecs:
 
 appliance:
   # standby: true # optional, if set appliance will not activate
-  host_names: localhost
+  domain: localhost
+  allowed_hosts: localhost testecs
   ssl:
-    letsencrypt_enabled: false
+    letsencrypt:
+      enabled: false
+      additional_hosts: false
     # use snakeoil certs, because eg. 443 is behind ssh tunneling
     client_certs_mandatory: true
-    # always need a client certificate
-    # key: # optional, if set ssl key for https host will be used
-    # cert: # optional, if set ssl key for https host will be used
-  authorized_keys: |
-      # insert your ssh keys here
-  backup:
-    url: ssh://app@localhost/volatile/ecs-backup-test/
-    encrypt: PGP PRIVATE KEY BLOCK OF BACKUP HERE
+    # if true, always need a client certificate
+    # key: filename-key.pem # optional, if set ssl key for https host will be used
+    # cert: filename-cert.pem # optional, if set ssl key for https host will be used
   storage:
     # setup: | # optional, will be executed if volatile or data can not be found
     # ignore_(volatile|data) # optional, if set, will not look for ecs-volatile or ecs-data filesystem
     ignore:
       volatile: true
       data: true
-
+  backup:
+    url: ssh://app@localhost/volatile/ecs-backup-test/
+    encrypt: PGP PRIVATE KEY BLOCK OF BACKUP HERE
+  authorized_keys: |
+      # insert your ssh keys here
   vault_encrypt: |
       -----BEGIN PGP PRIVATE KEY BLOCK-----
       Version: GnuPG v1.4.10
