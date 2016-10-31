@@ -11,13 +11,13 @@ include:
 {% for i in ['prepare-appliance.sh', 'prepare-ecs.sh', 'update-appliance.sh', 'update-ecs.sh'] %}
 /usr/local/sbin/{{ i }}:
   file.managed:
-    - source: salt://appliance/{{ i }}
+    - source: salt://appliance/scripts/{{ i }}
     - mode: "0755"
 {% endfor %}
 
 /usr/local/etc/appliance.include:
   file.managed:
-    - source: salt://appliance/appliance.include
+    - source: salt://appliance/scripts/appliance.include
 
 /etc/appliance/ecs:
   file.recurse:
