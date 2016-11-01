@@ -19,7 +19,7 @@ include:
 /etc/appliance/dehydrated/{{ i }}:
   file.directory:
     - makedirs: true
-    - owner: app
+    - user: app
     - require:
       - sls: common.user
 {% endfor %}
