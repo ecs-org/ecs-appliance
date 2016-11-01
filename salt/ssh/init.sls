@@ -21,7 +21,7 @@ openssh-server:
 {% from "ssh/lib.sls" import ssh_keys_update %}
 
 {{ ssh_keys_update('root',
-    pillar['adminkeys_present']|d(False),
-    pillar['adminkeys_absent']|d(False)
+    pillar.get('adminkeys_present', False),
+    pillar.get('adminkeys_absent', False)
     )
 }}

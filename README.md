@@ -6,16 +6,21 @@ it can be stacked on top of the developer vm, but is independend of it.
 ## upgrade your developer-vm, install appliance
 
 on your local machine:
+
 + insert your devserver name (eg. "testecs") into your /etc/hosts
+
 ```
 sudo -s 'printf "%s" "127.0.0.1 testecs" >> /etc/hosts'
 ```
+
 + connect to your developer vm with port 80 and 443:
+
 ```
 sudo -E ssh -F ~/.ssh/config testecs -L 80:localhost:80 -L 443:localhost:443 -L 8050:localhost:8050
 ```
 
 inside the developer vm:
+
 ```
 # clone appliance code
 git clone ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs-appliance.git /app/appliance
@@ -29,12 +34,13 @@ sudo salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
 ```
 
 if you also want the builder (for building the appliance image) installed:
+
 ```
 sudo salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance": {"enabled": true}}'
 ```
 
 ## configure  appliance
-+ make env.yml
++ describe make env.yml
 
 ## start appliance
 + start appliance: `sudo systemctl start appliance`

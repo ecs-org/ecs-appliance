@@ -1,7 +1,3 @@
-{% set dockerip="172.17.0.1" %}
-{% set dockernet="172.17.0.1/16" %}
-{% set dockernetmask="255.255.0.0" %}
-
 bridge-utils:
   pkg.installed:
     - pkgs:
@@ -14,8 +10,8 @@ docker0:
     - enabled: true
     - ports: none
     - proto: static
-    - ipaddr: {{ dockerip }}
-    - netmask: {{ dockernetmask }}
+    - ipaddr: {{ pillar.get('docker0_ip') }}
+    - netmask: {{ pillar.get('docker0_netmask') }}
     - stp: off
     - require:
       - pkg: bridge-utils

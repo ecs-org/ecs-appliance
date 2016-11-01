@@ -16,13 +16,13 @@ postgresql:
     - watch:
       - file: /etc/postgresql/9.5/main/pg_hba.conf
       - file: /etc/postgresql/9.5/main/postgresql.conf
-      
+
 /etc/postgresql/9.5/main/pg_hba.conf:
   file.replace:
     - pattern: |
         ^host.*{{ dockernet }}.*
     - repl: |
-        host    ecs             app             {{ dockernet }}           md5
+        host    ecs             app             {{ pillar.get('docker0_net') }}           md5
     - append_if_not_found: true
     - require:
       - pkg: postgresql
@@ -32,7 +32,7 @@ postgresql:
     - pattern: |
         ^.*listen_addresses.*
     - repl: |
-        listen_addresses = 'localhost,{{ dockerip }}'
+        listen_addresses = 'localhost,{{ pillar.get('docker0_ip') }}'
     - append_if_not_found: true
     - require:
       - pkg: postgresql

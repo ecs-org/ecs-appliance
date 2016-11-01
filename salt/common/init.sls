@@ -39,7 +39,7 @@ base_packages:
 
 system_timezone:
   timezone.system:
-    - name: {{ pillar['timezone'] }}
+    - name: {{ pillar.get('timezone') }}
     - utc: True
 
 /etc/sudoers.d/ssh_auth:
