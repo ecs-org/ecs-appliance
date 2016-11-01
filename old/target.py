@@ -8,66 +8,6 @@ import random
 import time
 import getpass
 
-from fabric.api import local, env, warn, abort, settings
-
-from deployment.utils import get_pythonenv, get_pythonexe, write_regex_replace, is_precise_or_older
-from deployment.utils import touch, control_upstart, apache_setup, strbool, strint, write_template, write_template_dir
-from deployment.pkgmanager import get_pkg_manager, packageline_split
-from deployment.conf import load_config
-
-class SetupTarget(object):
-    """ SetupTargetObject(use_sudo=True, dry=False, hostname=None, ip=None)
-    """
-
-    def __init__(self, *args, **kwargs):
-        dirname = os.path.dirname(__file__)
-
-        config_file = kwargs.pop('config', None)
-        if config_file is None:
-            config_file = os.path.join(dirname, '..', 'ecs.yml')
-
-        self.use_sudo = kwargs.pop('use_sudo', True)
-        self.dry = kwargs.pop('dry', False)
-        self.host = kwargs.pop('hostname', None)
-        self.ip = kwargs.pop('ip', None)
-        self.username = getpass.getuser()
-        self.destructive = strbool(kwargs.pop('destructive', False))
-
-        self.dirname = dirname
-        self.appname = 'ecs'
-
-        self.configure(config_file)
-        self.extra_kwargs = kwargs
-
-
-    def local(self, cmd):
-        if self.use_sudo:
-            cmd = ['sudo'] + cmd
-        return local(subprocess.list2cmdline(cmd))
-
-    def configure(self, config_file):
-        self.config = load_config(config_file)
-        self.homedir = os.path.expanduser('~')
-        self.configdir = os.path.join(self.homedir, 'ecs-conf')
-        self.pythonexedir = os.path.dirname(get_pythonexe())
-        # set legacy attributes
-        for attr in ('ip', 'host'):
-            setattr(self, attr, self.config[attr])
-        self.config['local_hostname'] = self.config['host'].split('.')[0]
-        # set default for parameter that are optional
-        self.config.setdefault('ssl.chain', '') # chain is optional
-        self.config.setdefault('postgresql.username', self.config['user'])
-        self.config.setdefault('postgresql.database', self.config['user'])
-        self.config.setdefault('postgresql.password', self.random_string(14, simpleset=True))
-        self.config.setdefault('rabbitmq.username', self.config['user'])
-        self.config.setdefault('rabbitmq.password', self.random_string(20))
-        self.config.setdefault('mediaserver.storage.encrypt_key', os.path.join(self.homedir, 'src', 'ecs', 'ecs_mediaserver.pub'))
-        self.config.setdefault('mediaserver.storage.signing_key', os.path.join(self.homedir, 'src', 'ecs', 'ecs_authority.sec'))
-        self.config.setdefault('mediaserver.storage.decrypt_key', os.path.join(self.homedir, 'src', 'ecs', 'ecs_mediaserver.sec'))
-        self.config.setdefault('mediaserver.storage.verify_key', os.path.join(self.homedir, 'src', 'ecs', 'ecs_authority.pub'))
-        self.config.setdefault('storagevault.implementation', 'ecs.mediaserver.storagevault.LocalFileStorageVault')
-        self.config.setdefault('storagevault.options.localfilestorage_root', os.path.join(self.homedir, 'ecs-storage-vault'))
-        self.config.setdefault('debug.logo_border_color', 'white')
 
     def random_string(self, length=40, simpleset=False):
         if simpleset:
@@ -82,42 +22,6 @@ class SetupTarget(object):
         length = strint(length)
 
         print self.random_string(length=length, simpleset=simpleset)
-
-    def get_config_template(self, template):
-        with open(os.path.join(self.dirname, 'templates', 'config', template)) as f:
-            data = f.read()
-        return data
-
-    def write_config_template(self, template, dst, context=None, filemode=None, backup=True, force=False, use_sudo=False):
-        if context is None:
-            context = self.config
-        print("Writing config template {0} to {1}".format(template, dst))
-        write_template(os.path.join(self.dirname, 'templates', 'config', template),
-            dst, context=context, filemode=filemode, backup=backup, force=force, use_sudo=use_sudo)
-
-    def write_config_templatedir(self, srcdir, dstdir, context=None, filemode=None, backup=True, force=False, use_sudo=False):
-        if context is None:
-            context = self.config
-        print("Writing config template dir {0} to {1}".format(srcdir, dstdir))
-        write_template_dir(
-            os.path.join(self.dirname, 'templates', 'config', srcdir),
-            dstdir,
-            context=context,
-            filemode=filemode,
-            backup=backup,
-            force=force,
-            use_sudo=use_sudo)
-
-    def help(self, *args, **kwargs):
-        print('''fab target:{0},action[,config=path-to-config.yml]
-  * actions: system_setup, update, and others
-
-        '''.format(self.appname))
-
-    def system_setup(self, *args, **kwargs):
-        ''' System Setup; Destructive, idempotent '''
-        self.destructive = True
-        self.setup(self, *args, **kwargs)
 
     def setup(self, *args, **kwargs):
         ''' Setup; idempotent, tries not to overwrite existing database or eg. ECS-CA , except destructive=True '''
@@ -164,91 +68,6 @@ class SetupTarget(object):
         self.apache_restart()
         self.daemons_start()
 
-
-    def update(self, *args, **kwargs):
-        ''' System Update: Non destructive '''
-        self.directory_config()
-
-        self.env_update()
-        self.db_update()
-
-        self.search_config()
-        self.search_update()
-
-        self.apache_restart()
-        self.daemons_start()
-
-    def maintenance(self, enable=True):
-        ''' Enable/Disable System Maintenance (stop daemons, display service html)'''
-        enable= strbool(enable)
-        if enable:
-            touch(os.path.join(self.configdir, 'service.now'))
-            self.wsgi_reload()
-            self.daemons_stop()
-        else:
-            os.remove(os.path.join(self.configdir, 'service.now'))
-            self.daemons_start()
-            self.wsgi_reload()
-
-    def directory_config(self):
-        homedir = os.path.expanduser('~')
-        for name in ('empty_html', 'public_html', '.python-eggs', 'ecs-conf'):
-            pathname = os.path.join(homedir, name)
-            if not os.path.exists(pathname):
-                os.mkdir(pathname)
-
-        # /opt/ecs directory
-        pathname = os.path.join('/opt', self.appname)
-        if not os.path.exists(pathname):
-            local('sudo mkdir {0}'.format(pathname))
-        local('sudo chown {0}:{0} {1}'.format(self.appname, pathname))
-
-
-    def host_config(self, with_current_ip=False):
-        with_current_ip = strbool(with_current_ip)
-
-        _, tmp = tempfile.mkstemp()
-        with tempfile.NamedTemporaryFile() as h:
-            h.write(self.config['host'])
-            h.flush()
-            local('sudo cp {0} /etc/hostname'.format(h.name))
-        local('sudo hostname -F /etc/hostname')
-
-        value = local('ip addr show eth0 | grep inet[^6] | sed -re "s/[[:space:]]+inet.([^ /]+).+/\\1/g"', capture=True)
-        if value != self.config['ip']:
-            warn('current ip ({0}) and to be configured ip ({1}) are not the same'.format(value, self.config['ip']))
-
-        if with_current_ip:
-            if value.succeeded:
-                self.config['current_ip'] = value
-                if self.config['current_ip'] != self.config['ip']:
-                    warn('Temporary set hosts resolution of {0} to {1} instead of {2}'.format(
-                        self.config['host'], self.config['current_ip'], self.config['ip']))
-            else:
-                abort("no ip address ? ip addr grep returned: {0}".format(value))
-        else:
-            self.config['current_ip'] = self.config['ip']
-
-        self.write_config_template('hosts', tmp)
-        local('sudo cp %s /etc/hosts' % tmp)
-        os.remove(tmp)
-
-    def custom_network_config(self):
-        if 'network.resolv' in self.config:
-            with tempfile.NamedTemporaryFile() as t:
-                t.write(self.config['network.resolv'])
-                t.flush()
-                local('sudo cp {0} /etc/resolv.conf'.format(t.name))
-
-        if 'network.interfaces' in self.config:
-            with tempfile.NamedTemporaryFile() as t:
-                t.write(self.config['network.interfaces'])
-                t.flush()
-                local('sudo cp {0} /etc/network/interfaces'.format(t.name))
-
-    def firewall_config(self):
-        write_template_dir(os.path.join(self.dirname, 'templates', 'config', 'shorewall'), '/', use_sudo=True)
-        local('sudo /etc/init.d/shorewall restart')
 
     def backup_config(self):
         if not self.config.get('backup', default=False):
