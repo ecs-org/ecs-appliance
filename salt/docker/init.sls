@@ -1,6 +1,5 @@
 include:
   - python
-  - .defaults
 
 docker-service:
   file.managed:

@@ -11,5 +11,5 @@ cadvisor:
     - require:
       - sls: docker
       - file: /etc/systemd/system/cadvisor.service
-      - watch:
-        - file: /etc/systemd/system/cadvisor.service
+    - watch:
+      - file: /etc/systemd/system/cadvisor.service

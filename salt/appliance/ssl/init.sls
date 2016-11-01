@@ -21,7 +21,7 @@ include:
     - makedirs: true
     - owner: app
     - require:
-      sls: common.user
+      - sls: common.user
 {% endfor %}
 
 /etc/appliance/dehydrated-hook.sh:
