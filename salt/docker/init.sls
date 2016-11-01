@@ -1,11 +1,6 @@
 include:
   - python
 
-docker-service:
-  file.managed:
-    - name: /etc/systemd/system/docker.service
-    - source: salt://docker/docker.service
-
 # enable cgroup memory and swap accounting, needs kernel restart
 docker-grub-settings:
   file.managed:
@@ -42,6 +37,34 @@ docker-defaults-{{ a }}:
   {% endfor %}
 {% endif %}
 
+docker-service:
+  file.managed:
+    - name: /etc/systemd/system/docker.service
+    - source: salt://docker/docker.service
+
+docker-requisites:
+  pkg.installed:
+    - pkgs:
+      - bridge-utils
+      - iptables
+      - ca-certificates
+      - lxc
+      - cgroup-bin
+      - systemd-docker
+
+docker-network:
+  network.managed:
+    - name: docker0
+    - type: bridge
+    - enabled: true
+    - ports: none
+    - proto: static
+    - ipaddr: {{ pillar.get('docker:ip') }}
+    - netmask: {{ pillar.get('docker:netmask') }}
+    - stp: off
+    - require:
+      - pkg: docker-requisites
+
 docker:
   pkgrepo.managed:
     - name: 'deb http://apt.dockerproject.org/repo ubuntu-xenial main'
@@ -52,14 +75,10 @@ docker:
 
   pkg.installed:
     - pkgs:
-      - iptables
-      - ca-certificates
-      - lxc
-      - cgroup-bin
       - docker-engine
-      - systemd-docker
     - require:
       - pkgrepo: docker
+      - network: docker-network
 
   service.running:
     - enable: true

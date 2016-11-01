@@ -1,5 +1,4 @@
 include:
-  - .network
   - docker
   - cadvisor
   - .ssl

@@ -1,5 +1,5 @@
 include:
-  - appliance.network
+  - docker
 
 postgresql:
   pkg.installed:
@@ -10,7 +10,7 @@ postgresql:
     - enable: true
     - require:
       - pkg: postgresql
-      - sls: appliance.network
+      - sls: docker
       - file: /etc/postgresql/9.5/main/pg_hba.conf
       - file: /etc/postgresql/9.5/main/postgresql.conf
     - watch:

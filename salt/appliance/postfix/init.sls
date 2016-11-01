@@ -1,5 +1,5 @@
 include:
-  - appliance.network
+  - docker
 
 /etc/postfix/main.cf:
   file.managed:
@@ -9,8 +9,6 @@ include:
     - defaults:
         additional_ip: {{ pillar.get('docker:ip') }}
         additional_net: {{ pillar.get('docker:net') }}
-    - require:
-      - sls: appliance.network
 
 postfix:
   pkg.installed:
@@ -22,6 +20,6 @@ postfix:
     - enable: true
     - require:
       - pkg: postfix
-      - sls: network
+      - sls: docker
     - watch:
       - file: /etc/postfix/main.cf
