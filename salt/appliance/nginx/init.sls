@@ -30,5 +30,6 @@ nginx:
   file.symlink:
     - target: /etc/appliance/snakeoil.identity
     - require:
-      - file: generate_snakeoil
+      - file: /etc/appliance/ssl-cert-snakeoil.key
+      - file: /etc/appliance/ssl-cert-snakeoil.pem
       - file: /etc/appliance/snakeoil.identity

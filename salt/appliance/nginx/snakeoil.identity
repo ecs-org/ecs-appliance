@@ -1,10 +1,10 @@
 server_name localhost;
-ssl_certificate /etc/ssl/certs/ssl-cert-snakeoil.pem;
-ssl_certificate_key /etc/ssl/private/ssl-cert-snakeoil.key;
+ssl_certificate /etc/appliance/ssl-cert-snakeoil.pem;
+ssl_certificate_key /etc/appliance/ssl-cert-snakeoil.key;
 # client certificate setup
 ssl_verify_client off;
 
-# just return error_page 
+# just return error_page
 location / {
     return 503;
 }

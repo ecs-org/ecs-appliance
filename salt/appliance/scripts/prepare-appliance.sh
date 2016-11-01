@@ -136,8 +136,8 @@ if is_truestr "${APPLIANCE_SSL_LETSENCRYPT_ENABLED:-true}"; then
 fi
 if $use_snakeoil; then
     echo "warning: letsencrypt disabled, symlink snakeoil.* to appliance/server*"
-    ln -sf /etc/appliance/server.cert.pem /etc/ssl/certs/ssl-cert-snakeoil.pem
-    ln -sf /etc/appliance/server.key.pem /etc/ssl/private/ssl-cert-snakeoil.key
+    ln -sf /etc/appliance/server.cert.pem /etc/appliance/ssl-cert-snakeoil.pem
+    ln -sf /etc/appliance/server.key.pem /etc/appliance/ssl-cert-snakeoil.key
     cat /etc/appliance/server.cert.pem /etc/appliance/dhparam.pem > /etc/appliance/server.cert.dhparam.pem
 fi
 
