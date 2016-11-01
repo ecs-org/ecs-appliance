@@ -2,7 +2,6 @@
 
 . /usr/local/etc/env.include
 . /usr/local/etc/appliance.include
-
 ECS_DATABASE=${ECS_DATABASE:-ecs}
 
 appliance_status_starting
@@ -10,6 +9,7 @@ appliance_status_starting
 systemctl enable nginx
 systemctl start nginx
 
+# ### environment setup
 # read userdata
 userdata_yaml=$(get_userdata)
 if test $? -ne 0; then
@@ -31,7 +31,7 @@ if is_truestr "$APPLIANCE_STANDBY"; then
     appliance_exit_standby
 fi
 
-# storage setup
+# ### storage setup
 need_storage_setup=false
 if test ! -d "/volatile/ecs-cache"; then
     echo "warning: cloud not find directory ecs-cache on /volatile"
@@ -62,23 +62,27 @@ if $need_storage_setup; then
     fi
 fi
 
-
-# database check
+# ### database setup
 gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw "$ECS_DATABASE"
 if test $? -ne 0; then
     appliance_exit "Appliance Standby" "Appliance is in standby, no postgresql database named $ECS_DATABASE"
 fi
 if ! $(sudo -u postgres psql -c "\dg;" | grep app -q); then
-    sudo -u postgres createuser app # create role app if not existing
+    # create role app
+    gosu postgres createuser app
 fi
+owner=$(gosu postgres psql -qtc "\l" | grep "^[ \t]*${ECS_DATABASE}" | sed -re "s/[^|]+|([^|]+)|.*/\1/")
+if test "$owner" != "app"; then
+    # set owner of ECS_DATABASE to app
+    gosu postgres psql -c "ALTER DATABASE ${ECS_DATABASE} OWNER TO app;"
+fi
+if ! $(sudo -u postgres psql ${ECS_DATABASE} -qtc "\dx" | grep -q pg_stat_statements); then
+    # create pg_stat_statements extension
+    gosu postgres psql ${ECS_DATABASE} -c "CREATE extension pg_stat_statements;"
+fi
+# modify app user postgresql password to random 8byte hex string
 pgpass=$(HOME=/root openssl rand -hex 8)
 sudo -u postgres psql -c "ALTER ROLE app WITH ENCRYPTED PASSWORD '"${pgpass}"';"
-# TODO: only execute if app not already owner of database ecs
-sudo -u postgres psql -c "ALTER DATABASE ${ECS_DATABASE} OWNER TO app;"
-if ! $(sudo -u postgres psql ${ECS_DATABASE} -qtc "\dx" | grep -q pg_stat_statements); then
-    # create extension if not existing
-    sudo -u postgres psql ${ECS_DATABASE} -c "CREATE extension pg_stat_statements;"
-fi
 
 # write out service_urls for docker-compose
 cat > /etc/appliance/ecs/service_urls.env << EOF
@@ -98,7 +102,7 @@ printf "%s" "$APPLIANCE_BACKUP_ENCRYPT" > /root/.gpg/backup_encrypt.sec
 chmod -R 0600 /root/.gpg/
 gpg --homedir /root/.gpg --batch --yes --import /root/.gpg/backup_encrypt.sec
 
-# ssl
+# ### ssl setup
 # re-generate dhparam.pem if not found or less than 2048 bit
 recreate_dhparam=$(test ! -e /etc/appliance/dhparam.pem && echo "true" || echo "false")
 if ! $recreate_dhparam; then
