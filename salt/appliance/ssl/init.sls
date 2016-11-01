@@ -66,15 +66,15 @@ generate_snakeoil:
 
 /etc/appliance/server.cert.pem:
   file.symlink:
-    - target: /etc/ssl/certs/ssl-cert-snakeoil.pem
+    - target: /etc/appliance/ssl-cert-snakeoil.pem
 
 /etc/appliance/server.cert.dhparam.pem:
   file.symlink:
-    - target: /etc/ssl/certs/ssl-cert-snakeoil.pem
+    - target: /etc/appliance/ssl-cert-snakeoil.pem
 
 /etc/appliance/server.key.pem:
   file.symlink:
-    - target: /etc/ssl/private/ssl-cert-snakeoil.key
+    - target: /etc/appliance/ssl-cert-snakeoil.key
 
 /etc/appliance/ca.cert.pem:
   file.symlink:
