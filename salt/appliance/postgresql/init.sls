@@ -20,7 +20,7 @@ postgresql:
 /etc/postgresql/9.5/main/pg_hba.conf:
   file.replace:
     - pattern: |
-        ^host.*{{ dockernet }}.*
+        ^host.*{{ pillar.get('docker0_net') }}.*
     - repl: |
         host    ecs             app             {{ pillar.get('docker0_net') }}           md5
     - append_if_not_found: true
