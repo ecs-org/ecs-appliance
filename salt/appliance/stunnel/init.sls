@@ -25,7 +25,6 @@ stunnel:
       - file: /etc/systemd/system/stunnel.service
     - watch:
       - file: /etc/appliance/stunnel.conf
-      - file: /etc/appliance/server.cert.dhparam.pem
       - file: /etc/appliance/server.key.pem
 
 # fixme: dhparam is not ready on build time, does stunnel create dhparam on start ?
