@@ -49,6 +49,11 @@ generate_snakeoil:
     - unless: test -f /etc/ssl/private/ssl-cert-snakeoil.key
     - require:
       - pkg: generate_snakeoil
+  file.managed:
+    - name: /etc/ssl/private/ssl-cert-snakeoil.key
+    - mode: "0644"
+    - require:
+      - cmd: generate_snakeoil
 
 /etc/appliance/server.cert.pem:
   file.symlink:

@@ -30,5 +30,5 @@ nginx:
   file.symlink:
     - target: /etc/appliance/snakeoil.identity
     - require:
-      - cmd: generate_snakeoil
+      - file: generate_snakeoil
       - file: /etc/appliance/snakeoil.identity
