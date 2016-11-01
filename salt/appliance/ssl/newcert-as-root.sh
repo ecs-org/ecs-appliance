@@ -3,3 +3,6 @@ local DOMAIN="${1}" KEYFILE="${2}" CERTFILE="${3}" FULLCHAINFILE="${4}" CHAINFIL
 ln -sf /etc/appliance/server.key.pem $KEYFILE
 ln -sf /etc/appliance/server.cert.pem $FULLCHAINFILE
 printf "%s" "$(if test -e /etc/appliance/dhparam.pem; then cat /etc/appliance/dhparam.pem; fi)" | cat /etc/appliance/server.cert.pem - > /etc/appliance/server.cert.dhparam.pem
+systemctl reload-or-restart nginx
+systemctl restart stunnel
+systemctl restart postfix
