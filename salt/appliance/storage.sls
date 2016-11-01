@@ -22,9 +22,9 @@ directories:
   /volatile:
     names:
       - docker
-      - ecs-log
-      - ecs-cache
       - ecs-backup-test
+      - ecs-cache
+      - ecs-log
       - redis
       # FIXME tmp and var/tmp have different dir_mode
       # - tmp
@@ -67,9 +67,9 @@ directories:
   /data:
     names:
       - appliance
-      - ecs-storage-vault
       - ecs-ca
       - ecs-pgdump
+      - ecs-storage-vault
       - postgresql
     options:
       - group: app
