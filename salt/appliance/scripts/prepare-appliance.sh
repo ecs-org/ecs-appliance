@@ -98,24 +98,7 @@ printf "%s" "$APPLIANCE_BACKUP_ENCRYPT" > /root/.gpg/backup_encrypt.sec
 chmod -R 0600 /root/.gpg/
 gpg --homedir /root/.gpg --batch --yes --import /root/.gpg/backup_encrypt.sec
 
-# ssl certificate setup
-if is_truestr "${APPLIANCE_SSL_LETSENCRYPT_ENABLED:-true}"; then
-    # generate certificates using letsencrypt (dehydrated client)
-    domains_file=/etc/appliance/dehydrated/domains.txt
-    if test -e $domains_file; then rm $domains_file; fi
-    printf "%s" "$APPLIANCE_DOMAIN" >> $domains_file
-    dehydrated -c
-    if test "$?" -ne 0; then
-        fallback to snakeoil
-
-    fi
-    ln -sf /etc/appliance/server.key.pem /etc/appliance/dehydrated/certs/$APPLIANCE_DOMAIN/privkey.pem
-    ln -sf /etc/appliance/server.cert.pem /etc/appliance/dehydrated/certs/$APPLIANCE_DOMAIN/fullchain.pem
-else
-    echo "warning: letsencrypt disabled, symlink snakeoil.* to appliance/server*"
-    ln -sf /etc/appliance/server.cert.pem /etc/ssl/certs/ssl-cert-snakeoil.pem
-    ln -sf /etc/appliance/server.key.pem /etc/ssl/private/ssl-cert-snakeoil.key
-fi
+# ssl
 # re-generate dhparam.pem if not found or less than 2048 bit
 recreate_dhparam=$(test ! -e /etc/appliance/dhparam.pem && echo "true" || echo "false")
 if ! $recreate_dhparam; then
@@ -126,7 +109,26 @@ if $recreate_dhparam; then
     mkdir -p /etc/appliance
     openssl dhparam 2048 -out /etc/appliance/dhparam.pem
 fi
-cat /etc/appliance/server.cert.pem /etc/appliance/dhparam.pem > /etc/appliance/server.cert.dhparam.pem
+# certificate setup
+use_snakeoil=true
+if is_truestr "${APPLIANCE_SSL_LETSENCRYPT_ENABLED:-true}"; then
+    # generate certificates using letsencrypt (dehydrated client)
+    domains_file=/etc/appliance/dehydrated/domains.txt
+    if test -e $domains_file; then rm $domains_file; fi
+    printf "%s" "$APPLIANCE_DOMAIN" >> $domains_file
+    sudo -u app -- dehydrated -c
+    if test "$?" -eq 0; then
+        use_snakeoil=false
+    else
+        echo "Warning: letsencrypt client (dehydrated) returned an error"
+    fi
+fi
+if $use_snakeoil; then
+    echo "warning: letsencrypt disabled, symlink snakeoil.* to appliance/server*"
+    ln -sf /etc/appliance/server.cert.pem /etc/ssl/certs/ssl-cert-snakeoil.pem
+    ln -sf /etc/appliance/server.key.pem /etc/ssl/private/ssl-cert-snakeoil.key
+    cat /etc/appliance/server.cert.pem /etc/appliance/dhparam.pem > /etc/appliance/server.cert.dhparam.pem
+fi
 
 # reload postfix with keys
 echo "fixme: postfix: rewrite domain, ssl certs, restart"

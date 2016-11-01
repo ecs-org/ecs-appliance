@@ -1,4 +1,7 @@
-# dehydrated is a letsencrypt shell client 
+include:
+  - common.user
+
+# dehydrated is a letsencrypt shell client
 /usr/local/bin/dehydrated:
   file.managed:
     - source: salt://appliance/ssl/dehydrated
@@ -9,13 +12,27 @@
     - contents: |
         BASEDIR="/etc/appliance/dehydrated"
         WELLKNOWN="/etc/appliance/dehydrated/acme-challenge"
+        HOOK="/etc/appliance/dehydrated-hook.sh"
     - makedirs: true
 
 {% for i in ['acme-challenge', 'certs'] %}
 /etc/appliance/dehydrated/{{ i }}:
   file.directory:
     - makedirs: true
+    - owner: app
+    - require:
+      sls: common.user
 {% endfor %}
+
+/etc/appliance/dehydrated-hook.sh:
+  file.managed:
+    - mode: "0755"
+    - source: salt://appliance/ssl/dehydrated-hook.sh
+
+/usr/local/sbin/newcert-as-root.sh:
+  file.managed:
+    - mode: "0755"
+    - source: salt://appliance/ssl/newcert-as-root.sh
 
 generate_snakeoil:
   pkg.installed:

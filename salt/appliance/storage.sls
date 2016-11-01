@@ -25,6 +25,7 @@ directories:
       - ecs-log
       - ecs-cache
       - ecs-backup-test
+      - redis
       # FIXME tmp and var/tmp have different dir_mode
       # - tmp
       # - var/tmp

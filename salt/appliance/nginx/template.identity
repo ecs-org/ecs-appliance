@@ -7,3 +7,20 @@ ssl_dhparam /etc/appliance/dhparam.pem;
 ssl_client_certificate /etc/appliance/ca.cert.pem;
 ssl_crl /etc/appliance/crl.pem;
 ssl_verify_client ##VERIFY_CLIENT##;
+
+location /bkuonline {
+    proxy_pass http://127.0.0.1:5090;
+}
+
+location /pdf-as-web {
+    proxy_pass http://127.0.0.1:5095;
+}
+
+location / {
+    # if appliance is in maintenance, display custom status page
+    if (-f /var/www/html/503.html ) {
+        return 503;
+    }
+    proxy_redirect off; # XXX: is this needed ?
+    proxy_pass   http://127.0.0.1:5000;
+}

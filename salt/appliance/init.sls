@@ -1,11 +1,12 @@
 include:
   - .network
   - docker
+  - cadvisor
   - .ssl
   - .nginx
-  # - .postfix
+  - .postfix
   - .stunnel
-  # - .postgresql
+  - .postgresql
   - .backup
 
 {% for i in ['prepare-appliance.sh', 'prepare-ecs.sh', 'update-appliance.sh', 'update-ecs.sh'] %}

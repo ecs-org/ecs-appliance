@@ -58,6 +58,7 @@ docker:
       - lxc
       - cgroup-bin
       - docker-engine
+      - systemd-docker
     - require:
       - pkgrepo: docker
 
