@@ -1,5 +1,5 @@
 include:
-  - .network
+  - appliance.network
 
 postgresql:
   pkg.installed:
@@ -10,7 +10,7 @@ postgresql:
     - enable: true
     - require:
       - pkg: postgresql
-      - sls: network
+      - sls: appliance.network
       - file: /etc/postgresql/9.5/main/pg_hba.conf
       - file: /etc/postgresql/9.5/main/postgresql.conf
     - watch:
