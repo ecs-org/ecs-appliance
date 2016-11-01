@@ -7,8 +7,8 @@ include:
     - template: jinja
     - makedirs: true
     - defaults:
-        additional_ip: {{ pillar.get('docker0_ip') }}
-        additional_net: {{ pillar.get('docker0_net') }}
+        additional_ip: {{ pillar.get('docker:ip') }}
+        additional_net: {{ pillar.get('docker:net') }}
     - require:
       - sls: appliance.network
 

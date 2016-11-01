@@ -10,8 +10,8 @@ docker0:
     - enabled: true
     - ports: none
     - proto: static
-    - ipaddr: {{ pillar.get('docker0_ip') }}
-    - netmask: {{ pillar.get('docker0_netmask') }}
+    - ipaddr: {{ pillar.get('docker:ip') }}
+    - netmask: {{ pillar.get('docker:netmask') }}
     - stp: off
     - require:
       - pkg: bridge-utils
