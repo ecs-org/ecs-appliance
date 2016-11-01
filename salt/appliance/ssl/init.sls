@@ -34,6 +34,13 @@ include:
     - mode: "0755"
     - source: salt://appliance/ssl/newcert-as-root.sh
 
+/etc/sudoers.d/newcert_auth:
+  file.managed:
+    - makedirs: True
+    - mode: "0440"
+    - contents: |
+        app ALL=(ALL) NOPASSWD: /usr/local/sbin/newcert-as-root.sh
+
 generate_snakeoil:
   pkg.installed:
     - name: ssl-cert

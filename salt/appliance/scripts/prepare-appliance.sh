@@ -67,7 +67,7 @@ gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw "$ECS_DATABASE"
 if test $? -ne 0; then
     appliance_exit "Appliance Standby" "Appliance is in standby, no postgresql database named $ECS_DATABASE"
 fi
-if ! $(sudo -u postgres psql -c "\dg;" | grep app -q); then
+if ! $(gosu postgres psql -c "\dg;" | grep app -q); then
     # create role app
     gosu postgres createuser app
 fi
@@ -76,13 +76,13 @@ if test "$owner" != "app"; then
     # set owner of ECS_DATABASE to app
     gosu postgres psql -c "ALTER DATABASE ${ECS_DATABASE} OWNER TO app;"
 fi
-if ! $(sudo -u postgres psql ${ECS_DATABASE} -qtc "\dx" | grep -q pg_stat_statements); then
+if ! $(gosu postgres psql ${ECS_DATABASE} -qtc "\dx" | grep -q pg_stat_statements); then
     # create pg_stat_statements extension
     gosu postgres psql ${ECS_DATABASE} -c "CREATE extension pg_stat_statements;"
 fi
 # modify app user postgresql password to random 8byte hex string
 pgpass=$(HOME=/root openssl rand -hex 8)
-sudo -u postgres psql -c "ALTER ROLE app WITH ENCRYPTED PASSWORD '"${pgpass}"';"
+gosu postgres psql -c "ALTER ROLE app WITH ENCRYPTED PASSWORD '"${pgpass}"';"
 
 # write out service_urls for docker-compose
 cat > /etc/appliance/ecs/service_urls.env << EOF
@@ -127,7 +127,7 @@ if test -e $domains_file; then rm $domains_file; fi
 if is_truestr "${APPLIANCE_SSL_LETSENCRYPT_ENABLED:-true}"; then
     echo "Information: generate certificates using letsencrypt (dehydrated client)"
     printf "%s" "$APPLIANCE_DOMAIN" > $domains_file
-    sudo -u app -- dehydrated -c
+    gosu app dehydrated -c
     if test "$?" -eq 0; then
         use_snakeoil=false
     else

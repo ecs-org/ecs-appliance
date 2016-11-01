@@ -2,8 +2,7 @@ default-kvm-settings:
   file.managed:
     - name: /etc/default/qemu-kvm
     - contents: |
-        # To disable qemu-kvm's page merging feature, set KSM_ENABLED=0 and
-        # sudo restart qemu-kvm
+        # To disable qemu-kvm's page merging feature, set KSM_ENABLED=0 and restart qemu-kvm
         KSM_ENABLED=1
         SLEEP_MILLISECS=200
         # To load the vhost_net module, which in some cases can speed up
