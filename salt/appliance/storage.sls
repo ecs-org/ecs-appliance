@@ -1,16 +1,16 @@
 {% from 'storage/lib.sls' import storage_setup with context %}
 
-{% if (not pillar.get("appliance:storage:ignore:volatile", false) and
+{% if (not salt['pillar.get']("appliance:storage:ignore:volatile", false) and
        not salt['file.file_exists']('/dev/disk/by-label/ecs-volatile')) or
-      (not pillar.get("appliance:storage:ignore:data", false) and
+      (not salt['pillar.get']("appliance:storage:ignore:data", false) and
        not salt['file.file_exists']('/dev/disk/by-label/ecs-data')) %}
 
-  {{ storage_setup(pillar.get("appliance:storage:setup", {})) }}
+  {{ storage_setup(salt['pillar.get']("appliance:storage:setup", {})) }}
 {% endif %}
 
 
 {% load_yaml as volatile_prepare %}
-  {% if not pillar.get("appliance:storage:ignore:volatile",false) %}
+  {% if not salt['pillar.get']("appliance:storage:ignore:volatile",false) %}
 mount:
   /volatile:
     device: /dev/disk/by-label/ecs-volatile
@@ -34,7 +34,7 @@ directories:
       - user: app
       - dir_mode: 775
       - file_mode: 664
-{% if not pillar.get("appliance:storage:ignore:volatile",false) %}
+{% if not salt['pillar.get']("appliance:storage:ignore:volatile",false) %}
     onlyif: mountpoint -q /volatile
 {% endif %}
 relocate:
@@ -56,7 +56,7 @@ relocate:
 
 
 {% load_yaml as data_prepare %}
-  {% if not pillar.get("appliance:storage:ignore:data",false) %}
+  {% if not salt['pillar.get']("appliance:storage:ignore:data",false) %}
 mount:
   /data:
     device: /dev/disk/by-label/ecs-data
@@ -76,7 +76,7 @@ directories:
       - user: app
       - dir_mode: 775
       - file_mode: 664
-  {% if not pillar.get("appliance:storage:ignore:data",false) %}
+  {% if not salt['pillar.get']("appliance:storage:ignore:data",false) %}
     onlyif: mountpoint -q /data
   {% endif %}
 relocate:

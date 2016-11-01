@@ -20,9 +20,9 @@ postgresql:
 /etc/postgresql/9.5/main/pg_hba.conf:
   file.replace:
     - pattern: |
-        ^host.*{{ pillar.get('docker:net') }}.*
+        ^host.*{{ salt['pillar.get']('docker:net') }}.*
     - repl: |
-        host     ecs             app             {{ pillar.get('docker:net') }}           md5
+        host     ecs             app             {{ salt['pillar.get']('docker:net') }}           md5
     - append_if_not_found: true
     - require:
       - pkg: postgresql
@@ -32,7 +32,7 @@ postgresql:
     - pattern: |
         ^.*listen_addresses.*
     - repl: |
-        listen_addresses = 'localhost,{{ pillar.get('docker:ip') }}'
+        listen_addresses = 'localhost,{{ salt['pillar.get']('docker:ip') }}'
     - append_if_not_found: true
     - require:
       - pkg: postgresql

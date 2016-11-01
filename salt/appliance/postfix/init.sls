@@ -7,8 +7,8 @@ include:
     - template: jinja
     - makedirs: true
     - defaults:
-        additional_ip: {{ pillar.get('docker:ip') }}
-        additional_net: {{ pillar.get('docker:net') }}
+        additional_ip: {{ salt['pillar.get']('docker:ip') }}
+        additional_net: {{ salt['pillar.get']('docker:net') }}
 
 postfix:
   pkg.installed:

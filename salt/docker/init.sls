@@ -19,11 +19,11 @@ docker-defaults:
     - pattern: |
         ^#?DOCKER_OPTIONS=.*
     - repl: |
-        DOCKER_OPTIONS="{{ pillar.get('docker:options', '') }}"
+        DOCKER_OPTIONS="{{ salt['pillar.get']('docker:options', '') }}"
     - backup: False
     - append_if_not_found: True
 
-{% if pillar.get('http_proxy', '') != '' %}
+{% if salt['pillar.get']('http_proxy', '') != '' %}
   {% for a in ['http_proxy', 'HTTP_PROXY'] %}
 docker-defaults-{{ a }}:
   file.replace:
@@ -31,7 +31,7 @@ docker-defaults-{{ a }}:
     - pattern: |
         ^#?export {{ a }}=.*
     - repl: |
-        export {{ a }}="{{ pillar.get('http_proxy') }}"
+        export {{ a }}="{{ salt['pillar.get']('http_proxy') }}"
     - backup: False
     - append_if_not_found: True
   {% endfor %}
@@ -59,8 +59,8 @@ docker-network:
     - enabled: true
     - ports: none
     - proto: static
-    - ipaddr: {{ pillar.get('docker:ip') }}
-    - netmask: {{ pillar.get('docker:netmask') }}
+    - ipaddr: {{ salt['pillar.get']('docker:ip') }}
+    - netmask: {{ salt['pillar.get']('docker:netmask') }}
     - stp: off
     - require:
       - pkg: docker-requisites
