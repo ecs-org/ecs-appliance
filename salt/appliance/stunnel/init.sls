@@ -4,6 +4,7 @@ include:
 /etc/appliance/stunnel.conf:
   file.managed:
     - source: salt://appliance/stunnel/stunnel.conf
+    - template: jinja
     - makedirs: true
     - defaults:
         main_ip: {{ salt['network.get_route'](salt['network.default_route']('inet')[0].gateway).source }}
