@@ -5,6 +5,8 @@ include:
   file.managed:
     - source: salt://appliance/stunnel/stunnel.conf
     - makedirs: true
+    - defaults:
+        main_ip: {{ salt['network.get_route'](salt['network.default_route']('inet')[0].gateway).source }}
     - require:
       - pkg: stunnel
 
