@@ -1,8 +1,8 @@
 #!/bin/bash
 
+target="invalid"
 update=false
 if test "$1" = "--update"; then update=true; fi
-target="invalid"
 ECS_GIT_BRANCH=${ECS_GIT_BRANCH:-master}
 ECS_GIT_SOURCE=${ECS_GIT_SOURCE:-https://github.com/ethikkom/ecs.git}
 ECS_DATABASE=ecs

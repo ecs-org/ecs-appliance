@@ -70,6 +70,14 @@ Path | Description
 + read container details in yaml `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
 + run a django shell `docker-compose run --no-deps ecs.web run ./manage.py shell_plus`
 + look at all appliance http status pages: `git grep "\(noupdate\|appliance\)_\(exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort`
++ line and word count appliance:
+
+```
+wc `find . -regex ".*\.\(sls\|yml\|sh\|json\|conf\|template\|include\|md\|service\|identity\)" `
+
+returns 3450 10440 97382 in total
+
+```
 
 ## Appliance
 

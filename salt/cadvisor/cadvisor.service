@@ -7,7 +7,8 @@ Requires=docker.service
 ExecStartPre=-/usr/bin/docker kill cadvisor
 ExecStartPre=-/usr/bin/docker rm cadvisor
 ExecStartPre=/usr/bin/docker pull google/cadvisor
-ExecStart=/usr/bin/systemd-docker run \
+ExecStart=/usr/bin/docker run \
+    --rm \
     --name %n \
     -p 127.0.0.1:5080:8080 \
     --net bridge \
@@ -18,7 +19,8 @@ ExecStart=/usr/bin/systemd-docker run \
     --housekeeping_interval=5s
 Restart=always
 RestartSec=10s
-Type=notify
-NotifyAccess=all
 TimeoutStartSec=120
 TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target

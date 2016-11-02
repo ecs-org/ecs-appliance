@@ -29,17 +29,20 @@ include:
     - mode: "0755"
     - source: salt://appliance/ssl/dehydrated-hook.sh
 
-/usr/local/sbin/newcert-as-root.sh:
+{% for i in ['deploy_cert_as_root.sh', 'unchanged_cert_as_root.sh'] %}
+/usr/local/sbin/{{ i }}:
   file.managed:
     - mode: "0755"
-    - source: salt://appliance/ssl/newcert-as-root.sh
+    - source: salt://appliance/ssl/{{ i }}
+{% endfor %}
 
 /etc/sudoers.d/newcert_auth:
   file.managed:
     - makedirs: True
     - mode: "0440"
     - contents: |
-        app ALL=(ALL) NOPASSWD: /usr/local/sbin/newcert-as-root.sh
+        app ALL=(ALL) NOPASSWD: /usr/local/sbin/deploy_cert_as_root.sh
+        app ALL=(ALL) NOPASSWD: /usr/local/sbin/unchanged_cert_as_root.sh
 
 generate_snakeoil:
   pkg.installed:
@@ -64,6 +67,10 @@ generate_snakeoil:
     - require:
       - cmd: generate_snakeoil
 
+/etc/appliance/server.key.pem:
+  file.symlink:
+    - target: /etc/appliance/ssl-cert-snakeoil.key
+
 /etc/appliance/server.cert.pem:
   file.symlink:
     - target: /etc/appliance/ssl-cert-snakeoil.pem
@@ -71,10 +78,6 @@ generate_snakeoil:
 /etc/appliance/server.cert.dhparam.pem:
   file.symlink:
     - target: /etc/appliance/ssl-cert-snakeoil.pem
-
-/etc/appliance/server.key.pem:
-  file.symlink:
-    - target: /etc/appliance/ssl-cert-snakeoil.key
 
 /etc/appliance/ca.cert.pem:
   file.symlink:

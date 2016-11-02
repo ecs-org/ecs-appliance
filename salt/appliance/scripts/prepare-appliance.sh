@@ -143,9 +143,11 @@ fi
 
 # reload postfix with keys
 echo "fixme: postfix: rewrite domain, ssl certs, restart"
+systemctl restart postfix
 
 # reload stunnel with keys
 echo "fixme: stunnel: rewrite domain, ssl certs, restart"
+systemctl restart stunnel
 
 # reload nginx with new identity and client cert config
 if is_truestr "${APPLIANCE_SSL_CLIENT_CERTS_MANDATORY:-false}"; then
