@@ -57,6 +57,7 @@ generate_snakeoil:
   file.copy:
     - source: /etc/ssl/private/ssl-cert-snakeoil.key
     - mode: "0644"
+    - force: true
     - require:
       - cmd: generate_snakeoil
 
@@ -64,19 +65,23 @@ generate_snakeoil:
   file.copy:
     - source: /etc/ssl/certs/ssl-cert-snakeoil.pem
     - mode: "0644"
+    - force: true
     - require:
       - cmd: generate_snakeoil
 
 /etc/appliance/server.key.pem:
   file.copy:
+    - force: true
     - source: /etc/appliance/ssl-cert-snakeoil.key
 
 /etc/appliance/server.cert.pem:
   file.copy:
+    - force: true
     - source: /etc/appliance/ssl-cert-snakeoil.pem
 
 /etc/appliance/server.cert.dhparam.pem:
   file.copy:
+    - force: true
     - source: /etc/appliance/ssl-cert-snakeoil.pem
 
 /etc/appliance/ca.cert.pem:

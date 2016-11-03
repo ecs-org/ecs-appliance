@@ -29,6 +29,7 @@ nginx:
 /etc/appliance/server.identity:
   file.copy:
     - source: /etc/appliance/snakeoil.identity
+    - force: true
     - require:
       - file: /etc/appliance/ssl-cert-snakeoil.key
       - file: /etc/appliance/ssl-cert-snakeoil.pem
