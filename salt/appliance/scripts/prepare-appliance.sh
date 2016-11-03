@@ -85,8 +85,7 @@ fi
 # modify app user postgresql password to random string and write to service_urls.env
 pgpass=$(HOME=/root openssl rand -hex 8)
 gosu postgres psql -c "ALTER ROLE app WITH ENCRYPTED PASSWORD '"${pgpass}"';"
-sed -ire "s/(postgres:\/\/app:)[^@]+(@[^\/]+\/).+/\1:${pgpass}\2${ECS_DATABASE}/" /etc/appliance/ecs/service_urls.env
-
+sed -ire "s/(postgres:\/\/app:)[^@]+(@[^\/]+\/).+/\1${pgpass}\2${ECS_DATABASE}/" /etc/appliance/ecs/service_urls.env
 # export vault keys from env to /etc/appliance
 printf "%s" "$APPLIANCE_VAULT_ENCRYPT" > /etc/appliance/storagevault_encrypt.sec
 printf "%s" "$APPLIANCE_VAULT_SIGN" > /etc/appliance/storagevault_sign.sec
