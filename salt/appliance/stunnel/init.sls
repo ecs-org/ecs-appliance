@@ -20,9 +20,15 @@ include:
 stunnel:
   pkg.installed:
     - name: stunnel4
+  cmd.run:
+    - name: setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/stunnel4
+    - unless: setcap -v CAP_NET_BIND_SERVICE=+eip /usr/bin/stunnel4
+    - require:
+      - pkg: stunnel
   service.running:
     - enable: true
     - require:
+      - cmd: stunnel
       - sls: appliance.ssl
       - file: /etc/appliance/stunnel.conf
       - file: /etc/systemd/system/stunnel.service
