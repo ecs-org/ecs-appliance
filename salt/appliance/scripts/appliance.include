@@ -15,8 +15,7 @@ appliance_status () {
         title=$(echo "$1" | tr / \\/)
         text=$(echo "$2" | tr / \\/)
         cat $templatefile |
-            sed -re "s/\{\{ ?title ?\}\}/$title/g" |
-            sed -re "s/\{\{ ?text ?\}\}/$text/g" > $resultfile
+            sed -r "s/\{\{ ?title ?\}\}/$title/g;s/\{\{ ?text ?\}\}/$text/g" > $resultfile
         if test "$(id -u)" = "0"; then
             # if currently root, set owner to app, so app can also override current status
             chown app:app $resultfile

@@ -21,6 +21,6 @@ RUN mkdir -p /app; printf "%s" '\
     <Whitelist>^https://HOSTNAME.*</Whitelist>\
   </DataURLConnection>\
 </MoccaConfiguration>\
-' | sed -re "s/HOSTNAME/$HOSTNAME/g" > /app/mocca-configuration.xml
+' | sed "s/HOSTNAME/$HOSTNAME/g" > /app/mocca-configuration.xml
 
 CMD ["catalina.sh", "run"]

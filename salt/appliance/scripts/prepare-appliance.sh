@@ -72,7 +72,7 @@ if ! $(gosu postgres psql -c "\dg;" | grep app -q); then
     gosu postgres createuser app
 fi
 owner=$(gosu postgres psql -qtc "\l" |
-    grep "^[ \t]*${ECS_DATABASE}" | sed -re "s/[^|]+\| +([^| ]+) +\|.*/\1/")
+    grep "^[ \t]*${ECS_DATABASE}" | sed -r "s/[^|]+\| +([^| ]+) +\|.*/\1/")
 
 if test "$owner" != "app"; then
     # set owner of ECS_DATABASE to app
@@ -85,7 +85,7 @@ fi
 # modify app user postgresql password to random string and write to service_urls.env
 pgpass=$(HOME=/root openssl rand -hex 8)
 gosu postgres psql -c "ALTER ROLE app WITH ENCRYPTED PASSWORD '"${pgpass}"';"
-sed -ire "s/(postgres:\/\/app:)[^@]+(@[^\/]+\/).+/\1${pgpass}\2${ECS_DATABASE}/" /etc/appliance/ecs/service_urls.env
+sed -ir "s/(postgres:\/\/app:)[^@]+(@[^\/]+\/).+/\1${pgpass}\2${ECS_DATABASE}/" /etc/appliance/ecs/service_urls.env
 # export vault keys from env to /etc/appliance
 printf "%s" "$APPLIANCE_VAULT_ENCRYPT" > /etc/appliance/storagevault_encrypt.sec
 printf "%s" "$APPLIANCE_VAULT_SIGN" > /etc/appliance/storagevault_sign.sec
@@ -137,7 +137,7 @@ if $use_snakeoil; then
 fi
 
 # rewrite postfix main.cf with APPLIANCE_DOMAIN, restart postfix with new domain and keys
-sed -ie "s/^myhostname.*/myhostname = $APPLIANCE_DOMAIN/;s/^mydomain.*/mydomain = $APPLIANCE_DOMAIN/" /etc/postfix/main.cf
+sed -i "s/^myhostname.*/myhostname = $APPLIANCE_DOMAIN/;s/^mydomain.*/mydomain = $APPLIANCE_DOMAIN/" /etc/postfix/main.cf
 systemctl restart postfix
 
 # restart stunnel with new keys
@@ -150,8 +150,7 @@ else
     client_certs="optional"
 fi
 cat /etc/appliance/template.identity |
-    sed -re "s/##ALLOWED_HOSTS##/$APPLIANCE_DOMAIN/g" |
-    sed -re "s/##VERIFY_CLIENT##/$client_certs/g"> /etc/appliance/server.identity
+    sed "s/##ALLOWED_HOSTS##/$APPLIANCE_DOMAIN/g;s/##VERIFY_CLIENT##/$client_certs/g" > /etc/appliance/server.identity
 systemctl reload-or-restart nginx
 
 # update all packages
