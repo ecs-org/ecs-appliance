@@ -116,7 +116,7 @@ if $recreate_dhparam; then
 fi
 # certificate setup
 use_snakeoil=true
-if test "${APPLIANCE_SSL_KEY}" != "" -a test "${APPLIANCE_SSL_CERT}" != ""; then
+if test "${APPLIANCE_SSL_KEY}" != "" -a "${APPLIANCE_SSL_CERT}" != ""; then
     echo "Information: using ssl key,cert supplied from environment"
     printf "%s" "${APPLIANCE_SSL_KEY}" > /etc/appliance/server.key.pem
     printf "%s" "${APPLIANCE_SSL_CERT}" > /etc/appliance/server.cert.pem
@@ -143,7 +143,7 @@ if $use_snakeoil; then
 fi
 
 # rewrite postfix main.cf with APPLIANCE_DOMAIN, restart postfix with new domain and keys
-sed -ie "s/^myhostname.*/myhostname = $APPLIANCE_DOMAIN/;s/^mydomain.*/mydomain = $APPLIANCE_DOMAIN" /etc/postfix/main.cf
+sed -ie "s/^myhostname.*/myhostname = $APPLIANCE_DOMAIN/;s/^mydomain.*/mydomain = $APPLIANCE_DOMAIN/" /etc/postfix/main.cf
 systemctl restart postfix
 
 # restart stunnel with new keys
