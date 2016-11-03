@@ -8,7 +8,6 @@ services:
       args:
         - http_proxy
     image: ecs/ecs
-    user: app
     volumes:
       - /data/ecs-storage-vault:/app/ecs-storage-vault
     environment:
@@ -25,7 +24,6 @@ services:
 
   ecs.smtpd:
     image: ecs/ecs
-    user: app
     volumes:
       - /data/ecs-storage-vault:/app/ecs-storage-vault
     environment:
@@ -42,7 +40,6 @@ services:
 
   ecs.worker:
     image: ecs/ecs
-    user: app
     volumes:
       - /data/ecs-storage-vault:/app/ecs-storage-vault
     environment:
@@ -57,7 +54,6 @@ services:
 
   ecs.beat:
     image: ecs/ecs
-    user: app
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
     env_file:

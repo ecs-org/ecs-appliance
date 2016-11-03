@@ -71,7 +71,8 @@ if ! $(gosu postgres psql -c "\dg;" | grep app -q); then
     # create role app
     gosu postgres createuser app
 fi
-owner=$(gosu postgres psql -qtc "\l" | grep "^[ \t]*${ECS_DATABASE}" | sed -re "s/[^|]+|([^|]+)|.*/\1/")
+owner=$(gosu postgres psql -qtc "\l" |
+    grep "^[ \t]*${ECS_DATABASE}" | sed -re "s/[^|]+\| +([^|]+)\|.*/\1/")
 if test "$owner" != "app"; then
     # set owner of ECS_DATABASE to app
     gosu postgres psql -c "ALTER DATABASE ${ECS_DATABASE} OWNER TO app;"
