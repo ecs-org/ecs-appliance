@@ -27,8 +27,8 @@ nginx:
     - source: salt://appliance/nginx/nginx.conf
 
 /etc/appliance/server.identity:
-  file.symlink:
-    - target: /etc/appliance/snakeoil.identity
+  file.copy:
+    - source: /etc/appliance/snakeoil.identity
     - require:
       - file: /etc/appliance/ssl-cert-snakeoil.key
       - file: /etc/appliance/ssl-cert-snakeoil.pem
