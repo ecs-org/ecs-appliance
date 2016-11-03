@@ -6,7 +6,7 @@ After=network.target
 [Service]
 ExecStart=/usr/bin/stunnel4 /etc/appliance/stunnel.conf
 User=stunnel4
-Type=forking
+Type=simple
 
 [Install]
 WantedBy=multi-user.target

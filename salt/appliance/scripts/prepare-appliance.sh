@@ -141,12 +141,11 @@ if $use_snakeoil; then
     cat /etc/appliance/server.cert.pem /etc/appliance/dhparam.pem > /etc/appliance/server.cert.dhparam.pem
 fi
 
-# reload postfix with keys
-echo "fixme: postfix: rewrite domain, ssl certs, restart"
+# rewrite postfix main.cf with APPLIANCE_DOMAIN, restart postfix with new domain and keys
+sed -ie "s/^myhostname.*/myhostname = $APPLIANCE_DOMAIN/;s/^mydomain.*/mydomain = $APPLIANCE_DOMAIN" /etc/postfix/main.cf
 systemctl restart postfix
 
-# reload stunnel with keys
-echo "fixme: stunnel: rewrite domain, ssl certs, restart"
+# restart stunnel with new keys
 systemctl restart stunnel
 
 # reload nginx with new identity and client cert config

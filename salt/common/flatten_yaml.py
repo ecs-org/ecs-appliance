@@ -39,7 +39,7 @@ def flatten(d, parent_key='', sep='_'):
                 v = ""
             elif isinstance(v, str):
                 v = quote(v.strip())
-            elif isinstance(v, bool)
+            elif isinstance(v, bool):
                 v = repr(v).lower()
             items.append((new_key, v))
     return dict(items)
