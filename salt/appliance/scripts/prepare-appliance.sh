@@ -82,16 +82,10 @@ if ! $(gosu postgres psql ${ECS_DATABASE} -qtc "\dx" | grep -q pg_stat_statement
     # create pg_stat_statements extension
     gosu postgres psql ${ECS_DATABASE} -c "CREATE extension pg_stat_statements;"
 fi
-# modify app user postgresql password to random 8byte hex string
+# modify app user postgresql password to random string and write to service_urls.env
 pgpass=$(HOME=/root openssl rand -hex 8)
 gosu postgres psql -c "ALTER ROLE app WITH ENCRYPTED PASSWORD '"${pgpass}"';"
-
-# write out service_urls for docker-compose
-cat > /etc/appliance/ecs/service_urls.env << EOF
-REDIS_URL=redis://ecs_redis_1:6379/0
-MEMCACHED_URL=memcached://ecs_memcached_1:11211
-DATABASE_URL=postgres://app:${pgpass}@${dockerip}:5432/${ECS_DATABASE}
-EOF
+sed -ire "s/(postgres:\/\/app:)[^@]+(@[^\/]+\/).+/\1:${pgpass}\2${ECS_DATABASE}/" /etc/appliance/ecs/service_urls.env
 
 # export vault keys from env to /etc/appliance
 printf "%s" "$APPLIANCE_VAULT_ENCRYPT" > /etc/appliance/storagevault_encrypt.sec

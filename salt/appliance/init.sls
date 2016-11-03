@@ -24,6 +24,13 @@ include:
     - source: salt://appliance/ecs
     - keep_symlinks: true
 
+/etc/appliance/ecs/service_urls.env:
+  file.managed:
+    - contents: |
+        REDIS_URL=redis://ecs_redis_1:6379/0
+        MEMCACHED_URL=memcached://ecs_memcached_1:11211
+        DATABASE_URL=postgres://app:invalidpassword@${{ salt['pillar.get']('docker:ip') }}:5432/ecs
+
 appliance_service:
   file.managed:
     - name: /etc/systemd/system/appliance.service
