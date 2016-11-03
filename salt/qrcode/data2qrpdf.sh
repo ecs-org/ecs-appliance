@@ -50,7 +50,7 @@ unittest() {
         if test $? -eq 0; then
             rm $x ${x}.new $x.pdf
         else
-            echo "error: $x and $x.new differ, leaving $x $x.new and $x.pdf for analysis"
+            echo "Error: $x and $x.new differ, leaving $x $x.new and $x.pdf for analysis"
         fi
     done
 }

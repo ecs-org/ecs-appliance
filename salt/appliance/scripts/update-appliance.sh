@@ -5,22 +5,22 @@ APPLIANCE_GIT_BRANCH=${APPLIANCE_GIT_BRANCH:-master}
 is_cleanrepo(){
     repo="${1:-.}"
     if ! git -C $repo diff-files --quiet --ignore-submodules --; then
-        echo "error: abort, your working directory is not clean."
+        echo "Error: abort, your working directory is not clean."
         git  -C $repo --no-pager diff-files --name-status -r --ignore-submodules --
         return 1
     fi
     if ! git -C $repo diff-index --cached --quiet HEAD --ignore-submodules --; then
-        echo "error: abort, you have cached/staged changes"
+        echo "Error: abort, you have cached/staged changes"
         git -C $repo --no-pager diff-index --cached --name-status -r --ignore-submodules HEAD --
         return 1
     fi
     if test "$(git -C $repo ls-files --other --exclude-standard --directory)" != ""; then
-        echo "error: abort, working directory has extra files"
+        echo "Error: abort, working directory has extra files"
         git -C $repo --no-pager ls-files --other --exclude-standard --directory
         return 1
     fi
     if test "$(git -C $repo log --branches --not --remotes --pretty=format:'%H')" != ""; then
-        echo "error: abort, there are unpushed changes"
+        echo "Error: abort, there are unpushed changes"
         git -C $repo --no-pager log --branches --not --remotes --pretty=oneline
         return 1
     fi

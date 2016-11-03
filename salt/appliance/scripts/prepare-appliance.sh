@@ -34,22 +34,22 @@ fi
 # ### storage setup
 need_storage_setup=false
 if test ! -d "/volatile/ecs-cache"; then
-    echo "warning: cloud not find directory ecs-cache on /volatile"
+    echo "Warning: cloud not find directory ecs-cache on /volatile"
     need_storage_setup=true
 fi
 if test ! -d "/data/ecs-storage-vault"; then
-    echo "warning: could not find directory ecs-storage-vault on /data"
+    echo "Warning: could not find directory ecs-storage-vault on /data"
     need_storage_setup=true
 fi
 if test "$(findmnt -S "LABEL=ecs-volatile" -f -l -n -o "TARGET")" = ""; then
     if is_falsestr "$APPLIANCE_STORAGE_IGNORE_VOLATILE"; then
-        echo "warning: could not find mount for ecs-volatile filesystem"
+        echo "Warning: could not find mount for ecs-volatile filesystem"
         need_storage_setup=true
     fi
 fi
 if test "$(findmnt -S "LABEL=ecs-data" -f -l -n -o "TARGET")" = ""; then
     if is_falsestr "$APPLIANCE_STORAGE_IGNORE_DATA"; then
-        echo "warning: could not find mount for ecs-data filesystem"
+        echo "Warning: could not find mount for ecs-data filesystem"
         need_storage_setup=true
     fi
 fi
@@ -73,7 +73,6 @@ if ! $(gosu postgres psql -c "\dg;" | grep app -q); then
 fi
 owner=$(gosu postgres psql -qtc "\l" |
     grep "^[ \t]*${ECS_DATABASE}" | sed -r "s/[^|]+\| +([^| ]+) +\|.*/\1/")
-
 if test "$owner" != "app"; then
     # set owner of ECS_DATABASE to app
     gosu postgres psql -c "ALTER DATABASE ${ECS_DATABASE} OWNER TO app;"
@@ -130,7 +129,7 @@ if is_truestr "${APPLIANCE_SSL_LETSENCRYPT_ENABLED:-true}"; then
     fi
 fi
 if $use_snakeoil; then
-    echo "warning: letsencrypt disabled, symlink snakeoil.* to appliance/server*"
+    echo "Warning: letsencrypt disabled, copy snakeoil.* to appliance/server*"
     cp /etc/appliance/ssl-cert-snakeoil.pem /etc/appliance/server.cert.pem
     cp /etc/appliance/ssl-cert-snakeoil.key /etc/appliance/server.key.pem
     cat /etc/appliance/server.cert.pem /etc/appliance/dhparam.pem > /etc/appliance/server.cert.dhparam.pem

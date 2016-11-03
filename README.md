@@ -3,7 +3,7 @@
 the ecs appliance is a selfservice production setup virtual machine builder and executor.
 it can be stacked on top of the developer vm, but is independend of it.
 
-## upgrade your developer-vm, install appliance
+## upgrade your developer-vm
 
 on your local machine:
 
@@ -20,6 +20,8 @@ sudo -E ssh -F ~/.ssh/config testecs -L 80:localhost:80 -L 443:localhost:443 -L 
 ```
 
 inside the developer vm:
+
++ install appliance
 
 ```
 # clone appliance code
@@ -39,6 +41,18 @@ if you also want the builder (for building the appliance image) installed:
 sudo salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance": {"enabled": true}}'
 ```
 
+## upgrade your xenial desktop
+
+it is the same procedure as with the developer vm,
+but be aware that the appliance takes over the following services:
+
++ postgresql config and database (but does not drop any data, unless you tell it to do so)
++ docker and docker container (stops all container at salt-call state.highstate, expects docker0 to be the default docker bridge, and has default ip values)
++ nginx configuration
++ postfix configuration
++ port 25,80,443,465
+
+
 ## configure  appliance
 + describe make env.yml
 
@@ -53,7 +67,7 @@ Path | Description
 --- | ---
 /pillar/                    | salt environment
 /pillar/top.sls             | defines the root of the environment tree
-/pillar/default-env.sls     | the fallback env yaml (localhost ecs config)
+/pillar/default-env.sls     | fallback env yaml and example localhost ecs config
 /salt/*.sls                 | states (to be executed)
 /salt/top.sls               | defines the root of the state tree
 /salt/common/init.sls       | common install
@@ -63,6 +77,20 @@ Path | Description
 /salt/appliance/prepare-ecs.sh       | script startet after prepare_appliance
 
 
+### environment
+
+#### Buildtime
+
+* salt-call state.highstate (the install part) does not need an environment, but has a default one
+
+#### Runtime
+* prepare-appliance tries to get a environment yaml from all local and network sources
+  * writes the filtered result ("ecs,appliance") to /app/active-env.yml
+  * Storage Setup (`salt-call state.sls storage.sls`) expects /app/active-env.yml
+* prepare-ecs and the appliance.service both parse /app/active-env.yml
+* appliance service calls docker-compose up with active-env
+  * docker compose passes service_urls.env and the current $ECS_SETTINGS to the ecs container
+
 ### unsorted commands of interest
 + reInstall appliance `sudo salt-call state.highstate pillar='{"appliance": "enabled": true}}'`
 + update appliance `sudo update-appliance` (more or less like git pull with state.highstate)
@@ -70,6 +98,12 @@ Path | Description
 + read container details in yaml `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
 + run a django shell `docker-compose run --no-deps ecs.web run ./manage.py shell_plus`
 + look at all appliance http status pages: `git grep "\(noupdate\|appliance\)_\(exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort`
++ enter a running ecs container:
+  + `sudo docker exec -it ecs_something.something_1` /bin/bash
++ enter the shell_plus in a running (eg. ecs_ecs.web_1) container:
+  + `sudo docker exec -it ecs_ecs.web_1 /start run ./manage.py shell_plus`
++ start the shell_plus in a new container
+  + `sudo docker run `
 + line and word count appliance:
 
 ```

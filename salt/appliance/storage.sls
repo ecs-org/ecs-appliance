@@ -40,7 +40,7 @@ directories:
 relocate:
   /var/lib/docker:
     destination: /volatile
-    exec_before: systemctl stop docker
+    exec_before: docker kill $(docker ps -q); systemctl stop docker
     exec_after: systemctl start docker
   /app/ecs-log:
     destination: /volatile
