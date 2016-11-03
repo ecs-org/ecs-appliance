@@ -72,7 +72,8 @@ if ! $(gosu postgres psql -c "\dg;" | grep app -q); then
     gosu postgres createuser app
 fi
 owner=$(gosu postgres psql -qtc "\l" |
-    grep "^[ \t]*${ECS_DATABASE}" | sed -re "s/[^|]+\|[ \t]+([^| \t]+)\|.*/\1/")
+    grep "^[ \t]*${ECS_DATABASE}" | sed -re "s/[^|]+\| +([^| ]+) +\|.*/\1/")
+
 if test "$owner" != "app"; then
     # set owner of ECS_DATABASE to app
     gosu postgres psql -c "ALTER DATABASE ${ECS_DATABASE} OWNER TO app;"
@@ -156,7 +157,7 @@ else
     client_certs="optional"
 fi
 cat /etc/appliance/template.identity |
-    sed -re "s/##ALLOWED_HOSTS##/$APPLIANCE_ALLOWED_HOSTS/g" |
+    sed -re "s/##ALLOWED_HOSTS##/$APPLIANCE_DOMAIN/g" |
     sed -re "s/##VERIFY_CLIENT##/$client_certs/g"> /etc/appliance/server.identity
 systemctl reload-or-restart nginx
 
