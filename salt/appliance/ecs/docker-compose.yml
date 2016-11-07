@@ -80,6 +80,8 @@ services:
       args:
         - http_proxy
     image: ecs/mocca
+    environment:
+      - HOSTNAME=${APPLIANCE_DOMAIN}
     ports:
       - "127.0.0.1:5090:8080"
     network_mode: "bridge"
@@ -90,6 +92,8 @@ services:
       args:
         - http_proxy
     image: ecs/pdfas
+    environment:
+      - HOSTNAME=${APPLIANCE_DOMAIN}
     ports:
       - "127.0.0.1:5095:8080"
     network_mode: "bridge"

@@ -46,15 +46,17 @@ sudo salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance
 it is the same procedure as with the developer vm,
 but be aware that the appliance takes over the following services:
 
-+ postgresql config and database (but does not drop any data, unless you tell it to do so)
-+ docker and docker container (stops all container at salt-call state.highstate, expects docker0 to be the default docker bridge, and has default ip values)
++ postgresql config, postgres user "app" and database "ecs"
+  + set password of user ecs for tcp connect to postgresql
+  + does not drop any data, unless told
++ docker and docker container (stops all container at salt-call state.highstate, expects docker0 to be the default docker bridge with default ip values)
 + nginx configuration
 + postfix configuration
-+ port 25,80,443,465
++ listens to port 25,80,443,465
 
 
-## configure  appliance
-+ describe make env.yml
+## configure appliance
++ FIXME describe howto make env.yml
 
 ## start appliance
 + start appliance: `sudo systemctl start appliance`
@@ -90,6 +92,7 @@ Path | Description
 * prepare-ecs and the appliance.service both parse /app/active-env.yml
 * appliance service calls docker-compose up with active-env
   * docker compose passes service_urls.env and the current $ECS_SETTINGS to the ecs container
+  * $APPLIANCE_DOMAIN is passed as HOSTNAME to mocca and pdfas
 
 ### unsorted commands of interest
 + reInstall appliance `sudo salt-call state.highstate pillar='{"appliance": "enabled": true}}'`

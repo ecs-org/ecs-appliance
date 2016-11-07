@@ -85,10 +85,8 @@ fi
 pgpass=$(HOME=/root openssl rand -hex 8)
 gosu postgres psql -c "ALTER ROLE app WITH ENCRYPTED PASSWORD '"${pgpass}"';"
 sed -ri "s/(postgres:\/\/app:)[^@]+(@[^\/]+\/).+/\1${pgpass}\2${ECS_DATABASE}/" /etc/appliance/ecs/service_urls.env
-# export vault keys from env to /etc/appliance
-printf "%s" "$APPLIANCE_VAULT_ENCRYPT" > /etc/appliance/storagevault_encrypt.sec
-printf "%s" "$APPLIANCE_VAULT_SIGN" > /etc/appliance/storagevault_sign.sec
 
+# ### backup setup
 # create ready to use /root/.gpg for backup being done using duplicity
 if test -d /root/.gpg; then rm -r /root/.gpg; fi
 mkdir -p /root/.gpg

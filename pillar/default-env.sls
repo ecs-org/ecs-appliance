@@ -1,3 +1,29 @@
+
+appliance:
+  # standby: true # optional, if set appliance will not activate
+  domain: localhost
+  allowed_hosts: localhost testecs
+  ssl:
+    letsencrypt:
+      # use snakeoil certs, because eg. 443 is behind ssh tunneling
+      enabled: false
+      additional_hosts: false
+    client_certs_mandatory: true
+    # if true, always need a client certificate
+    # key: filename-key.pem # optional, if set ssl key for https host will be used
+    # cert: filename-cert.pem # optional, if set ssl key for https host will be used
+  storage:
+    # setup: | # optional, will be executed if volatile or data can not be found
+    # ignore_(volatile|data) # optional, if set, will not look for ecs-volatile or ecs-data filesystem
+    ignore:
+      volatile: true
+      data: true
+  authorized_keys: |
+      # put your ssh keys here, this is a text block not a list like cloud-init ssh_authorized_keys
+  backup:
+    url: ssh://app@localhost/volatile/ecs-backup-test/
+    encrypt: PGP PRIVATE KEY BLOCK OF BACKUP HERE
+
 ecs:
   migrate:
       auto: true
@@ -20,33 +46,6 @@ ecs:
     EMAIL_BACKEND = 'django.core.mail.backends.console.emailbackend'
     EMAIL_BACKEND_UNFILTERED = 'django.core.mail.backends.console.EmailBackend'
 
-    STORAGE_VAULT['encryption_key'] = '/etc/appliance/storagevault_encrypt.sec'
-    STORAGE_VAULT['signature_key'] = '/etc/appliance/storagevault_sign.sec'
-
-appliance:
-  # standby: true # optional, if set appliance will not activate
-  domain: localhost
-  allowed_hosts: localhost testecs
-  ssl:
-    letsencrypt:
-      enabled: false
-      additional_hosts: false
-    # use snakeoil certs, because eg. 443 is behind ssh tunneling
-    client_certs_mandatory: true
-    # if true, always need a client certificate
-    # key: filename-key.pem # optional, if set ssl key for https host will be used
-    # cert: filename-cert.pem # optional, if set ssl key for https host will be used
-  storage:
-    # setup: | # optional, will be executed if volatile or data can not be found
-    # ignore_(volatile|data) # optional, if set, will not look for ecs-volatile or ecs-data filesystem
-    ignore:
-      volatile: true
-      data: true
-  backup:
-    url: ssh://app@localhost/volatile/ecs-backup-test/
-    encrypt: PGP PRIVATE KEY BLOCK OF BACKUP HERE
-  authorized_keys: |
-      # insert your ssh keys here
   vault_encrypt: |
       -----BEGIN PGP PRIVATE KEY BLOCK-----
       Version: GnuPG v1.4.10
