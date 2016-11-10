@@ -3,26 +3,13 @@ python:
     - pkgs:
       - python
       - python-setuptools
-      - python3
-      - python3-setuptools
-{# refresh old "faulty" pip with version from pypi, as workaround for saltstack and probably others #}
-
-remove_faulty_pip:
-  pkg.removed:
-    - pkgs:
       - python-pip
       - python-pip-whl
-    - require:
-      - pkg: python
+      - python3
+      - python3-pip
+      - python3-setuptools
 
-{% for i in ['', '3'] %}
-
-easy_install{{ i }}_pip:
+pip_upgrade:
   cmd.run:
-    - name: easy_install{{ i }} pip
-    - unless: which pip{{ i }}
-    - require:
-      - pkg: remove_faulty_pip
-{#  - reload_modules: true #}
-
-{% endfor %}
+    - name: pip install --upgrade pip
+    

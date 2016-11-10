@@ -99,16 +99,18 @@ wc `find . -regex ".*\.\(sls\|yml\|sh\|json\|conf\|template\|include\|md\|servic
 
 Path | Description
 --- | ---
-/pillar/                    | salt environment
-/pillar/top.sls             | defines the root of the environment tree
-/pillar/default-env.sls     | fallback env yaml and example localhost ecs config
-/salt/*.sls                 | states (to be executed)
-/salt/top.sls               | defines the root of the state tree
-/salt/common/init.sls       | common install
-/salt/appliance/init.sls    | ecs appliance install
-/salt/appliance/appliance.service    | systemd appliance service (starts prepare and docker-compose)
+/pillar/                        | salt environment
+/pillar/top.sls                 | defines the root of the environment tree
+/pillar/default-env.sls         | fallback env yaml and example localhost ecs config
+/salt/*.sls                     | states (to be executed)
+/salt/top.sls                   | defines the root of the state tree
+/salt/common/init.sls           | common install
+/salt/common/env.template.yml   | template used to generate a new env.yml
+/salt/common/generate-new-env.yml   | command line utility for env generation
+/salt/appliance/init.sls            | ecs appliance install
+/salt/appliance/appliance.service   | systemd appliance service (starts prepare and docker-compose)
 /salt/appliance/prepare-appliance.sh | script started on ready to run appliance
-/salt/appliance/prepare-ecs.sh       | script startet after prepare_appliance
+/salt/appliance/prepare-ecs.sh      | script startet after prepare_appliance
 
 
 ### Environment

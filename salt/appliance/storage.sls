@@ -24,7 +24,6 @@ directories:
       - docker
       - ecs-backup-test
       - ecs-cache
-      - ecs-log
       - redis
       # FIXME tmp and var/tmp have different dir_mode
       # - tmp
@@ -42,8 +41,6 @@ relocate:
     destination: /volatile
     exec_before: docker kill $(docker ps -q); systemctl stop docker
     exec_after: systemctl start docker
-  /app/ecs-log:
-    destination: /volatile
   /app/ecs-cache:
     destination: /volatile
   # TODO tmp and var/tmp have different dir_mode
@@ -80,11 +77,11 @@ directories:
     onlyif: mountpoint -q /data
   {% endif %}
 relocate:
-  /app/ecs-storage-vault:
+  /etc/appliance:
     destination: /data/
   /app/ecs-ca:
     destination: /data/
-  /etc/appliance:
+  /app/ecs-storage-vault:
     destination: /data/
   /var/lib/postgresql:
     destination: /data/
