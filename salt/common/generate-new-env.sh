@@ -13,6 +13,5 @@ fi
 domain=$1
 targetdir=$(readlink -f "$2")
 shift 2
-sudo mkdir -p $targetdir
-sudo salt-call state.sls common.env_gen pillar="{\"domain\": \"$domain\", \"targetdir\": \"$targetdir\"}" $@
-sudo chown $USER:$USER $targetdir/env.yml
+sudo salt-call state.sls common.env_gen \
+    pillar="{\"domain\": \"$domain\", \"targetdir\": \"$targetdir\", \"user\": \"$USER\"}" $@
