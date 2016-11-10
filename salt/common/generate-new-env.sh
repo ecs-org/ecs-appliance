@@ -26,3 +26,5 @@ local-hostname: linux
 EOF
 
 genisoimage -volid cidata -joliet -rock -input-charset utf-8 -output $targetdir/ecs-env-cidata.iso -graft-points user-data=$targetdir/env.yml meta-data=$targetdir/meta-data
+
+data2qrpdf env.yml
