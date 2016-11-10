@@ -12,4 +12,4 @@ mkdir -p $truststore_dir
 cp /app/server.cert.pem $tobeadded_dir
 cp /app/server.cert.pem $truststore_dir
 
-exec /usr/local/bin/catalina.sh "$@"
+exec /usr/local/tomcat/bin/catalina.sh "$@"

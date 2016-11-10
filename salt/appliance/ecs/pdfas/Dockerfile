@@ -10,4 +10,4 @@ RUN echo "2008e413032fc926e30b2d666f4363707328a5171a4b170c0fb0599a4e894421 */usr
 
 COPY pdf-as-web.properties /app/pdf-as-web.properties.tmpl
 
-CMD ["/bin/sh", "-c", "sed \"s/HOSTNAME/$HOSTNAME/g\" /app/pdf-as-web.properties.tmpl > /app/pdf-as-web.properties; exec /usr/local/bin/catalina.sh run"]
+CMD ["/bin/sh", "-c", "sed \"s/HOSTNAME/$HOSTNAME/g\" /app/pdf-as-web.properties.tmpl > /app/pdf-as-web.properties; exec /usr/local/tomcat/bin/catalina.sh run"]
