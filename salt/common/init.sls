@@ -77,3 +77,8 @@ python3-yaml:
 /usr/local/etc/env.include:
   file.managed:
     - source: salt://common/env.include
+
+/usr/local/sbin/generate-new-env.sh:
+  file.managed:
+    - source: salt://common/generate-new-env.sh
+    - mode: "0755"
