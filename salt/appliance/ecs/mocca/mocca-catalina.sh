@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 mocca_config=/app/mocca-configuration.xml
 sed "s/HOSTNAME/$HOSTNAME/g" ${mocca_config}.tmpl > ${mocca_config}

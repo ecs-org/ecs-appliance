@@ -26,4 +26,4 @@ RUN mkdir -p /app; printf "%s" '\
 </MoccaConfiguration>\
 ' > /app/mocca-configuration.xml.tmpl
 
-CMD ['/app/mocca-catalina.sh', 'run']
+CMD ["/app/mocca-catalina.sh", "run"]
