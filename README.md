@@ -92,9 +92,6 @@ but be aware that the appliance takes over the following services:
 
 ```
 wc `find . -regex ".*\.\(sls\|yml\|sh\|json\|conf\|template\|include\|md\|service\|identity\)" `
-
-returns 3450 10440 97382 in total
-
 ```
 
 
@@ -125,11 +122,11 @@ Path | Description
   * writes the filtered result ("ecs,appliance") to /app/active-env.yml
   * Storage Setup (`salt-call state.sls storage.sls`) expects /app/active-env.yml
 * prepare-ecs and the appliance.service both parse /app/active-env.yml
-* appliance service calls docker-compose up with active-env
+* appliance.service calls docker-compose up with active-env
   * docker compose passes the following to the ecs/ecs* container
       * service_urls.env,
-      * the current $ECS_SETTINGS, ECS_VAULT_SIGN, ECS_VAULT_ENCRYPT, APPLIANCE_DOMAIN
-  * docker compose passes $APPLIANCE_DOMAIN as HOSTNAME to mocca and pdfas
+      * ECS_SETTINGS, ECS_VAULT_SIGN, ECS_VAULT_ENCRYPT
+  * docker compose passes APPLIANCE_DOMAIN as HOSTNAME to mocca and pdfas
 
 
 ## Builder

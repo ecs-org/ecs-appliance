@@ -64,6 +64,7 @@ ecs:
       DOMAIN = 'localhost'
       ABSOLUTE_URL_PREFIX = 'https://{}'.format(DOMAIN)
       ALLOWED_HOSTS = [DOMAIN, 'testecs']
+      PDFAS_SERVICE = ABSOLUTE_URL_PREFIX+ '/pdf-as-web/'
       SECURE_PROXY_SSL = True
       CLIENT_CERTS_REQUIRED = True
       DEBUG = False
