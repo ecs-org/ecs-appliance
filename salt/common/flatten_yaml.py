@@ -19,7 +19,7 @@ reads yaml from stdin,
 filter yaml from roots (seperated by ",") or "." for all,
 flatten (combine name space with "_") & upper case key names,
 convert lists to names using key_name_0, and key_name_len as maxindex,
-strip and shlex.quote values value is a string,
+strip and shlex.quote value if value is a string,
 if value is bool, convert to repr(value).lower(),
 output {prefix}{KEY_NAME}='{shlex quoted value}'{postfix} to stdout
 
