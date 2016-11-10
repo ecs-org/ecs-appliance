@@ -3,7 +3,9 @@
 the ecs appliance is a selfservice production setup virtual machine builder and executor.
 it can be stacked on top of the developer vm, but is independend of it.
 
-## upgrade your developer-vm
+## installing on top of a existing machine
+
+### upgrade your developer-vm
 
 on your local machine:
 
@@ -41,7 +43,7 @@ if you also want the builder (for building the appliance image) installed:
 sudo salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance": {"enabled": true}}'
 ```
 
-## upgrade your xenial desktop
+### upgrade your xenial desktop
 
 it is the same procedure as with the developer vm,
 but be aware that the appliance takes over the following services:
@@ -56,12 +58,45 @@ but be aware that the appliance takes over the following services:
 
 
 ## configure appliance
-+ FIXME describe howto make env.yml
+
+### make a new environment config file
++ make a new env.yml: `generate-new-env.sh testecs /app/env.yml`
++ edit your settings in /app/env.yml
 
 ## start appliance
 + start appliance: `sudo systemctl start appliance`
 + open your browser and go to: http://testecs or http://localhost
 + stop appliance: `sudo systemctl stop appliance`
+
+### commands of interest
+
++ quick update appliance:
+    + `cd ~/appliance; git pull; sudo salt-call state.highstate pillar='{"appliance": "enabled": true}}'`
++ standard update appliance `sudo update-appliance` (~ git pull , state.highstate, restart)
++ update ecs `sudo update-ecs`
++ enter a running ecs container:
+  + `sudo docker exec -it ecs_image[.startcommand]_1 /bin/bash`
+  + image = ecs, mocca pdfas memcached redis
+  + ecs .startcommand = web worker beat smtpd
++ enter a django shell_plus in a running (eg. ecs_ecs.web_1) container:
+  + `sudo docker exec -it ecs_ecs.web_1 /start run ./manage.py shell_plus`
++ run a new django shell `sudo docker-compose -f /etc/appliance/ecs/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
++ follow the appliance log file (including web,beat,worker,smtp,redis,memcached,pdfas,mocca):
+    + `sudo journalctl -u appliance -f`
++ look at the last things happened in the journal: `sudo journalctl -xe`
+
+
++ read container details in yaml `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
++ look at all appliance http status pages: `git grep "\(noupdate\|appliance\)_\(exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort`
++ line and word count appliance:
+
+```
+wc `find . -regex ".*\.\(sls\|yml\|sh\|json\|conf\|template\|include\|md\|service\|identity\)" `
+
+returns 3450 10440 97382 in total
+
+```
+
 
 ### files of interest
 
@@ -79,46 +114,33 @@ Path | Description
 /salt/appliance/prepare-ecs.sh       | script startet after prepare_appliance
 
 
-### environment
+### Environment
 
-#### Buildtime
+#### Buildtime Environment Usage
 
 * salt-call state.highstate (the install part) does not need an environment, but has a default one
 
-#### Runtime
+#### VM Runtime Environment Usage
 * prepare-appliance tries to get a environment yaml from all local and network sources
   * writes the filtered result ("ecs,appliance") to /app/active-env.yml
   * Storage Setup (`salt-call state.sls storage.sls`) expects /app/active-env.yml
 * prepare-ecs and the appliance.service both parse /app/active-env.yml
 * appliance service calls docker-compose up with active-env
-  * docker compose passes service_urls.env and the current $ECS_SETTINGS to the ecs container
-  * $APPLIANCE_DOMAIN is passed as HOSTNAME to mocca and pdfas
+  * docker compose passes the following to the ecs/ecs* container
+      * service_urls.env,
+      * the current $ECS_SETTINGS, ECS_VAULT_SIGN, ECS_VAULT_ENCRYPT, APPLIANCE_DOMAIN
+  * docker compose passes $APPLIANCE_DOMAIN as HOSTNAME to mocca and pdfas
 
-### unsorted commands of interest
-+ reInstall appliance `sudo salt-call state.highstate pillar='{"appliance": "enabled": true}}'`
-+ update appliance `sudo update-appliance` (more or less like git pull with state.highstate)
-+ update ecs `sudo update-ecs`
-+ read container details in yaml `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
-+ run a django shell `docker-compose run --no-deps ecs.web run ./manage.py shell_plus`
-+ look at all appliance http status pages: `git grep "\(noupdate\|appliance\)_\(exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort`
-+ enter a running ecs container:
-  + `sudo docker exec -it ecs_something.something_1` /bin/bash
-+ enter the shell_plus in a running (eg. ecs_ecs.web_1) container:
-  + `sudo docker exec -it ecs_ecs.web_1 /start run ./manage.py shell_plus`
-+ start the shell_plus in a new container
-  + `sudo docker run `
-+ line and word count appliance:
 
-```
-wc `find . -regex ".*\.\(sls\|yml\|sh\|json\|conf\|template\|include\|md\|service\|identity\)" `
+## Builder
 
-returns 3450 10440 97382 in total
+appliance gets build using packer.
 
-```
+`vagrant up` installs all packages needed for builder
 
-## Appliance
+add on top of developer-vm or appliance update:
+`sudo salt-call state.highstate pillar='{"builder": "enabled": true}}'`
 
-appliance gets build using packer
 
 ### Partitioning
 
@@ -136,22 +158,9 @@ appliance gets build using packer
         + add p2 (all usable space) as pv-lvm
         + add a vg and volumes ecs-data (60%) ecs-volatile (30%), rest is for snapshots
 
+
+
 ### still to be implemented
-
-#### Vagrant Appliance Builder
-
-`vagrant up` installs all packages needed for builder
-
-add on top of developer-vm or appliance update:
-`sudo salt-call state.highstate pillar='{"appliance": "enabled": true}}'`
-
-+ builder config_new {outputfilename}
-    + creates a env.yml with all key material inside
-    + see env.yml for Examples
-
-+ builder config_build {inputfilename}
-    + creates several iso's with user-data and meta-data for cloud-init
-    + creates a pdf to print with qrcodes of the config data for offline storage
 
 + builder rescueshell_install user@host env.yml
     + ssh into target user@host
@@ -188,18 +197,3 @@ add on top of developer-vm or appliance update:
 #### if createfirstuser:
 + create user (group office) plus 1 Day certificate send to email address with transport password
     + useremail,user first,last,gender, transportpass (min 15chars)
-
-### ENV
-```
-# set by builder
-version:
-  git:
-    rev:
-    branch:
-
-# used by devserver
-dev:
-    autostart: true
-    rebase_to: master
-
-```

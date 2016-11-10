@@ -17,3 +17,12 @@ appuser=$USER
 
 sudo salt-call state.sls common.env_gen \
     pillar="{\"domain\": \"$domain\", \"targetdir\": \"$targetdir\", \"appuser\": \"$appuser\"}" $@
+
+exit 0
+
+> $targetdir/meta-data << EOF
+instance-id: iid-cloud-default
+local-hostname: linux
+EOF
+
+genisoimage -volid cidata -joliet -rock -input-charset utf-8 -output $targetdir/ecs-env-cidata.iso -graft-points user-data=$targetdir/env.yml meta-data=$targetdir/meta-data
