@@ -16,12 +16,12 @@ def usage():
     print("usage: {0} ".format(sys.argv[0])+ '''(root[,root]*)|.} [prefix] [postfix] < data.yml
 
 reads yaml from stdin,
-select optional roots (seperated by ",") to filter yaml or "." for all,
-flatten (concatinate with "_") & upper case key names,
-convert lists seperate names using key_name_0, and key_name_len as maxindex,
-strip and shlex.quote values if string,
-convert bool to repr(value).lower(),
-output {prefix}{KEY_NAME}{'['+ index+ ']'}='{shlex quoted value}'{postfix} to stdout
+filter yaml from roots (seperated by ",") or "." for all,
+flatten (combine name space with "_") & upper case key names,
+convert lists to names using key_name_0, and key_name_len as maxindex,
+strip and shlex.quote values value is a string,
+if value is bool, convert to repr(value).lower(),
+output {prefix}{KEY_NAME}='{shlex quoted value}'{postfix} to stdout
 
 program will exit with code 1 on error (empty parameter, missing library)
 
