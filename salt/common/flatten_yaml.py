@@ -18,7 +18,7 @@ def usage():
 reads yaml from stdin,
 select optional roots (seperated by ",") to filter yaml or "." for all,
 flatten (concatinate with "_") & upper case key names,
-convert lists to arrays using key_name[0] syntax,
+convert lists seperate names using key_name_0, and key_name_len as maxindex,
 strip and shlex.quote values if string,
 convert bool to repr(value).lower(),
 output {prefix}{KEY_NAME}{'['+ index+ ']'}='{shlex quoted value}'{postfix} to stdout
@@ -29,7 +29,7 @@ program will exit with code 1 on error (empty parameter, missing library)
     sys.exit(1)
 
 
-def flatten(d, parent_key='', sep='_', index=None):
+def flatten(d, parent_key='', sep='_'):
     def _repr(v):
         if v is None:
             v = ""
@@ -44,17 +44,18 @@ def flatten(d, parent_key='', sep='_', index=None):
     if isinstance(d, collections.MutableMapping):
         for k, v in d.items():
             new_key = parent_key + sep + k if parent_key else k
-            items.extend(flatten(v, new_key, sep=sep, index=index).items())
+            items.extend(flatten(v, new_key, sep=sep).items())
         return dict(items)
 
     elif isinstance(d, (list, tuple)):
         for i, r in enumerate(d):
-            items.extend(flatten(r, parent_key=parent_key, sep=sep, index=i).items())
+            items.extend(flatten(r, parent_key=parent_key+ sep+ str(i), sep=sep).items())
+        len_key = parent_key+ sep+ "len"
+        items.extend([(len_key, len(d))])
         return dict(items)
 
     else:
-        new_key = parent_key+ '_{}'.format(index) if index is not None else parent_key
-        return {new_key: _repr(d)}
+        return {parent_key: _repr(d)}
 
 
 def main():
