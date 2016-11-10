@@ -10,4 +10,6 @@ EOF
     exit 1
 fi
 
-sudo salt-call state.sls common.env_gen pillar="{\"domain\": \"$1\", \"targetdir\": \"$(readlink -e "$2")\"}"
+targetdir=$(readlink -e "$2")
+
+sudo salt-call state.sls common.env_gen pillar="{\"domain\": \"$1\", \"targetdir\": \"$targetdir\"}"
