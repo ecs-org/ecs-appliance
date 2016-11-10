@@ -16,7 +16,7 @@
 {%- endmacro %}
 
 
-{% load_yaml as env_overwrite %}
+{% load_yaml as env_overwrite with context %}
 appliance:
   domain: {{ domain }}
   allowed_hosts: {{ domain }}
