@@ -52,6 +52,7 @@ done
 if type apt-get >/dev/null 2>&1; then
     echo "cleanup apt"
     apt-get -y autoremove
+    apt-get -y autoremove
     apt-get -y clean
 fi
 

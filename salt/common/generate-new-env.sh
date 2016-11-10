@@ -25,6 +25,17 @@ instance-id: iid-cloud-default
 local-hostname: linux
 EOF
 
+
+#cloud-config ssh keys and user (for empty cloud xenial)
+ssh_authorized_keys:
+  - "your-sshkey here"
+
+users:
+  - name: vagrant
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh-authorized-keys:
+      - "your-sshkey here"
+
 genisoimage -volid cidata -joliet -rock -input-charset utf-8 -output $targetdir/ecs-env-cidata.iso -graft-points user-data=$targetdir/env.yml meta-data=$targetdir/meta-data
 
 data2qrpdf env.yml
