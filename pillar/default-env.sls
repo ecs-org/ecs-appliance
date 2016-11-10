@@ -21,8 +21,39 @@ appliance:
       # put your ssh keys here, this is a text block not a list like cloud-init ssh_authorized_keys
   backup:
     url: ssh://app@localhost/volatile/ecs-backup-test/
-    encrypt: PGP PRIVATE KEY BLOCK OF BACKUP HERE
+    encrypt: |
+        -----BEGIN PGP PRIVATE KEY BLOCK-----
+        Version: GnuPG v1
 
+        lQOYBFgj284BCADhEvUgeeimNrWFEAiX3KvJmT74tvi2DnqtTLIEvRQBrI2vrnhg
+        SWDslB2grWVWEPqE3cZB2RfiDr2SHCZgEV9IPkg+OBTHqJ/N51Gzj/1pMXTXXxcQ
+        sPsfNZaIPXIJo5H+xyNvP6k8cKvlIYWI8LCWE1EGbvs21TkQIrmCCMWuB6YO/hYs
+        CX2RuDzqtz2NK7QUG0tSehgVVwW9u4A4EzaEGghe9z5HQotGWgAS5hDRshI7iIeL
+        MkgX8S9JXKoeDLmZopHNHhgCbquxRLmjg59E19shvaXrsEFNQNjQWdvYpYzUqzYD
+        tK2x/WwafjkZWOnvN5JhK+0W/JXkTYtsI+e9ABEBAAEAB/oC4mGPGQjYDz9Sjtx+
+        IVDEdijv4OmW7OB54o/G23gLanKGLXpZvFVlF4o528CYWQJ0DyLoh2q7L3ASx7be
+        yDI1177iXAkfvH02kzzBWPqVuissMsnpB8xicsC0vibW0UhzoNbHKPEKaksFoweW
+        GoS4AG2rVnynj/vZq7w/wP/suKKCtfEUXBhEUx8rB9U+1WBHhUR/yWToM1hQpxn4
+        jTQE6w0Q6xbFAm9fdL1zoO6oHBOQe5KcowGnpjIFgCDE/B8RjekfqsIoJxrkhWke
+        87ncmiMk+khldAcxqYkmQWQQabtnVZ5jCVI0D4TVf5FzZZuEQsnbyOrLUcr7aFZx
+        tA3JBADjqJCLVe+xoGVUFui5HJizgAnm3B6KlB96fmoHMVc6X8R+sLVjvkDZgjiK
+        d5gU2ZBbkU/aOUGlvUA6cHGsDiFGnmb4uz+cWA4a5u9o2CqNaONpzWLMmJ0PmROc
+        gS1XvDyaClLzEiqYkpurrPLahcf+wMLwHd1sWYdow/NTuWg8qQQA/RgHR4hN4bNb
+        sL2OBofDobxdlyrPmSZ83qFrGcFKMM7EGXjOYK9xSwPo2kgj8HcEQs0sKn1yaYzN
+        jqDgqxZWwjnNfV5p9bICXQ4XynU5Fx+7J0zg6kLlo+QVs0BVEN+8yHYtnHdtcrjV
+        uH9YVAZy58b0IfGAWMR48LYtykGxSvUEANkW7hzSB20ZhZJDcyhRewBqwL5h6/zD
+        3yAJB8m1oPlrgEd37SX8eM2/ft9HBOyM1Ei5OLu/55cM9QQh+sZSvPz2GIrmdtda
+        vknwTGREDPMRDhJ46fm13oU4kFZHv7hSSPg9kg2HanIkO5adEkhEVBL1vr7GPNDR
+        tiRcURHt56YwPry0CmVjc19iYWNrdXCJATgEEwECACIFAlgj284CGy8GCwkIBwMC
+        BhUIAgkKCwQWAgMBAh4BAheAAAoJEIp/e7BqphvsmpwIANUm39gF2/PwTHGQbv4v
+        0U67wdAKfhDKWpvvdvg44cYud5ydglcf5PqXzMnnLLsOTRvyjVHtCyF4I6sCEST6
+        6P5aceP/VIL6+J8H/1p1+3jv0/2xV8lnM2P1lRh6I11apZTzFb33lW2qsKIj9HrX
+        Bwuhu6aMztYzVR1kqL5ZDUdno+OID3PhHevBTOIvAOlLkVV9XddWnJAk1bq5A4aO
+        UGrC209mlORHmmj/VmmzQNlH9x208eS3S10iZpn9S65h40XJWbf6vYMm2qmXo3Ug
+        jFzLXf5X8h8Yoc77c4LCGBVmkSqI8M62D22KYUcJFgzWWAQUlsxRAOL7Thiid+kj
+        5tQ=
+        =ix16
+        -----END PGP PRIVATE KEY BLOCK-----
 ecs:
   migrate:
     auto: true
@@ -37,17 +68,26 @@ ecs:
       CLIENT_CERTS_REQUIRED = True
       DEBUG = False
 
+      # SENTRY_DSN = 'https://url' # set to sentry url if available
+      # target EC
       ETHICS_COMMISSION_UUID = 'ecececececececececececececececec'
+
       SECRET_KEY = 'ptn5xj+85fvd=d4u@i1-($z*otufbvlk%x1vflb&!5k94f$i3w'
       REGISTRATION_SECRET = '!brihi7#cxrd^twvj$r=398mdp4neo$xa-rm7b!8w1jfa@7zu_'
       PASSWORD_RESET_SECRET = 'j2obdvrb-hm$$x949k*f5gk_2$1x%2etxhd!$+*^qs8$4ra3=a'
 
-      EMAIL_BACKEND = 'django.core.mail.backends.console.emailbackend'
+      EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
       EMAIL_BACKEND_UNFILTERED = 'django.core.mail.backends.console.EmailBackend'
+      EMAIL_UNFILTERED_DOMAINS = () # = ('example.com', 'shoddy.technology')
+
+      # EMAIL_BACKEND = all emails except EMAIL_BACKEND_UNFILTERED
+      # EMAIL_BACKEND_UNFILTERED = only registration/forgot-password/client-cert & UNFILTERED_DOMAINS
+      # do not sent email but log to console: django.core.mail.backends.console.EmailBackend
+      # send via EMAIL_* smtp settings: django.core.mail.backends.smtp.EmailBackend
 
   vault_encrypt: |
       -----BEGIN PGP PRIVATE KEY BLOCK-----
-      Version: GnuPG v1.4.10
+      Version: GnuPG v1
 
       lQOYBE3kIS0BCADHNBytxcTEasGbcT0ybEtCjbgUy8ePRaoDXaSo7W6/val+Gl3X
       AwbHAbAYNOO3Kr/4zvaX2qc3n8+AnsNNKnZDvYFEGsMzE80oVEwJMpoqH18mtnav
@@ -80,7 +120,7 @@ ecs:
       -----END PGP PRIVATE KEY BLOCK-----
   vault_sign: |
       -----BEGIN PGP PRIVATE KEY BLOCK-----
-      Version: GnuPG v1.4.10
+      Version: GnuPG v1
 
       lQOYBE3kIQABCACsH2oUgCb8SHIqPx3aEn2pS+DStTMO01eZkoUH+NdY+h7egYN1
       SCebY4fYMwqayf9dP/eRBm+QI3/lJeuaxxa3uIjkO+4ENsgj4CH5ZeVR605U8CAo
