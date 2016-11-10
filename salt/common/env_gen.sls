@@ -1,4 +1,4 @@
-{{ targetdir }}/env.yml:
+{{ salt['pillar.get']('targetdir') }}/env.yml:
   file.managed:
     - template: jinja
     - source: salt://common/env.template.yml
