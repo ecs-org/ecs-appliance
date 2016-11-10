@@ -1,4 +1,3 @@
-
 appliance:
   # standby: true # optional, if set appliance will not activate
   domain: localhost
@@ -26,25 +25,25 @@ appliance:
 
 ecs:
   migrate:
-      auto: true
+    auto: true
   userswitcher:
-      enabled: true
-      parameter: -it
+    enabled: true
+    parameter: -it
   settings: |
-    DOMAIN = 'localhost'
-    ABSOLUTE_URL_PREFIX = 'https://{}'.format(DOMAIN)
-    ALLOWED_HOSTS = [DOMAIN, 'testecs']
-    SECURE_PROXY_SSL = True
-    CLIENT_CERTS_REQUIRED = True
-    DEBUG = False
+      DOMAIN = 'localhost'
+      ABSOLUTE_URL_PREFIX = 'https://{}'.format(DOMAIN)
+      ALLOWED_HOSTS = [DOMAIN, 'testecs']
+      SECURE_PROXY_SSL = True
+      CLIENT_CERTS_REQUIRED = True
+      DEBUG = False
 
-    ETHICS_COMMISSION_UUID = 'ecececececececececececececececec'
-    SECRET_KEY = 'ptn5xj+85fvd=d4u@i1-($z*otufbvlk%x1vflb&!5k94f$i3w'
-    REGISTRATION_SECRET = '!brihi7#cxrd^twvj$r=398mdp4neo$xa-rm7b!8w1jfa@7zu_'
-    PASSWORD_RESET_SECRET = 'j2obdvrb-hm$$x949k*f5gk_2$1x%2etxhd!$+*^qs8$4ra3=a'
+      ETHICS_COMMISSION_UUID = 'ecececececececececececececececec'
+      SECRET_KEY = 'ptn5xj+85fvd=d4u@i1-($z*otufbvlk%x1vflb&!5k94f$i3w'
+      REGISTRATION_SECRET = '!brihi7#cxrd^twvj$r=398mdp4neo$xa-rm7b!8w1jfa@7zu_'
+      PASSWORD_RESET_SECRET = 'j2obdvrb-hm$$x949k*f5gk_2$1x%2etxhd!$+*^qs8$4ra3=a'
 
-    EMAIL_BACKEND = 'django.core.mail.backends.console.emailbackend'
-    EMAIL_BACKEND_UNFILTERED = 'django.core.mail.backends.console.EmailBackend'
+      EMAIL_BACKEND = 'django.core.mail.backends.console.emailbackend'
+      EMAIL_BACKEND_UNFILTERED = 'django.core.mail.backends.console.EmailBackend'
 
   vault_encrypt: |
       -----BEGIN PGP PRIVATE KEY BLOCK-----
