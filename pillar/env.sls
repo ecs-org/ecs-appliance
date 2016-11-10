@@ -5,3 +5,5 @@ include:
 include:
   - default-env
 {% endif %}
+
+{% import_yaml "default-env.sls" as default_env %}

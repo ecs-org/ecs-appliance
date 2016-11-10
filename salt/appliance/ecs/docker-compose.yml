@@ -12,6 +12,8 @@ services:
       - /data/ecs-storage-vault:/app/ecs-storage-vault
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
+      - ECS_VAULT_ENCRYPT=${ECS_VAULT_ENCRYPT}
+      - ECS_VAULT_SIGN=${ECS_VAULT_SIGN}
     env_file:
       - service_urls.env
     ports:
@@ -28,6 +30,8 @@ services:
       - /data/ecs-storage-vault:/app/ecs-storage-vault
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
+      - ECS_VAULT_ENCRYPT=${ECS_VAULT_ENCRYPT}
+      - ECS_VAULT_SIGN=${ECS_VAULT_SIGN}
     env_file:
       - service_urls.env
     ports:
@@ -44,6 +48,8 @@ services:
       - /data/ecs-storage-vault:/app/ecs-storage-vault
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
+      - ECS_VAULT_ENCRYPT=${ECS_VAULT_ENCRYPT}
+      - ECS_VAULT_SIGN=${ECS_VAULT_SIGN}
     env_file:
       - service_urls.env
     links:
@@ -56,6 +62,8 @@ services:
     image: ecs/ecs
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
+      - ECS_VAULT_ENCRYPT=${ECS_VAULT_ENCRYPT}
+      - ECS_VAULT_SIGN=${ECS_VAULT_SIGN}
     env_file:
       - service_urls.env
     links:

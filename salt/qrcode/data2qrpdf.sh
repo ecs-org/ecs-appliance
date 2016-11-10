@@ -74,7 +74,6 @@ data2pdf() {
 
     local tempdir=`mktemp -d`
     if test ! -d $tempdir; then echo "ERROR: creating tempdir"; exit 10; fi
-    if test "${tempdir:0:5}" != "/tmp/"; then echo "ERROR: creating tempdir (not inside /tmp: $tempdir)"; exit 10; fi
 
     if test $fsize -le 2110; then
         cat $fname | python -c "import sys, base64; sys.stdout.write(base64.b32encode(sys.stdin.read()))" | qrencode -o $tempdir/$fbase.png -l M -i
