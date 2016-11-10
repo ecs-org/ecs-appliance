@@ -13,5 +13,7 @@ fi
 domain=$1
 targetdir=$(readlink -f "$2")
 shift 2
+appuser=$USER
+
 sudo salt-call state.sls common.env_gen \
-    pillar="{\"domain\": \"$domain\", \"targetdir\": \"$targetdir\", \"user\": \"$USER\"}" $@
+    pillar="{\"domain\": \"$domain\", \"targetdir\": \"$targetdir\", \"appuser\": \"$appuser\"}" $@
