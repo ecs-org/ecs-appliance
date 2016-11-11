@@ -90,6 +90,8 @@ services:
     image: ecs/mocca
     environment:
       - HOSTNAME=${APPLIANCE_DOMAIN}
+    volumes:
+      - "/etc/appliance/server.cert.pem:/data/server.cert.pem"
     ports:
       - "127.0.0.1:5090:8080"
     network_mode: "bridge"

@@ -7,6 +7,7 @@ qrcode:
       - qrencode
       - imagemagick
       - zbar-tools
+      - enscript
 
 {% for a in ['data2qrpdf.sh', 'qrpdf2data.sh'] %}
 /usr/local/bin/{{ a}}:

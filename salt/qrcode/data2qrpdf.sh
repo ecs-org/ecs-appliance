@@ -35,6 +35,10 @@ EOF
 
 unittest() {
     local a x
+    local tempdir=`mktemp -d`
+    if test ! -d $tempdir; then echo "ERROR: creating tempdir"; exit 1; fi
+    pushd $tempdir
+
     for a in 2110 4200 19900 50000 114100; do
         x="test${a}"
         echo "a: $a x: $x"
@@ -53,6 +57,9 @@ unittest() {
             echo "Error: $x and $x.new differ, leaving $x $x.new and $x.pdf for analysis"
         fi
     done
+
+    popd $tempdir
+    rm -r $tempdir
 }
 
 

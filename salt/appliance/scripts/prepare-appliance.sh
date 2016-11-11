@@ -2,6 +2,7 @@
 
 . /usr/local/etc/env.include
 . /usr/local/etc/appliance.include
+
 ECS_DATABASE=${ECS_DATABASE:-ecs}
 
 appliance_status_starting

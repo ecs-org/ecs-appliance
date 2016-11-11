@@ -1,50 +1,44 @@
 #!/bin/bash
 
-target="invalid"
-update=false
-if test "$1" = "--update"; then update=true; fi
-ECS_GIT_BRANCH=${ECS_GIT_BRANCH:-master}
-ECS_GIT_SOURCE=${ECS_GIT_SOURCE:-https://github.com/ethikkom/ecs.git}
-ECS_DATABASE=ecs
-
 . /usr/local/etc/appliance.include
 . /usr/local/etc/env.include
 
-noupdate_status()
+if test "$1" = "--update"; then update=true; shift; else update=false; fi
+
+update_status()
 {
     if $update; then
-        echo "INFO: muted (did not update) appliance status: $1 : $2"
+        echo "INFO: muted appliance status: $1 : $2"
     else
         appliance_status "$1" "$2"
     fi
 }
-noupdate_exit()
-{
-    if $update; then appliance_exit "$1" "$2"; else exit 1; fi
-}
-noupdate_exit_standby()
-{
-    if $update; then appliance_exit_standby; else exit 1; fi
-}
+update_exit(){ if $update; then appliance_exit "$1" "$2"; else exit 1; fi }
+update_exit_standby(){ if $update; then appliance_exit_standby; else exit 1; fi }
+
+target="invalid"
+ECS_GIT_BRANCH=${ECS_GIT_BRANCH:-master}
+ECS_GIT_SOURCE=${ECS_GIT_SOURCE:-https://github.com/ethikkom/ecs.git}
+ECS_DATABASE=ecs
 
 if $update; then
-    noupdate_status "Appliance Update" "Starting ecs update"
+    update_status "Appliance Update" "Starting ecs update"
 else
-    noupdate_status "Appliance Startup" "Starting ecs"
+    update_status "Appliance Startup" "Starting ecs"
 fi
 
 # export active yaml into environment
 if test ! -e /app/active-env.yml; then
-    noupdate_exit "Appliance Error" "No /app/active-env.yml, did you run prepare_appliance ?"
+    update_exit "Appliance Error" "No /app/active-env.yml, did you run prepare_appliance ?"
 fi
 ENV_YML=/app/active-env.yml update_env_from_userdata ecs,appliance
 if test $? -ne 0; then
-    noupdate_exit "Appliance Error" "Could not activate userdata environment"
+    update_exit "Appliance Error" "Could not activate userdata environment"
 fi
 
 # check if standby is true
 if is_truestr "$APPLIANCE_STANDBY"; then
-    noupdate_exit_standby
+    update_exit_standby
 fi
 
 # get target commit hash

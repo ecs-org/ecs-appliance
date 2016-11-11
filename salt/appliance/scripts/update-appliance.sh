@@ -1,9 +1,9 @@
 #!/bin/bash
 
-APPLIANCE_GIT_BRANCH=${APPLIANCE_GIT_BRANCH:-master}
+. /usr/local/etc/appliance.include
 
 is_cleanrepo(){
-    repo="${1:-.}"
+    local repo="${1:-.}"
     if ! git -C $repo diff-files --quiet --ignore-submodules --; then
         echo "Error: abort, your working directory is not clean."
         git  -C $repo --no-pager diff-files --name-status -r --ignore-submodules --
@@ -27,7 +27,7 @@ is_cleanrepo(){
     return 0
 }
 
-. /usr/local/etc/appliance.include
+APPLIANCE_GIT_BRANCH=${APPLIANCE_GIT_BRANCH:-master}
 
 appliance_status "Appliance Update" "Updating appliance"
 cd /app/appliance
@@ -42,7 +42,7 @@ target=$(gosu app git rev-parse origin/$APPLIANCE_GIT_BRANCH)
 last_running=$(gosu app git rev-parse HEAD)
 appliance_status "Appliance Update" "Updating appliance from $last_running to $target"
 
-if test is_cleanrepo -eq 0; then
+if is_cleanrepo; then
     gosu app git checkout -f $APPLIANCE_GIT_BRANCH
     gosu app git reset --hard origin/$APPLIANCE_GIT_BRANCH
 else
