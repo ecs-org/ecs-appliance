@@ -7,7 +7,6 @@ qrcode:
       - qrencode
       - imagemagick
       - zbar-tools
-      - enscript
 
 {% for a in ['data2qrpdf.sh', 'qrpdf2data.sh'] %}
 /usr/local/bin/{{ a}}:
@@ -15,3 +14,10 @@ qrcode:
     - source: salt://qrcode/{{ a }}
     - mode: "0755"
 {% endfor %}
+
+pdfgeneration:
+  pkg.installed:
+    - pkgs:
+      - enscript
+      - ghostscript
+      - pdftk

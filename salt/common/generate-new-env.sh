@@ -26,7 +26,6 @@ instance-id: iid-cloud-default
 local-hostname: linux
 EOF
 
-
 #cloud-config ssh keys and user (for empty cloud xenial)
 ssh_authorized_keys:
   - "your-sshkey here"
@@ -42,6 +41,6 @@ genisoimage -volid cidata -joliet -rock -input-charset utf-8 -output $targetdir/
 cat env.yml | gzip -9 > env.yml.gz
 data2qrpdf env.yml.gz
 enscript -p - env.yml | ps2pdf - env.yml.txt.pdf
-enscript -p - qrpdf2data.sh | ps2pdf - qrpdf2data.sh.pdf
+enscript -p - $(which qrpdf2data.sh) | ps2pdf - qrpdf2data.sh.pdf
 pdftk env.yml.txt.pdf env.yml.gz.pdf qrpdf2data.sh.pdf cat output env.yml.pdf
 rm env.yml.gz env.yml.gz.pdf env.yml.txt.pdf qrpdf2data.sh.pdf
