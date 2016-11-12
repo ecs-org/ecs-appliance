@@ -68,12 +68,16 @@ but be aware that the appliance takes over the following services:
 + open your browser and go to: http://testecs or http://localhost
 + stop appliance: `sudo systemctl stop appliance`
 
+## update appliance
+
+Update Appliance (this includes also update ecs): `sudo update-appliance.sh`
+
 ### commands of interest
 
++ update ecs `sudo update-ecs.sh`
 + quick update appliance:
     + `cd ~/appliance; git pull; sudo salt-call state.highstate pillar='{"appliance": "enabled": true}}'`
-+ standard update appliance `sudo update-appliance.sh` (~ git pull , state.highstate, restart)
-+ update ecs `sudo update-ecs.sh`
+
 + enter a running ecs container:
   + `sudo docker exec -it ecs_image[.startcommand]_1 /bin/bash`
   + image = ecs, mocca, pdfas, memcached, redis

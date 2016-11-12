@@ -9,7 +9,7 @@ TimeoutStartSec=10m
 ExecStartPre=/usr/local/sbin/prepare-appliance.sh
 ExecStartPre=/usr/local/sbin/prepare-ecs.sh
 ExecStart=/bin/bash -c ". /usr/local/etc/env.include; ENV_YML=/app/active-env.yml update_env_from_userdata ecs,appliance; cd /etc/appliance/ecs; exec -a docker-compose /usr/local/bin/docker-compose up --abort-on-container-exit"
-ExecStartPost=/bin/bash -c ". /usr/local/etc/appliance.include; appliance_status --disable"
+ExecStartPost=/bin/bash -c "sleep 10; . /usr/local/etc/appliance.include; appliance_status --disable"
 ExecStop=/usr/local/bin/docker-compose -f /etc/appliance/ecs/docker-compose.yml stop
 ExecStopPost=/bin/bash -c ". /usr/local/etc/appliance.include; appliance_exit_standby"
 Restart=on-failure

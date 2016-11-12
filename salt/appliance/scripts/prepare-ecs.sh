@@ -84,10 +84,12 @@ else
 fi
 
 cd /etc/appliance/ecs
-appliance_status "Appliance Update" "Building ecs"
+update_status "Appliance Update" "Building ecs $target (current= $last_running)"
 docker-compose pull --ignore-pull-failures
-docker-compose build --pull
-
+if ! docker-compose build --pull; then
+    update_status "Appliance Error" "build $target failed, restarting old build $last_running"
+    exit 0
+fi
 appliance_status "Appliance Update" "Updating ecs"
 docker-compose stop
 
