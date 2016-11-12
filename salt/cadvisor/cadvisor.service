@@ -4,8 +4,8 @@ After=docker.service
 Requires=docker.service
 
 [Service]
-ExecStartPre=-/usr/bin/docker kill cadvisor
-ExecStartPre=-/usr/bin/docker rm cadvisor
+ExecStartPre=-/usr/bin/docker kill cadvisor.service
+ExecStartPre=-/usr/bin/docker rm cadvisor.service
 ExecStartPre=/usr/bin/docker pull google/cadvisor
 ExecStart=/usr/bin/docker run \
     --rm \

@@ -72,12 +72,12 @@ but be aware that the appliance takes over the following services:
 
 + quick update appliance:
     + `cd ~/appliance; git pull; sudo salt-call state.highstate pillar='{"appliance": "enabled": true}}'`
-+ standard update appliance `sudo update-appliance` (~ git pull , state.highstate, restart)
-+ update ecs `sudo update-ecs`
++ standard update appliance `sudo update-appliance.sh` (~ git pull , state.highstate, restart)
++ update ecs `sudo update-ecs.sh`
 + enter a running ecs container:
   + `sudo docker exec -it ecs_image[.startcommand]_1 /bin/bash`
-  + image = ecs, mocca pdfas memcached redis
-  + ecs .startcommand = web worker beat smtpd
+  + image = ecs, mocca, pdfas, memcached, redis
+  + ecs .startcommand = web, worker, beat, smtpd
 + enter a django shell_plus in a running (eg. ecs_ecs.web_1) container:
   + `sudo docker exec -it ecs_ecs.web_1 /start run ./manage.py shell_plus`
 + run a new django shell `sudo docker-compose -f /etc/appliance/ecs/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
