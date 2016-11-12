@@ -91,7 +91,7 @@ services:
     environment:
       - HOSTNAME=${APPLIANCE_DOMAIN}
     volumes:
-      - "/etc/appliance/server.cert.pem:/data/server.cert.pem"
+      - "/etc/appliance/server.cert.pem:/data/server.cert.pem:ro"
     ports:
       - "127.0.0.1:5090:8080"
     network_mode: "bridge"

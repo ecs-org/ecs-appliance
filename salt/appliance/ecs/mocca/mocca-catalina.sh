@@ -3,8 +3,7 @@
 mocca_config=/app/mocca-configuration.xml
 sed "s/HOSTNAME/$HOSTNAME/g" ${mocca_config}.tmpl > ${mocca_config}
 tobeadded_dir="/usr/local/tomcat/webapps/bkuonline/WEB-INF/classes/at/gv/egiz/bku/certs/certStore/toBeAdded"
-truststore_dir="/usr/local/tomcat/webapps/bkuonline/WEB-INF/classes/at/gv/egiz/bku/certs/trustStore
-"
+truststore_dir="/usr/local/tomcat/webapps/bkuonline/WEB-INF/classes/at/gv/egiz/bku/certs/trustStore"
 
 mkdir -p $tobeadded_dir
 mkdir -p $truststore_dir
