@@ -2,7 +2,7 @@ FROM tomcat:8
 MAINTAINER felix@erkinger.at
 
 ENV HOSTNAME localhost
-ENV CATALINA_OPTS "-Dpdf-as-web.conf=/app/pdf-as-web.properties"
+ENV CATALINA_OPTS "-Dpdf-as-web.conf=/app/pdf-as-web/pdf-as-web.properties"
 
 RUN mkdir -p /app/pdf-as-web
 
