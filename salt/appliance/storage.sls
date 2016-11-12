@@ -39,8 +39,8 @@ directories:
 relocate:
   /var/lib/docker:
     destination: /volatile
-    exec_before: docker kill $(docker ps -q); systemctl stop docker
-    exec_after: systemctl start docker
+    exec_before: systemctl stop cadvisor; docker kill $(docker ps -q); systemctl stop docker
+    exec_after: systemctl start docker; systemctl start cadvisor
   /app/ecs-cache:
     destination: /volatile
   # TODO tmp and var/tmp have different dir_mode

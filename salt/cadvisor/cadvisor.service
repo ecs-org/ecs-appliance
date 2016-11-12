@@ -7,16 +7,17 @@ Requires=docker.service
 ExecStartPre=-/usr/bin/docker kill cadvisor.service
 ExecStartPre=-/usr/bin/docker rm cadvisor.service
 ExecStartPre=/usr/bin/docker pull google/cadvisor
-ExecStart=/usr/bin/docker run \
+ExecStart=/bin/bash -c "var_lib_docker=$(readlink -e /var/lib/docker); exec /usr/bin/docker run \
     --rm \
     --name %n \
     -p 127.0.0.1:5080:8080 \
     --net bridge \
     -v /:/rootfs:ro \
     -v /sys:/sys:ro \
-    -v /var/lib/docker/:/var/lib/docker:ro \
+    -v /var/run:/var/run:ro \
+    -v $var_lib_docker:/var/lib/docker:ro \
     google/cadvisor \
-    --housekeeping_interval=5s
+    --housekeeping_interval=5s"
 Restart=always
 RestartSec=10s
 TimeoutStartSec=120
