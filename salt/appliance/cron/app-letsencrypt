@@ -1,1 +1,5 @@
 + local: update letsencrypt
+
+deploy_cert_as_root.sh:
+
++# FIXME restart mocca container (has certs in it) if exists, just restart and make docker-compose be ok with it
