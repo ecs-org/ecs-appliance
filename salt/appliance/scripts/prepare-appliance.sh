@@ -150,8 +150,4 @@ fi
 cat /etc/appliance/template.identity |
     sed "s/##ALLOWED_HOSTS##/$APPLIANCE_DOMAIN/g;s/##VERIFY_CLIENT##/$client_certs/g" > /etc/appliance/server.identity
 systemctl reload-or-restart nginx
-
-# update all packages
-appliance_status "Appliance Update" "Update system packages"
-echo "fixme: update all packages"
 appliance_status_starting
