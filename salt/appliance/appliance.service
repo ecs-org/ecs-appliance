@@ -1,7 +1,8 @@
 [Unit]
 Description=Appliance
-After=docker.service postgresql.service network.service
-Requires=docker.service postgresql.service stunnel.service nginx.service
+
+Requires=prepare-appliance.service prepare-ecs.service
+After=prepare-appliance.service prepare-ecs.service
 
 [Service]
 ExecStart=/bin/bash -c ". /usr/local/etc/env.include; ENV_YML=/app/active-env.yml update_env_from_userdata ecs,appliance; cd /etc/appliance/ecs; exec -a docker-compose /usr/local/bin/docker-compose up --abort-on-container-exit"

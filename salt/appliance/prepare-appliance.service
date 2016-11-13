@@ -1,0 +1,18 @@
+[Unit]
+Description=Appliance Preparation
+
+PartOf=appliance.service
+ReloadPropagatedFrom=appliance.service
+
+Requires=docker.service postgresql.service stunnel.service nginx.service
+After=network.target docker.service postgresql.service
+Before=appliance.service prepare-ecs.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/prepare-appliance.sh
+ExecReload=/bin/true
+RemainAfterExit=on
+
+[Install]
+WantedBy=multi-user.target

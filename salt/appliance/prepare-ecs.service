@@ -1,13 +1,16 @@
 [Unit]
-Description=Appliance Preparation
+Description=ECS Preparation
 
 PartOf=appliance.service
 ReloadPropagatedFrom=appliance.service
-Before=appliance.service ecs_prepare.service
+
+Requires=prepare-appliance.service
+After=prepare-appliance.service
+Before=appliance.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/sbin/prepare-appliance.sh
+ExecStart=/usr/local/sbin/prepare-ecs.sh
 ExecReload=/bin/true
 RemainAfterExit=on
 
