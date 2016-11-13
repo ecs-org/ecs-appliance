@@ -5,7 +5,7 @@ require "fileutils"
 Vagrant.require_version ">= 1.6.0"
 
 $cpus = 2
-$memory = 1500
+$memory = 2048
 $server_name = File.basename(File.expand_path(File.dirname(__FILE__)))
 $libvirt_management_network_name = "vagrant-libvirt"
 $libvirt_management_network_address = ""
@@ -66,7 +66,7 @@ Vagrant.configure(2) do |config|
         #salt.install_args = "v2015.5.1"
         #salt.bootstrap_options = "-F -c /tmp/ -P"
         salt.pillar({
-            "builder" => {
+            "appliance" => {
                 "enabled" => true
             }
         })
