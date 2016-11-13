@@ -1,20 +1,25 @@
 include:
   - docker
 
+late_postgresql.service:
+  file.managed:
+    - name: /etc/systemd/system/late_postgresql.service
+    - source: salt://appliance/postgresql/late_postgresql.service
+  cmd.wait:
+    - name: systemctl enable late_postgresql.service
+    - watch:
+      - file: late_postgresql.service
+
 postgresql:
   pkg.installed:
     - pkgs:
       - postgresql
       - postgresql-contrib
-  file.managed:
-    - name: /etc/systemd/system/multi-user.target.wants/postgresql.service
-    - source: salt://appliance/postgresql/postgresql.service
-    - follow_symlinks: false
   service.running:
     - enable: true
     - require:
       - pkg: postgresql
-      - file: postgresql
+      - cmd: late_postgresql.service
       - sls: docker
       - file: /etc/postgresql/9.5/main/pg_hba.conf
       - file: /etc/postgresql/9.5/main/postgresql.conf

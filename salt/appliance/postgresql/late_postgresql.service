@@ -1,0 +1,16 @@
+# appliance: start after network.target because we also listen to docker0
+
+[Unit]
+Description=Delay PostgreSQL RDBMS
+After=network.target
+Before=postgresql.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/true
+ExecReload=/bin/true
+RemainAfterExit=on
+
+[Install]
+WantedBy=multi-user.target
+RequiredBy=postgresql.service
