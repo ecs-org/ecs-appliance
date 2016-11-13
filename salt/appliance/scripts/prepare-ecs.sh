@@ -24,9 +24,7 @@ ECS_GIT_SOURCE=${ECS_GIT_SOURCE:-https://github.com/ethikkom/ecs.git}
 ECS_DATABASE=ecs
 
 if $update; then
-    update_status "Appliance Update" "Starting ecs update"
-else
-    update_status "Appliance Startup" "Starting ecs"
+    update_status "Appliance Update" "Starting ecs update build"
 fi
 
 # export active yaml into environment
@@ -40,7 +38,7 @@ fi
 
 # check if standby is true
 if is_truestr "$APPLIANCE_STANDBY"; then
-    update_exit "Appliance Update" "Appliance is in standby, update aborted"
+    update_exit "Appliance Error" "Appliance is in standby, update aborted"
 fi
 
 # get target commit hash
@@ -86,13 +84,19 @@ else
 fi
 
 cd /etc/appliance/ecs
-update_status "Appliance Update" "Building ecs $target (current= $last_running)"
+update_status "Appliance Update" "Pulling new images"
 docker-compose pull --ignore-pull-failures
-if ! docker-compose build --pull; then
-    update_status "Appliance Error" "build $target failed, restarting old build $last_running"
+if test "$target" = "devserver" -o test "$target" != "$last_running"; then
+    update_status "Appliance Update" "Building ecs $target (current= $last_running)"
+    if ! docker-compose build --pull; then
+        update_status "Appliance Error" "build $target failed, restarting old build $last_running"
+        exit 0
+    fi
+    appliance_status "Appliance Update" "Build complete, starting ecs"
+else
+    update_status "Appliance Update" "Last version = current version = $last_running, skipping build"
     exit 0
 fi
-appliance_status "Appliance Update" "Updating ecs"
 docker-compose stop
 
 if $need_migration; then
