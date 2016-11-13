@@ -1,6 +1,6 @@
 [Unit]
 Description=Appliance
-After=docker.service postgresql.service network.target
+After=docker.service postgresql.service network.service
 Requires=docker.service postgresql.service stunnel.service nginx.service
 
 [Service]

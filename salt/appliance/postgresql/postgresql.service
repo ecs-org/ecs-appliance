@@ -5,7 +5,7 @@
 
 [Unit]
 Description=PostgreSQL RDBMS
-After=network.target
+After=network.service
 
 [Service]
 Type=oneshot
