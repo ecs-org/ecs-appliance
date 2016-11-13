@@ -1,0 +1,15 @@
+[Unit]
+Description=Appliance Preparation
+
+PartOf=appliance.service
+ReloadPropagatedFrom=appliance.service
+Before=appliance.service ecs_prepare.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/prepare-appliance.sh
+ExecReload=/bin/true
+RemainAfterExit=on
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,16 @@
+[Unit]
+Description=ECS Preparation
+
+PartOf=appliance.service
+ReloadPropagatedFrom=appliance.service
+Before=appliance.service
+After=appliance_prepare.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/prepare-ecs.sh
+ExecReload=/bin/true
+RemainAfterExit=on
+
+[Install]
+WantedBy=multi-user.target

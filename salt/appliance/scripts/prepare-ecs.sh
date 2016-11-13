@@ -13,8 +13,10 @@ update_status()
         appliance_status "$1" "$2"
     fi
 }
-update_exit(){ if $update; then appliance_exit "$1" "$2"; else exit 1; fi }
-update_exit_standby(){ if $update; then appliance_exit_standby; else exit 1; fi }
+update_exit()
+{
+    update_status "$1" "$2"; exit 1
+}
 
 target="invalid"
 ECS_GIT_BRANCH=${ECS_GIT_BRANCH:-master}
@@ -38,7 +40,7 @@ fi
 
 # check if standby is true
 if is_truestr "$APPLIANCE_STANDBY"; then
-    update_exit_standby
+    update_exit "Appliance Update" "Appliance is in standby, update aborted"
 fi
 
 # get target commit hash
@@ -66,8 +68,8 @@ if test "$target" = "invalid"; then
 fi
 
 # get last_running commit hash
-if test -e /etc/appliance/last_running_commitid; then
-    last_running=$(cat /etc/appliance/last_running_commitid || echo "invalid")
+if test -e /etc/appliance/last_running_ecs; then
+    last_running=$(cat /etc/appliance/last_running_ecs || echo "invalid")
 else
     last_running="invalid"
 fi
@@ -109,5 +111,5 @@ if $need_migration; then
     fi
 fi
 
-# save next about to be executed commitid
-printf "%s" "$target" > /etc/appliance/last_running_commitid
+# save next about to be executed commit
+printf "%s" "$target" > /etc/appliance/last_running_ecs

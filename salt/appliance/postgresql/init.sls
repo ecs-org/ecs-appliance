@@ -6,14 +6,19 @@ postgresql:
     - pkgs:
       - postgresql
       - postgresql-contrib
+  file.managed:
+    - name: /etc/systemd/system/postgresql.service
+    - source: salt://appliance/postgresql/postgresql.service
   service.running:
     - enable: true
     - require:
       - pkg: postgresql
+      - file: postgresql
       - sls: docker
       - file: /etc/postgresql/9.5/main/pg_hba.conf
       - file: /etc/postgresql/9.5/main/postgresql.conf
     - watch:
+      - file: postgresql
       - file: /etc/postgresql/9.5/main/pg_hba.conf
       - file: /etc/postgresql/9.5/main/postgresql.conf
 

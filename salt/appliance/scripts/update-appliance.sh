@@ -50,6 +50,8 @@ else
 fi
 
 salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
+# save executed commit
+printf "%s" "$target" > /etc/appliance/last_running_appliance
 
 appliance_status "Appliance Update" "Restarting appliance"
 systemctl restart appliance
