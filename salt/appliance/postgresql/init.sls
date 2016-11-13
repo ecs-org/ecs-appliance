@@ -7,8 +7,9 @@ postgresql:
       - postgresql
       - postgresql-contrib
   file.managed:
-    - name: /etc/systemd/system/postgresql.service
+    - name: /etc/systemd/system/multi-user.target.wants/postgresql.service
     - source: salt://appliance/postgresql/postgresql.service
+    - follow_symlinks: false
   service.running:
     - enable: true
     - require:
