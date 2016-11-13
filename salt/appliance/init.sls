@@ -32,7 +32,7 @@ include:
         SMTP_URL=smtp://{{ salt['pillar.get']('docker:ip') }}:25
         DATABASE_URL=postgres://app:invalidpassword@{{ salt['pillar.get']('docker:ip') }}:5432/ecs
 
-{% for n in ['prepare-appliance.service', 'prepare-ecs.service', 'appliance-service'] %}
+{% for n in ['prepare-appliance.service', 'prepare-ecs.service', 'appliance.service'] %}
 install_{{ n }}:
   file.managed:
     - name: /etc/systemd/system/{{ n }}
@@ -42,12 +42,3 @@ install_{{ n }}:
     - watch:
       - file: install_{{ n }}
 {% endfor %}
-
-reload_services:
-  cmd.wait:
-    - name: systemctl daemon-reload
-    - watch:
-      - file: install_appliance.service
-      - file: install_prepare-appliance.service
-      - file: install_prepare-ecs.service
-    - order: last
