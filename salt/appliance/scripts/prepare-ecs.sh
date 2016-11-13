@@ -86,7 +86,7 @@ fi
 cd /etc/appliance/ecs
 update_status "Appliance Update" "Pulling new images"
 docker-compose pull --ignore-pull-failures
-if test "$target" = "devserver" -o test "$target" != "$last_running"; then
+if test "$last_running" = "devserver" -o test "$target" != "$last_running"; then
     update_status "Appliance Update" "Building ecs $target (current= $last_running)"
     if ! docker-compose build --pull; then
         update_status "Appliance Error" "build $target failed, restarting old build $last_running"
