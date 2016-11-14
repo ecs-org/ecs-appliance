@@ -84,8 +84,10 @@ else
 fi
 
 cd /etc/appliance/ecs
-update_status "Appliance Update" "Pulling new images"
-docker-compose pull --ignore-pull-failures redis memcached tomcat ubuntu
+update_status "Appliance Update" "Pulling base images"
+for n in redis:3 memcached tomcat:8 ubuntu:xenial; do
+    docker pull $n
+done
 if test "$last_running" = "devserver" -o "$target" != "$last_running"; then
     update_status "Appliance Update" "Building ecs $target (current= $last_running)"
     if ! docker-compose build mocca pdfas ecs.web; then
