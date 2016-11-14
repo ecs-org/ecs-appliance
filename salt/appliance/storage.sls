@@ -69,8 +69,8 @@ directories:
       - ecs-storage-vault
       - postgresql
     options:
-      - group: app
-      - user: app
+      - group: 1000
+      - user: 1000
       - dir_mode: 775
       - file_mode: 664
   {% if not salt['pillar.get']("appliance:storage:ignore:data",false) %}

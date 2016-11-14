@@ -1,7 +1,9 @@
 #!/bin/sh
 
-mocca_config=/app/mocca/mocca-configuration.xml
-sed "s/HOSTNAME/$HOSTNAME/g" ${mocca_config}.tmpl > ${mocca_config}
+set -e
+config=/app/mocca/bkuonline-configuration.xml
+sed "s/HOSTNAME/$HOSTNAME/g" ${config}.tmpl > ${config}
+
 tobeadded_dir="/usr/local/tomcat/webapps/bkuonline/WEB-INF/classes/at/gv/egiz/bku/certs/certStore/toBeAdded"
 truststore_dir="/usr/local/tomcat/webapps/bkuonline/WEB-INF/classes/at/gv/egiz/bku/certs/trustStore"
 

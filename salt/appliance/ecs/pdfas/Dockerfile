@@ -14,5 +14,7 @@ RUN echo "d6a413702b4a73d056c2d8e61d815ed99b2743996998bebed86e4c4c5b64e665 */app
 RUN unzip /app/defaultConfig.zip -d /app/pdf-as-web; rm /app/defaultConfig.zip
 
 COPY pdf-as-web.properties /app/pdf-as-web/pdf-as-web.properties.tmpl
+COPY pdfas-catalina.sh /app/pdf-as-web/pdfas-catalina.sh
+RUN  chmod +x /app/pdf-as-web/pdfas-catalina.sh
 
-CMD ["/bin/sh", "-c", "sed \"s/HOSTNAME/$HOSTNAME/g\" /app/pdf-as-web/pdf-as-web.properties.tmpl > /app/pdf-as-web/pdf-as-web.properties; exec /usr/local/tomcat/bin/catalina.sh run"]
+CMD ["/app/pdf-as-web/pdfas-catalina.sh", "run"]

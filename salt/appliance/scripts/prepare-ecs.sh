@@ -78,17 +78,17 @@ else
     if test "$last_running" = "invalid"; then
         need_migration=true
     else
-        need_migration=$(gosu app git diff --name-status $last_running..origin/$target |
+        need_migration=$(gosu app git diff --name-status $last_running...$target |
             grep -q "^A.*/migrations/" && echo true || echo false)
     fi
 fi
 
 cd /etc/appliance/ecs
 update_status "Appliance Update" "Pulling new images"
-docker-compose pull --ignore-pull-failures
+docker-compose pull --ignore-pull-failures redis memcached tomcat ubuntu
 if test "$last_running" = "devserver" -o "$target" != "$last_running"; then
     update_status "Appliance Update" "Building ecs $target (current= $last_running)"
-    if ! docker-compose build --pull; then
+    if ! docker-compose build mocca pdfas ecs.web; then
         update_status "Appliance Error" "build $target failed, restarting old build $last_running"
         exit 0
     fi

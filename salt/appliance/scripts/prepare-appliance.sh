@@ -123,12 +123,13 @@ if is_truestr "${APPLIANCE_SSL_LETSENCRYPT_ENABLED:-true}"; then
     gosu app dehydrated -c
     if test "$?" -eq 0; then
         use_snakeoil=false
+        echo "Information: letsencrypt was successful, using letsencrypt certificate"
     else
         echo "Warning: letsencrypt client (dehydrated) returned an error"
     fi
 fi
 if $use_snakeoil; then
-    echo "Warning: letsencrypt disabled, copy snakeoil.* to appliance/server*"
+    echo "Warning: couldnt setup server certificate, copy snakeoil.* to appliance/server*"
     cp /etc/appliance/ssl-cert-snakeoil.pem /etc/appliance/server.cert.pem
     cp /etc/appliance/ssl-cert-snakeoil.key /etc/appliance/server.key.pem
     cat /etc/appliance/server.cert.pem /etc/appliance/dhparam.pem > /etc/appliance/server.cert.dhparam.pem
