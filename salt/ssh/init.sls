@@ -21,7 +21,7 @@ openssh-server:
 {% from "ssh/lib.sls" import ssh_keys_update %}
 
 {{ ssh_keys_update('root',
-    salt['pillar.get']('adminkeys_present', False),
-    salt['pillar.get']('adminkeys_absent', False)
+    salt['pillar.get']('ssh_authorized_keys', False),
+    salt['pillar.get']('ssh_deprecated_keys', False)
     )
 }}

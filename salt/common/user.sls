@@ -1,3 +1,5 @@
+{% from "ssh/lib.sls" import ssh_keys_update %}
+
 application_user:
   group.present:
     - name: app
@@ -14,6 +16,13 @@ application_user:
     - mode: 700
     - require:
       - user: application_user
+
+
+{{ ssh_keys_update('app',
+    salt['pillar.get']('ssh_authorized_keys', False),
+    salt['pillar.get']('ssh_deprecated_keys', False)
+    )
+}}
 
 {% for n in ['ecs', 'appliance'] %}
 ensure_app_user_on_{{ n }}:

@@ -1,6 +1,9 @@
 ssh_authorized_keys:
   # you can put your ssh keys here, this is also used by cloud-init
   # - "ssh-rsa and some long glibberish somebody@somewhere"
+ssh_deprecated_keys:
+  # you can copy deprecated keys here,
+  # state.highstate will remove these old keys from users 
 appliance:
   # standby: true # optional, if set appliance will not activate
   domain: localhost
