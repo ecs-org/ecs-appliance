@@ -384,7 +384,7 @@ after-{{ item }}-{{ data['destination'] }}-relocate:
     - name: {{ data['exec_after'] }}
     - require:
       - cmd: {{ item }}-{{ data['destination'] }}-relocate
-    - unless: test -L {{ item }}
+    # TODO disabled: rewrite storage with only what we need ? - unless: test -L {{ item }}
     - onlyif: test -d {{ data['destination'] }}
     {% endif %}
 
