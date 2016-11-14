@@ -34,3 +34,14 @@ nginx:
       - file: /etc/appliance/ssl-cert-snakeoil.key
       - file: /etc/appliance/ssl-cert-snakeoil.pem
       - file: /etc/appliance/snakeoil.identity
+
+/var/www/html/503.html:
+  file.managed:
+    - source: /etc/appliance/app-template.html
+    - template: jinja
+    - defaults:
+        title: "System Information"
+        text: "Empty Appliance"
+    - replace: false
+    - require:
+      - file: /etc/appliance/app-template.html

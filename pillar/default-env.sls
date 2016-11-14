@@ -1,3 +1,6 @@
+ssh_authorized_keys:
+  # you can put your ssh keys here, this is also used by cloud-init
+  # - "ssh-rsa and some long glibberish somebody@somewhere"
 appliance:
   # standby: true # optional, if set appliance will not activate
   domain: localhost
@@ -17,8 +20,6 @@ appliance:
     ignore:
       volatile: true
       data: true
-  authorized_keys: |
-      # put your ssh keys here, this is a text block not a list like cloud-init ssh_authorized_keys
   backup:
     url: ssh://app@localhost/volatile/ecs-backup-test/
     encrypt: |

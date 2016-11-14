@@ -50,7 +50,6 @@ docker-requisites:
       - ca-certificates
       - lxc
       - cgroup-bin
-      - systemd-docker
 
 docker-network:
   network.managed:
