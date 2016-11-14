@@ -15,8 +15,20 @@ application_user:
     - require:
       - user: application_user
 
-{% for i in ".bash_logout", ".bashrc", ".profile" %}
+{% for n in ['ecs', 'appliance'] %}
+ensure_app_user_on_{{ n }}:
+  file.directory:
+    - name: /app/{{ n }}
+    - user: app
+    - group: app
+    - recurse:
+      - user
+      - group
+    - require:
+      - user: application_user
+{% endfor %}
 
+{% for i in ".bash_logout", ".bashrc", ".profile" %}
 application_skeleton_{{ i }}:
   file.copy:
     - name: /app/{{ i }}
@@ -26,5 +38,4 @@ application_skeleton_{{ i }}:
     - unless: test /app/{{ i }} -nt /etc/skel/{{ i }}
     - require:
       - user: application_user
-
 {% endfor %}
