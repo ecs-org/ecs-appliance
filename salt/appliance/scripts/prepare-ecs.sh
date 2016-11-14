@@ -19,8 +19,8 @@ update_exit()
 }
 
 target="invalid"
-ECS_GIT_BRANCH=${ECS_GIT_BRANCH:-master}
-ECS_GIT_SOURCE=${ECS_GIT_SOURCE:-https://github.com/ethikkom/ecs.git}
+ECS_GIT_BRANCH=${ECS_GIT_BRANCH:-deployment_fixes}
+ECS_GIT_SOURCE=${ECS_GIT_SOURCE:-ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs.git}
 ECS_DATABASE=ecs
 
 if $update; then

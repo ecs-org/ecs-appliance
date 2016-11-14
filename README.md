@@ -62,6 +62,8 @@ but be aware that the appliance takes over the following services:
 ### make a new environment config file
 + make a new env.yml: `generate-new-env.sh testecs /app/env.yml`
 + edit your settings in /app/env.yml
++ create a empty ecs database: `sudo -u postgres createdb ecs -T template0  -l de_DE.utf8`
++ copy key for Repository
 
 ## start appliance
 + start appliance: `sudo systemctl start appliance`
