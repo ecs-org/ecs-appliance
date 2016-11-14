@@ -29,13 +29,19 @@ base_packages:
   pkg.installed:
     - pkgs:
       - ca-certificates
-      - acpi
-      - git
-      - wget
+      - acpid
+      - haveged
       - curl
+      - wget
+      - rsync
+      - gosu
+      - git
+
+manual_intervention:
+  pkg.installed:
+    - pkgs:
       - tmux
       - socat
-      - haveged
 
 system_timezone:
   timezone.system:
