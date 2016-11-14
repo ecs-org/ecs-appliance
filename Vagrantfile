@@ -21,7 +21,7 @@ Vagrant.configure(2) do |config|
     config.ssh.forward_agent = true
     config.vm.box = "xenial"
     config.vm.define "ecs-builder"
-    config.vm.synced_folder ".", "/app/appliance", type: "rsync", create: true, rsync__exclude: "", rsync__auto: false
+    config.vm.synced_folder ".", "/app/appliance", type: "rsync", create: true, rsync__exclude: "", rsync__auto: false, rsync__args: ["--verbose", "--archive", "--delete", "-z", "--links"]
 
     if Vagrant.has_plugin?("vagrant-proxyconf")
         if "#{ENV['http_proxy']}" != ""
