@@ -78,13 +78,13 @@ directories:
   {% endif %}
 relocate:
   /etc/appliance:
-    destination: /data/
+    destination: /data
   /app/ecs-ca:
-    destination: /data/
+    destination: /data
   /app/ecs-storage-vault:
-    destination: /data/
+    destination: /data
   /var/lib/postgresql:
-    destination: /data/
+    destination: /data
     exec_before: systemctl stop postgresql
     exec_after: systemctl start postgresql
 {% endload %}
