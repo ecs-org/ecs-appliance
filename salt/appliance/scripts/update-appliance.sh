@@ -10,7 +10,7 @@ is_cleanrepo(){
         return 1
     fi
     if ! git -C $repo diff-index --cached --quiet HEAD --ignore-submodules --; then
-        echo "Error: abort, you have cached/staged changes"
+        echo "Error: abort, you have cached and or staged changes"
         git -C $repo --no-pager diff-index --cached --name-status -r --ignore-submodules HEAD --
         return 1
     fi
@@ -46,7 +46,7 @@ if is_cleanrepo; then
     gosu app git checkout -f $APPLIANCE_GIT_BRANCH
     gosu app git reset --hard origin/$APPLIANCE_GIT_BRANCH
 else
-    appliance_exit "Appliance Error" "Error: /app/appliance not clean, can not update"
+    appliance_exit "Appliance Error" "Error: appliance directory not clean, can not update"
 fi
 
 salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
