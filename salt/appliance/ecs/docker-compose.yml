@@ -10,6 +10,8 @@ services:
     image: ecs/ecs
     volumes:
       - /data/ecs-storage-vault:/app/ecs-storage-vault
+      - /data/ecs-ca:/app/ecs-ca
+      - /volatile/ecs-cache:/app/ecs-cache
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
       - ECS_VAULT_ENCRYPT=${ECS_VAULT_ENCRYPT}
@@ -24,28 +26,12 @@ services:
     network_mode: "bridge"
     command: web
 
-  ecs.smtpd:
-    image: ecs/ecs
-    volumes:
-      - /data/ecs-storage-vault:/app/ecs-storage-vault
-    environment:
-      - ECS_SETTINGS=${ECS_SETTINGS}
-      - ECS_VAULT_ENCRYPT=${ECS_VAULT_ENCRYPT}
-      - ECS_VAULT_SIGN=${ECS_VAULT_SIGN}
-    env_file:
-      - service_urls.env
-    ports:
-      - "127.0.0.1:8025:8025"
-    links:
-      - redis
-      - memcached
-    network_mode: "bridge"
-    command: smtpd
-
   ecs.worker:
     image: ecs/ecs
     volumes:
       - /data/ecs-storage-vault:/app/ecs-storage-vault
+      - /data/ecs-ca:/app/ecs-ca
+      - /volatile/ecs-cache:/app/ecs-cache
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
       - ECS_VAULT_ENCRYPT=${ECS_VAULT_ENCRYPT}
@@ -58,12 +44,24 @@ services:
     network_mode: "bridge"
     command: worker
 
+  ecs.smtpd:
+    image: ecs/ecs
+    environment:
+      - ECS_SETTINGS=${ECS_SETTINGS}
+    env_file:
+      - service_urls.env
+    ports:
+      - "127.0.0.1:8025:8025"
+    links:
+      - redis
+      - memcached
+    network_mode: "bridge"
+    command: smtpd
+
   ecs.beat:
     image: ecs/ecs
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
-      - ECS_VAULT_ENCRYPT=${ECS_VAULT_ENCRYPT}
-      - ECS_VAULT_SIGN=${ECS_VAULT_SIGN}
     env_file:
       - service_urls.env
     links:
