@@ -108,7 +108,7 @@ if $need_migration; then
         appliance_exit "Appliance Error" "Could not pgdump database $ECS_DATABASE before starting migration"
     fi
     appliance_status "Appliance Update" "Migrating ecs database"
-    docker-compose run --no-deps --name ecs.migration ecs.web migrate
+    docker-compose run --no-deps --rm --name ecs.migration ecs.web migrate
     err=$?
     if test $err -ne 0; then
         appliance_exit "Appliance Error" "Migration Error"
