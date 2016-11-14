@@ -19,8 +19,8 @@ update_exit()
 }
 
 target="invalid"
-ECS_GIT_BRANCH=${ECS_GIT_BRANCH:-deployment_fixes}
-ECS_GIT_SOURCE=${ECS_GIT_SOURCE:-ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs.git}
+ECS_GIT_BRANCH="${ECS_GIT_BRANCH:-deployment_fixes}"
+ECS_GIT_SOURCE="${ECS_GIT_SOURCE:-ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs.git}"
 ECS_DATABASE=ecs
 
 if $update; then
@@ -108,7 +108,7 @@ if $need_migration; then
         appliance_exit "Appliance Error" "Could not pgdump database $ECS_DATABASE before starting migration"
     fi
     appliance_status "Appliance Update" "Migrating ecs database"
-    docker-compose run ecs.web --name ecs.migration --no-deps migrate
+    docker-compose run --no-deps --name ecs.migration ecs.web migrate
     err=$?
     if test $err -ne 0; then
         appliance_exit "Appliance Error" "Migration Error"
