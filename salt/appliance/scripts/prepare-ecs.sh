@@ -75,15 +75,17 @@ else
     last_running="invalid"
 fi
 
-if test $target = "devserver"; then
-    need_migration=false
-else
+need_migration=false
+if test $target != "devserver"; then
     if test "$last_running" = "invalid"; then
         need_migration=true
     else
         need_migration=$(gosu app git diff --name-status $last_running...$target |
             grep -q "^A.*/migrations/" && echo true || echo false)
     fi
+    # hard update source
+    gosu app git checkout -f $ECS_GIT_BRANCH
+    gosu app git reset --hard $target
 fi
 
 
