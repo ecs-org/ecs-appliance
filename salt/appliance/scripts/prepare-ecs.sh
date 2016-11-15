@@ -3,19 +3,19 @@
 . /usr/local/etc/appliance.include
 . /usr/local/etc/env.include
 
-if test "$1" = "--update"; then update=true; shift; else update=false; fi
+if test "$1" = "--build-only"; then build_only=true; shift; else build_only=false; fi
 
-update_status()
+ecs_status()
 {
-    if $update; then
+    if $build_only; then
         echo "INFO: muted appliance status: $1 : $2"
     else
         appliance_status "$1" "$2"
     fi
 }
-update_exit()
+ecs_exit()
 {
-    update_status "$1" "$2"; exit 1
+    ecs_status "$1" "$2"; exit 1
 }
 
 target="invalid"
@@ -23,22 +23,23 @@ ECS_GIT_BRANCH="${ECS_GIT_BRANCH:-deployment_fixes}"
 ECS_GIT_SOURCE="${ECS_GIT_SOURCE:-ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs.git}"
 ECS_DATABASE=ecs
 
-if $update; then
-    update_status "Appliance Update" "Starting ecs update build"
+if $build_only; then
+    ecs_status "Appliance Update" "Starting ecs update build"
+    printf "%s" "invalid" > /etc/appliance/last_build_ecs
 fi
 
 # export active yaml into environment
 if test ! -e /app/active-env.yml; then
-    update_exit "Appliance Error" "No /app/active-env.yml, did you run prepare_appliance ?"
+    ecs_exit "Appliance Error" "No /app/active-env.yml, did you run prepare_appliance ?"
 fi
 ENV_YML=/app/active-env.yml update_env_from_userdata ecs,appliance
 if test $? -ne 0; then
-    update_exit "Appliance Error" "Could not activate userdata environment"
+    ecs_exit "Appliance Error" "Could not activate userdata environment"
 fi
 
 # check if standby is true
 if is_truestr "$APPLIANCE_STANDBY"; then
-    update_exit "Appliance Error" "Appliance is in standby, update aborted"
+    ecs_exit "Appliance Error" "Appliance is in standby, update aborted"
 fi
 
 # get target commit hash
@@ -53,6 +54,8 @@ if test ! -e /app/ecs/ecs/settings.py; then
     gosu app git clone --branch $ECS_GIT_BRANCH $ECS_GIT_SOURCE /app/ecs
 fi
 
+
+# update source, eval need_migration, last_running, target
 cd /app/ecs
 
 # fetch all updates from origin, except if devserver
@@ -83,25 +86,32 @@ else
     fi
 fi
 
+
+# rebuild images
 cd /etc/appliance/ecs
-update_status "Appliance Update" "Pulling base images"
+
+ecs_status "Appliance Update" "Pulling base images"
 for n in redis:3 memcached tomcat:8 ubuntu:xenial; do
     docker pull $n
 done
 if test "$last_running" = "devserver" -o "$target" != "$last_running"; then
-    update_status "Appliance Update" "Building ecs $target (current= $last_running)"
+    ecs_status "Appliance Update" "Building ecs $target (current= $last_running)"
     if ! docker-compose build mocca pdfas ecs.web; then
-        update_status "Appliance Error" "build $target failed, restarting old build $last_running"
+        ecs_status "Appliance Error" "build $target failed, restarting old build $last_running"
         exit 0
     fi
     appliance_status "Appliance Update" "Build complete, starting ecs"
 else
-    update_status "Appliance Update" "Last version = current version = $last_running, skipping build"
+    ecs_status "Appliance Update" "Last version = current version = $last_running, skipping build"
     exit 0
 fi
-docker-compose stop
+if $build_only; then
+    printf "%s" "$target" > /etc/appliance/last_build_ecs
+    exit 0
+fi
 
 if $need_migration; then
+    docker-compose stop
     appliance_status "Appliance Update" "Pgdump ${ECS_DATABASE} database"
     dbdump=/data/ecs-pgdump/${ECS_DATABASE}-migrate.pgdump
     if gosu app pg_dump --encoding="utf-8" --format=custom -Z6 -f ${dbdump}.new -d $ECS_DATABASE; then
