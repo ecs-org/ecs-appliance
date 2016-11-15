@@ -90,6 +90,9 @@ Update Appliance (this includes also update ecs): `sudo update-appliance.sh`
 + follow the appliance log file (including web,beat,worker,smtp,redis,memcached,pdfas,mocca):
     + `sudo journalctl -u appliance -f`
 + look at the last things happened in the journal: `sudo journalctl -xe`
++ follow whole journal: `sudo journalctl -f`
++ follow prepare-appliance: `sudo journalctl -u prepare-appliance -f`
++ follow prepare-ecs: `sudo journalctl -u prepare-ecs`
 
 
 + read container details in yaml `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
@@ -115,8 +118,8 @@ Path | Description
 /salt/common/generate-new-env.yml   | command line utility for env generation
 /salt/appliance/init.sls            | ecs appliance install
 /salt/appliance/appliance.service   | systemd appliance service (starts prepare and docker-compose)
-/salt/appliance/prepare-appliance.sh | script started on ready to run appliance
-/salt/appliance/prepare-ecs.sh      | script startet after prepare_appliance
+/salt/appliance/prepare-appliance.sh | script started before start of appliance.service
+/salt/appliance/prepare-ecs.sh      | script startet after prepare_appliance but before appliance.service
 
 
 ### Environment

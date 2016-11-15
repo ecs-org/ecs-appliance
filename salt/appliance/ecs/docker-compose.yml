@@ -51,7 +51,7 @@ services:
     env_file:
       - service_urls.env
     ports:
-      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:5025:8025"
     links:
       - redis
       - memcached
