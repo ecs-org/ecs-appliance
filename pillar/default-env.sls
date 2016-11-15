@@ -3,7 +3,7 @@ ssh_authorized_keys:
   # - "ssh-rsa and some long glibberish somebody@somewhere"
 ssh_deprecated_keys:
   # you can copy deprecated keys here,
-  # state.highstate will remove these old keys from users 
+  # state.highstate will remove these old keys from users
 appliance:
   # standby: true # optional, if set appliance will not activate
   domain: localhost
@@ -84,6 +84,9 @@ ecs:
       EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
       EMAIL_BACKEND_UNFILTERED = 'django.core.mail.backends.console.EmailBackend'
       EMAIL_UNFILTERED_DOMAINS = () # = ('example.com', 'shoddy.technology')
+
+      SMTPD_CONFIG['listen_addr'] = ('0.0.0.0', 8025)
+      SMTPD_CONFIG['domain'] = DOMAIN
 
       # EMAIL_BACKEND = all emails except EMAIL_BACKEND_UNFILTERED
       # EMAIL_BACKEND_UNFILTERED = only registration/forgot-password/client-cert & UNFILTERED_DOMAINS
