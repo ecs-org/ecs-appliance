@@ -28,6 +28,7 @@ appliance_status () {
     if test "$1" = "--disable"; then
         if test -e $resultfile; then
             rm -f $resultfile
+            sentry_entry "Appliance Running" "Appliance started" "info"
         fi
     else
         echo "INFO: appliance status: $1 : $2"
