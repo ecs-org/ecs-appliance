@@ -8,8 +8,8 @@ sentry_entry () {
         current_appliance=$(git -C /app/appliance rev-parse HEAD)
 
         /usr/local/bin/raven-cli.py \
-            --culprit ${UNITNAME:-shellscript} \
             --dsn ${APPLIANCE_SENTRY_DSN} \
+            --culprit ${UNITNAME:-shellscript} \
             --logger appliance.status \
             --release $current_appliance \
             --site "${APPLIANCE_DOMAIN}"  \
