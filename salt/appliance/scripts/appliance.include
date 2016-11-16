@@ -14,7 +14,7 @@ sentry_entry () {
             --release "$current_appliance" \
             --site "$APPLIANCE_DOMAIN"  \
             --level "${3:-critical}" \
-            --tags "{'group': '$1', 'last_running_appliance': $last_running_appliance, 'last_running_ecs': '$last_running_ecs', 'last_build_ecs': '$last_build_ecs'}" \
+            --tags "{'group': '$1', 'last_running_appliance': '$last_running_appliance', 'last_running_ecs': '$last_running_ecs', 'last_build_ecs': '$last_build_ecs'}" \
             "$2"
     fi
 }
