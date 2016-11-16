@@ -58,21 +58,19 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--version', action='version', version=get_version())
-
-    parser.add_argument('message', nargs='+')
-    parser.add_argument('--dsn', nargs=1, help="SENTRY_DSN")
-
     parser.add_argument('--culprit', default='raven.scripts.runner')
     parser.add_argument('--logger', default='raven.test')
     parser.add_argument('--release', default='')
     parser.add_argument('--site', default='')
     parser.add_argument('--level', default='info', choices=logging_choices)
-    parser.add_argument('--tags', action=JsonAction, nargs='?')
-    parser.add_argument('--request', action=JsonAction, nargs='?', default=
+    parser.add_argument('--tags', action=JsonAction)
+    parser.add_argument('--request', action=JsonAction, default=
         {
             'method': 'GET',
             'url': 'http://example.com',
         })
+    parser.add_argument('--dsn', required=True)
+    parser.add_argument('message', nargs='+')
 
     args = parser.parse_args()
     client = Client(args.dsn, include_paths=['raven'],
