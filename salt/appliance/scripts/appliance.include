@@ -1,5 +1,24 @@
 #!/bin/bash
 
+sentry_entry () {
+    if test -n "$APPLIANCE_SENTRY_DSN"; then
+        last_running_ecs=$(cat /etc/appliance/last_running_ecs || echo "invalid")
+        last_build_ecs=$(cat /etc/appliance/last_build_ecs || echo "invalid")
+        last_running_appliance=$(/etc/appliance/last_running_appliance || echo "invalid")
+        current_appliance=$(git -C /app/appliance rev-parse HEAD)
+
+        /usr/local/bin/raven-cli.py \
+            --culprit ${UNITNAME:-shellscript} \
+            --dsn ${APPLIANCE_SENTRY_DSN} \
+            --logger appliance.status \
+            --release $current_appliance \
+            --site "${APPLIANCE_DOMAIN}"  \
+            --level ${3:-critical} \
+            --tags "{'group': '$1', 'last_running_appliance': $last_running_appliance, 'last_running_ecs': '$last_running_ecs', 'last_build_ecs': '$last_build_ecs'}" \
+            "$2"
+    fi
+}
+
 appliance_status () {
     # call(Title, Text)
     # or call("--disable")
@@ -30,11 +49,12 @@ appliance_status_starting () {
 appliance_exit()
 {
     appliance_status "$1" "$2"
+    sentry_entry "$1" "$2" "$3"
     exit 1
 }
 
 appliance_exit_standby () {
-    appliance_exit "Appliance Standby" "Appliance is in standby"
+    appliance_exit "Appliance Standby" "Appliance is in standby" "warning"
 }
 
 is_truestr () {
