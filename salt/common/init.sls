@@ -1,3 +1,5 @@
+{% from "python/lib.sls" import pip3_install %}
+
 include:
   - .user
   - python
@@ -73,12 +75,19 @@ python3-yaml:
     - require:
       - sls: python
 
-/usr/local/bin/flatten_yaml.py:
-  file.managed:
-    - source: salt://common/flatten_yaml.py
-    - mode: "0755"
+python3-requests:
+  pkg.installed:
     - require:
-      - pkg: python3-yaml
+      - sls: python
+
+{{ pip3_install('raven') }}
+
+{% for n in ['flatten_yaml.py', 'raven-cli.py'] %}
+/usr/local/bin/{{ n }}:
+  file.managed:
+    - source: salt://common/{{ n }}
+    - mode: "0755"
+{% endfor %}
 
 /usr/local/etc/env.include:
   file.managed:

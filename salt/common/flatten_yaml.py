@@ -8,24 +8,23 @@ from shlex import quote
 try:
     import yaml
 except ImportError as e:
-    print('ERROR: fatal, could not import: {0}'.format(e))
+    print('ERROR: fatal, could not import yaml: {0}, try "apt install python3-yaml"'.format(e))
     sys.exit(1)
 
 
 def usage():
     print('usage: {0} '.format(sys.argv[0])+
-        '''(key[,key]*|.) [prefix] [postfix] < data.yml
+        '''(key[,key]*|.) [prefix [postfix]] < data.yml
 
-reads yaml from stdin,
-filter yaml using subtrees of root (seperated by ",") or "." for all,
-flatten (combine name space with "_") & upper case key names,
-convert lists to names using key_name_0, and key_name_len as maxindex,
-strip and shlex.quote value if value is a string,
-if value is bool, convert to repr(value).lower(),
+read yaml from stdin, filter,
+flatten (combine name space with "_") & upper case key names
 output sorted keys to stdout using
-{prefix}{KEY_NAME}='{shlex quoted value}'{postfix}
+{prefix}{KEY_NAME}={value}{postfix}
 
-program will exit with code 1 on error (empty parameter, missing library)
++ strings are modified with strip and shlex.quote
++ lists are converted to names using key_name_0, key_name_len as maxindex
++ bools are converted to repr(value).lower()
++ None is converted to an empty string
 
   ''')
     sys.exit(1)

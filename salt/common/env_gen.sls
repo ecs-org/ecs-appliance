@@ -1,8 +1,14 @@
+include:
+  - qrcode
+
 env_gen_pkgs:
   pkg.installed:
     - pkgs:
       - gnupg
       - openssl
+      - enscript
+      - ghostscript
+      - pdftk
 
 {{ salt['pillar.get']('targetdir') }}/env.yml:
   file.managed:
@@ -13,3 +19,7 @@ env_gen_pkgs:
     - makedirs: true
     - defaults:
         domain: {{ salt['pillar.get']('domain') }}
+    - require:
+      - sls: qrcode
+      - pkg: env_gen_pkgs
+ 
