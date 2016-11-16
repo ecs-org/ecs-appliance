@@ -15,7 +15,12 @@ ecs_status()
 }
 ecs_exit()
 {
-    ecs_status "$1" "$2"; exit 1
+    if $build_only; then
+        echo "INFO: muted appliance status: $1 : $2"
+        exit 1
+    else
+        appliance_exit "$1" "$2"
+    fi
 }
 
 target="invalid"
