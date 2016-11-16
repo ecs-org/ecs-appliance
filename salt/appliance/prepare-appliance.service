@@ -10,6 +10,7 @@ Before=appliance.service prepare-ecs.service
 
 [Service]
 Type=oneshot
+Environment="UNITNAME=%n"
 ExecStart=/usr/local/sbin/prepare-appliance.sh
 ExecReload=/bin/true
 RemainAfterExit=on

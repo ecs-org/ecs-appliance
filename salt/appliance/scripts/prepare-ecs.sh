@@ -101,7 +101,6 @@ if test "$last_running" = "devserver" -o "$target" != "$last_running"; then
     if ! docker-compose build mocca pdfas ecs.web; then
         if "$last_running" = "invalid"; then
             ecs_exit "Appliance Error" "build $target failed and no old build found, standby"
-            exit 1
         fi
         ecs_status "Appliance Error" "build $target failed, restarting old build $last_running"
         exit 0

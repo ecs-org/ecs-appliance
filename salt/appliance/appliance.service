@@ -5,6 +5,8 @@ Requires=prepare-appliance.service prepare-ecs.service
 After=prepare-appliance.service prepare-ecs.service
 
 [Service]
+Type=simple
+Environment="UNITNAME=%n"
 ExecStart=/bin/bash -c ". /usr/local/etc/env.include; ENV_YML=/app/active-env.yml update_env_from_userdata ecs,appliance; cd /etc/appliance/ecs; exec -a docker-compose /usr/local/bin/docker-compose up --abort-on-container-exit"
 ExecStartPost=/bin/bash -c "sleep 30; . /usr/local/etc/env.include; ENV_YML=/app/active-env.yml update_env_from_userdata ecs,appliance; . /usr/local/etc/appliance.include; appliance_status --disable"
 ExecStop=/usr/local/bin/docker-compose -f /etc/appliance/ecs/docker-compose.yml stop

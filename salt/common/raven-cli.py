@@ -12,7 +12,6 @@ from raven import Client, get_version
 from raven.transport.requests import RequestsHTTPTransport
 from raven.utils.json import json
 
-logging_choices= ('critical', 'error', 'warning', 'info', 'debug')
 
 class JsonAction(argparse.Action):
     def __init__(self, option_strings, dest, **kwargs):
@@ -25,6 +24,7 @@ class JsonAction(argparse.Action):
                 option_strings, values), file=sys.stderr)
             raise
         setattr(namespace, self.dest, values)
+
 
 def get_uid():
     try:
@@ -53,6 +53,7 @@ def send_message(client, message, options):
 
 
 def main():
+    logging_choices= ('critical', 'error', 'warning', 'info', 'debug')
     root = logging.getLogger('sentry.errors')
     root.setLevel(logging.DEBUG)
 
@@ -69,7 +70,8 @@ def main():
     parser.add_argument('message', nargs='+')
 
     args = parser.parse_args()
-    client = Client(args.dsn, include_paths=['raven'],
+    client = Client(args.dsn,
+        include_paths=['raven'],
         transport=RequestsHTTPTransport,
         release=args.release,
         site=args.site,
@@ -80,7 +82,7 @@ def main():
         sys.exit(1)
 
     if not client.is_enabled():
-        print('Error: Client reports as being disabled!', file=sys.stderr)
+        print('Error: Client reports are disabled!', file=sys.stderr)
         sys.exit(1)
 
     success, eventid = send_message(client, " ".join (args.message), args.__dict__)
@@ -93,4 +95,4 @@ def main():
 
 if __name__ == '__main__':
     sys.argv[0] = re.sub(r'(-script\.pyw?|\.exe)?$', '', sys.argv[0])
-    sys.exit(main())
+    main()
