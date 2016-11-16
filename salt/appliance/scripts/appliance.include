@@ -14,11 +14,12 @@ sentry_entry () {
             --release "$current_appliance" \
             --site "$APPLIANCE_DOMAIN"  \
             --level "${3:-critical}" \
-            --tags "{'group': '$1', 'last_running_appliance': '$last_running_appliance', 'last_running_ecs': '$last_running_ecs', 'last_build_ecs': '$last_build_ecs'}" \
+            --tags "{\"group\": \"$1\", \"last_running_appliance\": \"$last_running_appliance\", \"last_running_ecs\": \"$last_running_ecs\", \"last_build_ecs\": \"$last_build_ecs\"}" \
             "$2"
     fi
 }
-
+{"group": "Appliance Standby", "last_running_appliance": "426a26d50f010dda2ac9c10cf5b6c9e02f1c0
+735", "last_running_ecs": "c570b8aa03509855cb8ceb26e8a1067017592415", "last_build_ecs": "invalid"}
 appliance_status () {
     # call(Title, Text)
     # or call("--disable")
