@@ -3,3 +3,4 @@ local: backup
    + assure non empty ecs-files
    + pgdump to /data/pgdump
    + duplicity to thirdparty of /data/* (ecs-files, pgdump and envsettings)
+   + errors to raven

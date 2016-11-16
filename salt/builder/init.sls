@@ -2,7 +2,6 @@ include:
   - common
   - packer
   - libvirt
-  - qrcode
 
 profile_packer:
   file.append:
