@@ -14,10 +14,3 @@ qrcode:
     - source: salt://qrcode/{{ a }}
     - mode: "0755"
 {% endfor %}
-
-pdfgeneration:
-  pkg.installed:
-    - pkgs:
-      - enscript
-      - ghostscript
-      - pdftk

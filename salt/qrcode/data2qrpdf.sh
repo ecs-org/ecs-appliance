@@ -4,12 +4,10 @@ usage() {
     cat <<EOF
 Usage: $0 datafile
 
-takes (compressed) binary data,
-encodes it in base32 and generates one alphanumeric qrcode,
-and put this qrcode inside a pdf,
-or if to large for one qrcode generates max 100 x Version 29 alphanumeric qrcodes
-and arranges them in a 2x2 matrix per page pdf
-writes it to \${datafile}.pdf
+take (compressed) binary data,
+encode base32 and generate one or more alphanumeric qrcode,
+and arrange these in a 2x2 matrix per page pdf
+output to \${datafile}.pdf
 
 Limits:
  * Single QRCode:
