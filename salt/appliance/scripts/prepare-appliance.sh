@@ -108,25 +108,29 @@ if $recreate_dhparam; then
 fi
 # certificate setup
 use_snakeoil=true
+domains_file=/etc/appliance/dehydrated/domains.txt
 if test "${APPLIANCE_SSL_KEY}" != "" -a "${APPLIANCE_SSL_CERT}" != ""; then
     echo "Information: using ssl key,cert supplied from environment"
     printf "%s" "${APPLIANCE_SSL_KEY}" > /etc/appliance/server.key.pem
     printf "%s" "${APPLIANCE_SSL_CERT}" > /etc/appliance/server.cert.pem
     cat /etc/appliance/server.cert.pem /etc/appliance/dhparam.pem > /etc/appliance/server.cert.dhparam.pem
     use_snakeoil=false
-fi
-domains_file=/etc/appliance/dehydrated/domains.txt
-if test -e $domains_file; then rm $domains_file; fi
-if is_truestr "${APPLIANCE_SSL_LETSENCRYPT_ENABLED:-true}"; then
-    echo "Information: generate certificates using letsencrypt (dehydrated client)"
-    printf "%s" "$APPLIANCE_DOMAIN" > $domains_file
-    gosu app dehydrated -c
-    if test "$?" -eq 0; then
-        use_snakeoil=false
-        echo "Information: letsencrypt was successful, using letsencrypt certificate"
-    else
-        echo "Warning: letsencrypt client (dehydrated) returned an error"
+else
+    if is_truestr "${APPLIANCE_SSL_LETSENCRYPT_ENABLED:-true}"; then
+        echo "Information: generate certificates using letsencrypt (dehydrated client)"
+        printf "%s" "$APPLIANCE_DOMAIN" > $domains_file
+        gosu app dehydrated -c
+        if test "$?" -eq 0; then
+            use_snakeoil=false
+            echo "Information: letsencrypt was successful, using letsencrypt certificate"
+        else
+            echo "Warning: letsencrypt client (dehydrated) returned an error"
+        fi
     fi
+fi
+if is_falsestr "${APPLIANCE_SSL_LETSENCRYPT_ENABLED:-true}"; then
+    # delete domains_file to keep cron from retrying to refresh certs
+    if test -e $domains_file; then rm $domains_file; fi
 fi
 if $use_snakeoil; then
     echo "Warning: couldnt setup server certificate, copy snakeoil.* to appliance/server*"

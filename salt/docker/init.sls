@@ -90,7 +90,5 @@ docker:
       - file: /etc/default/docker
       - file: docker-service
 
-docker-compose:
-  pip.installed:
-    - require:
-      - sls: python
+{% from "python/lib.sls" import pip2_install %}
+pip2_install('docker-compose')

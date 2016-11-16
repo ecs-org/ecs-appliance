@@ -29,7 +29,7 @@ nginx:
 /etc/appliance/server.identity:
   file.copy:
     - source: /etc/appliance/snakeoil.identity
-    - force: true
+    - replace: false
     - require:
       - file: /etc/appliance/ssl-cert-snakeoil.key
       - file: /etc/appliance/ssl-cert-snakeoil.pem
@@ -41,7 +41,7 @@ nginx:
     - template: jinja
     - defaults:
         title: "System Information"
-        text: "Empty Appliance"
+        text: "uninitialized"
     - replace: false
     - require:
       - file: /etc/appliance/app-template.html
