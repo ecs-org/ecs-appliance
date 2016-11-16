@@ -17,7 +17,7 @@ logging_choices= ('critical', 'error', 'warning', 'info', 'debug')
 class JsonAction(argparse.Action):
     def __init__(self, option_strings, dest, **kwargs):
         super(JsonAction, self).__init__(option_strings, dest, **kwargs)
-    def __call__(self, parser, namespace, values, opts_str):
+    def __call__(self, parser, namespace, values, opt_str):
         try:
             values = json.loads(values)
         except ValueError:
