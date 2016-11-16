@@ -38,12 +38,8 @@ base_packages:
       - rsync
       - gosu
       - git
-
-manual_intervention:
-  pkg.installed:
-    - pkgs:
-      - tmux
       - socat
+      - tmux
 
 system_timezone:
   timezone.system:
@@ -70,13 +66,11 @@ set_locale:
     - watch:
       - file: /etc/default/locale
 
-python3-yaml:
+python3-common-packages:
   pkg.installed:
-    - require:
-      - sls: python
-
-python3-requests:
-  pkg.installed:
+    - pkgs:
+      - python3-yaml
+      - python3-requests
     - require:
       - sls: python
 
