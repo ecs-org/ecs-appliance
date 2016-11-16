@@ -64,8 +64,7 @@ def main():
     parser.add_argument('--site', default='')
     parser.add_argument('--level', default='info', choices=logging_choices)
     parser.add_argument('--tags', action=JsonAction)
-    parser.add_argument('--request', action=JsonAction,
-        default={'method': 'GET', 'url': 'http://example.com', })
+    parser.add_argument('--request', action=JsonAction, default={})
     parser.add_argument('--dsn', required=True)
     parser.add_argument('message', nargs='+')
 
