@@ -91,4 +91,4 @@ docker:
       - file: docker-service
 
 {% from "python/lib.sls" import pip2_install %}
-pip2_install('docker-compose')
+{{ pip2_install('docker-compose') }}
