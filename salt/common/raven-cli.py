@@ -23,7 +23,7 @@ class JsonAction(argparse.Action):
         except ValueError:
             print('Invalid JSON was used for option {}.  Received: {}'.format(
                 option_strings, values), file=sys.stderr)
-            sys.exit(1)
+            raise
         setattr(namespace, self.dest, values)
 
 def get_uid():
@@ -64,11 +64,8 @@ def main():
     parser.add_argument('--site', default='')
     parser.add_argument('--level', default='info', choices=logging_choices)
     parser.add_argument('--tags', action=JsonAction)
-    parser.add_argument('--request', action=JsonAction, default=
-        {
-            'method': 'GET',
-            'url': 'http://example.com',
-        })
+    parser.add_argument('--request', action=JsonAction,
+        default={'method': 'GET', 'url': 'http://example.com', })
     parser.add_argument('--dsn', required=True)
     parser.add_argument('message', nargs='+')
 
