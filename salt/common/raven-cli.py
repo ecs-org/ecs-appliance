@@ -17,12 +17,12 @@ logging_choices= ('critical', 'error', 'warning', 'info', 'debug')
 class JsonAction(argparse.Action):
     def __init__(self, option_strings, dest, **kwargs):
         super(JsonAction, self).__init__(option_strings, dest, **kwargs)
-    def __call__(self, parser, namespace, values, opt_str):
+    def __call__(self, parser, namespace, values, option_strings):
         try:
             values = json.loads(values)
         except ValueError:
             print('Invalid JSON was used for option {}.  Received: {}'.format(
-                opt_str, values), file=sys.stderr)
+                option_strings, values), file=sys.stderr)
             sys.exit(1)
         setattr(namespace, self.dest, values)
 
