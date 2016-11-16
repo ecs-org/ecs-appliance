@@ -3,7 +3,7 @@ include:
 
 
 {% macro pip_install(package, version="") %}
-python{{ postfix }}-{{ package }}:
+python{{ version }}-{{ package }}:
   pip.installed:
     - name: {{ package }}
   {% if version %}
