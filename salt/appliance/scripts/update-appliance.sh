@@ -54,4 +54,3 @@ salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
 printf "%s" "$target" > /etc/appliance/last_running_appliance
 
 appliance_status "Appliance Update" "Restarting appliance"
-systemctl restart appliance
