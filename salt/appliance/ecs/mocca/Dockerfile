@@ -1,4 +1,4 @@
-FROM tomcat:8
+FROM tomcat:8-jre8
 MAINTAINER felix@erkinger.at
 
 ENV HOSTNAME localhost

@@ -98,7 +98,7 @@ fi
 cd /etc/appliance/ecs
 
 ecs_status "Appliance Update" "Pulling base images"
-for n in redis:3 memcached tomcat:8 ubuntu:xenial; do
+for n in redis:3 memcached tomcat:8-jre8 ubuntu:xenial; do
     docker pull $n
 done
 if test -e /etc/appliance/rebuild_wanted_ecs -o "$last_running" = "devserver" -o "$target" != "$last_running"; then
