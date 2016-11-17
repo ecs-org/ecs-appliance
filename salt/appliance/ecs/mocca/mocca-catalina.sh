@@ -13,8 +13,9 @@ cp /app/import/server.cert.pem $tobeadded_dir
 cp /app/import/server.cert.pem $truststore_dir
 
 # add cert to standard-keystore
-cp /app/import/server.cert.pem /usr/local/share/ca-certificates/server.crt
 # update-ca-certificates will also update the java keystore (if ca-certificates-java is installed)
-/usr/sbin/update-ca-certificates
+cp /app/import/server.cert.pem /usr/local/share/ca-certificates/server.crt
+chmod 0600 /usr/local/share/ca-certificates/server.crt
+/usr/sbin/update-ca-certificates --fresh --verbose
 
 exec /usr/local/tomcat/bin/catalina.sh "$@"
