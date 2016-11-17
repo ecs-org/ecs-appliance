@@ -82,7 +82,7 @@ if ! $(gosu postgres psql ${ECS_DATABASE} -qtc "\dx" | grep -q pg_stat_statement
     # create pg_stat_statements extension
     gosu postgres psql ${ECS_DATABASE} -c "CREATE extension pg_stat_statements;"
 fi
-# modify app user postgresql password to random string and write to service_urls.env
+# modify app user postgresql password to random string (if not set) and write to service_urls.env
 pgpass=$(HOME=/root openssl rand -hex 8)
 gosu postgres psql -c "ALTER ROLE app WITH ENCRYPTED PASSWORD '"${pgpass}"';"
 sed -ri "s/(postgres:\/\/app:)[^@]+(@[^\/]+\/).+/\1${pgpass}\2${ECS_DATABASE}/" /etc/appliance/ecs/service_urls.env
@@ -118,7 +118,8 @@ if test "${APPLIANCE_SSL_KEY}" != "" -a "${APPLIANCE_SSL_CERT}" != ""; then
 else
     if is_truestr "${APPLIANCE_SSL_LETSENCRYPT_ENABLED:-true}"; then
         echo "Information: generate certificates using letsencrypt (dehydrated client)"
-        printf "%s" "$APPLIANCE_DOMAIN" > $domains_file
+        # we need a SAN (subject alternative name) for java ssl :(
+        printf "%s" "$APPLIANCE_DOMAIN $APPLIANCE_DOMAIN" > $domains_file
         gosu app dehydrated -c
         if test "$?" -eq 0; then
             use_snakeoil=false
