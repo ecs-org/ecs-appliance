@@ -4,6 +4,9 @@ ssh_authorized_keys:
 ssh_deprecated_keys:
   # you can copy deprecated keys here,
   # state.highstate will remove these old keys from users
+meta:
+  #
+  encrypt: Your gpg public key
 appliance:
   # standby: true # optional, if set appliance will not activate
   domain: localhost

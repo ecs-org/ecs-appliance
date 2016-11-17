@@ -7,8 +7,7 @@ sentry_entry () {
         last_running_appliance=$(cat /etc/appliance/last_running_appliance || echo "invalid" 2> /dev/null)
         current_appliance=$(git -C /app/appliance rev-parse HEAD)
 
-        /usr/local/bin/raven-cli.py \
-            --dsn $APPLIANCE_SENTRY_DSN \
+        SENTRY_DSN="$APPLIANCE_SENTRY_DSN" /usr/local/bin/raven-cli.py \
             --culprit ${UNITNAME:-shellscript} \
             --logger appliance.status \
             --release "$current_appliance" \

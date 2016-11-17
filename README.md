@@ -94,9 +94,8 @@ Update Appliance (this includes also update ecs): `sudo update-appliance.sh`
 + follow prepare-appliance: `sudo journalctl -u prepare-appliance -f`
 + follow prepare-ecs: `sudo journalctl -u prepare-ecs`
 
-
 + read container details in yaml `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
-+ look at all appliance http status pages: `git grep "\(noupdate\|appliance\)_\(exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort`
++ look at all appliance http status pages: `git grep "\(ecs\|appliance\)_\(exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort`
 + line and word count appliance:
 
 ```
