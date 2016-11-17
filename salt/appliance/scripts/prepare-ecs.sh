@@ -101,7 +101,8 @@ ecs_status "Appliance Update" "Pulling base images"
 for n in redis:3 memcached tomcat:8 ubuntu:xenial; do
     docker pull $n
 done
-if test "$last_running" = "devserver" -o "$target" != "$last_running"; then
+if test -e /etc/appliance/rebuild_wanted_ecs -o "$last_running" = "devserver" -o "$target" != "$last_running"; then
+    if test -e /etc/appliance/rebuild_wanted_ecs; then rm /etc/appliance/rebuild_wanted_ecs; fi
     ecs_status "Appliance Update" "Building ecs $target (current= $last_running)"
     if ! docker-compose build mocca pdfas ecs.web; then
         if "$last_running" = "invalid"; then

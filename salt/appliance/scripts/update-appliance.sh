@@ -49,6 +49,10 @@ else
     appliance_exit "Appliance Error" "Error: appliance directory not clean, can not update"
 fi
 
+if test "$last_running" != "$target"; then
+    # appliance code has updated, we need a rebuild of ecs container
+    touch /etc/appliance/rebuild_wanted_ecs
+fi
 salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
 # save executed commit
 printf "%s" "$target" > /etc/appliance/last_running_appliance
