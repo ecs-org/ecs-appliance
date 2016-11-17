@@ -149,7 +149,7 @@ def main():
             with codecs.open(sys.stdin, 'r', 'utf-8') as f:
                 args.request= json.loads(f.read())
 
-        success, eventid = send_message(client, " ".join (args.message), args.__dict__)
+        success, eventid = send_message(client, args.message, args.__dict__)
 
 if __name__ == '__main__':
     sys.argv[0] = re.sub(r'(-script\.pyw?|\.exe)?$', '', sys.argv[0])
