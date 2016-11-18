@@ -16,6 +16,6 @@ cp /app/import/server.cert.pem $truststore_dir
 # update-ca-certificates will also update the java keystore (if ca-certificates-java is installed)
 cp /app/import/server.cert.pem /usr/local/share/ca-certificates/server.crt
 chmod 0600 /usr/local/share/ca-certificates/server.crt
-/usr/sbin/update-ca-certificates --fresh --verbose
+/usr/sbin/update-ca-certificates
 
 exec /usr/local/tomcat/bin/catalina.sh "$@"
