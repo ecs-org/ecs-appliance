@@ -12,6 +12,9 @@ mkdir -p $truststore_dir
 cp /app/import/server.cert.pem $tobeadded_dir
 cp /app/import/server.cert.pem $truststore_dir
 
+# fix stal.wsdl
+sed /usr/local/tomcat/webapps/bkuonline/WEB-INF/wsdl/stal.wsdl -r -i -e 's/location="http:\/\/.+\/stal"/location="https:\/\/'$HOSTNAME'\/bkuonline\/stal"/g'
+
 # add cert to standard-keystore
 # update-ca-certificates will also update the java keystore (if ca-certificates-java is installed)
 cp /app/import/server.cert.pem /usr/local/share/ca-certificates/server.crt
