@@ -4,8 +4,8 @@ Description=Appliance Preparation
 PartOf=appliance.service
 ReloadPropagatedFrom=appliance.service
 
-Requires=docker.service postgresql.service stunnel.service nginx.service
-After=network.target docker.service postgresql.service
+Requires=docker.service postgresql.service stunnel.service nginx.service prepare-env.service
+After=network.target docker.service postgresql.service prepare-env.service
 Before=appliance.service prepare-ecs.service
 
 [Service]

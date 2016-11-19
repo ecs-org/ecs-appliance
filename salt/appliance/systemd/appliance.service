@@ -1,8 +1,8 @@
 [Unit]
 Description=Appliance
 
-Requires=prepare-appliance.service prepare-ecs.service
-After=prepare-appliance.service prepare-ecs.service
+Requires=prepare-env.service prepare-appliance.service prepare-ecs.service
+After=prepare-env.service prepare-appliance.service prepare-ecs.service
 
 [Service]
 Type=simple

@@ -59,11 +59,22 @@ but be aware that the appliance takes over the following services:
 
 ## configure appliance
 
-### make a new environment config file
-+ make a new env.yml: `generate-new-env.sh testecs /app/env.yml`
+### development server
++ login in devserver
++ make a development env.yml: `cp /app/appliance/salt/pillar/default-env.sls /app/env.yml`
++ edit your settings in /app/env.yml and change your domainname
+
+### production prepare
++ vagrant up
++ make a new env.yml: `generate-new-env.sh domainname.domain /app/env.yml`
 + edit your settings in /app/env.yml
++ build env into different formats: `build-env.sh /app/env.yml`
++ print out /app/env.yml.pdf
++ save and keep env.yml.tar.gz.gpg
+
+#### on appliance
++ login in empty appliance, copy env to /app/env.yml
 + create a empty ecs database: `sudo -u postgres createdb ecs -T template0  -l de_DE.utf8`
-+ copy key for Repository
 
 ## start appliance
 + start appliance: `sudo systemctl start appliance`
@@ -97,7 +108,7 @@ Update Appliance (this includes also update ecs): `sudo update-appliance.sh`
   + `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
 + look at all appliance http status pages: `git grep "\(ecs\|appliance\)_\(exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort`
 + line and word count appliance:
-  + `wc $(find . -regex ".*\.\(sls\|yml\|sh\|json\|conf\|template\|include\|md\|service\|identity\)")`
+  + `wc $(find . -regex ".*\.\(sls\|yml\|sh\|json\|conf\|template\|include\|service\|identity\)")`
 
 
 ### files
@@ -111,11 +122,12 @@ Path | Description
 /salt/top.sls                   | defines the root of the state tree
 /salt/common/init.sls           | common install
 /salt/common/env.template.yml   | template used to generate a new env.yml
-/salt/common/generate-new-env.yml   | command line utility for env generation
+/salt/common/generate-new-env.sh   | command line utility for env generation
 /salt/appliance/init.sls            | ecs appliance install
-/salt/appliance/appliance.service   | systemd appliance service (starts prepare and docker-compose)
-/salt/appliance/prepare-appliance.sh | script started before start of appliance.service
-/salt/appliance/prepare-ecs.sh      | script startet after prepare_appliance but before appliance.service
+/salt/appliance/prepare-env.sh       | script started first to read environment
+/salt/appliance/prepare-appliance.sh | script started after prepare-env.sh
+/salt/appliance/prepare-ecs.sh      | script startet after prepare-appliance
+/salt/appliance/appliance.service   | systemd appliance service
 
 
 ### Environment

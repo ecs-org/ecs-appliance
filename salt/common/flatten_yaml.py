@@ -2,6 +2,7 @@
 import sys
 import string
 import collections
+import argparse
 
 from shlex import quote
 
@@ -9,24 +10,6 @@ try:
     import yaml
 except ImportError as e:
     print('ERROR: fatal, could not import yaml: {0}, try "apt install python3-yaml"'.format(e))
-    sys.exit(1)
-
-
-def usage():
-    print('usage: {0} '.format(sys.argv[0])+
-        '''(key[,key]*|.) [prefix [postfix]] < data.yml
-
-read yaml from stdin, filter,
-flatten (combine name space with "_") & upper case key names
-output sorted keys to stdout using
-{prefix}{KEY_NAME}={value}{postfix}
-
-+ strings are modified with strip and shlex.quote
-+ lists are converted to names using key_name_0, key_name_len as maxindex
-+ bools are converted to repr(value).lower()
-+ None is converted to an empty string
-
-  ''')
     sys.exit(1)
 
 
@@ -57,35 +40,51 @@ def flatten(d, parent_key='', sep='_'):
 
 
 def main():
-    prefix = postfix = ''
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog='''
+read yaml from FILE or stdin, filter,
+flatten (combine name space with "_") & upper case key names
+output sorted keys to stdout as {prefix}{KEY_NAME}={value}{postfix}
 
-    if len(sys.argv) < 2:
-        usage()
-    if len(sys.argv) >= 3:
-        prefix = sys.argv[2]
-    if len(sys.argv) >= 4:
-        postfix = sys.argv[3]
++ strings are modified with strip and shlex.quote
++ lists are converted to names using key_name_0, key_name_len as maxindex
++ bools are converted to repr(value).lower()
++ None is converted to an empty string
+        ''')
 
-    with sys.stdin as f:
+    parser.add_argument('-m --alt-multiline', action='store_true', default=False,
+        help='''add literal "\\n \\" to each newline of a multiline string''')
+    parser.add_argument('--prefix', default='')
+    parser.add_argument('--postfix', default='')
+    parser.add_argument('--file', nargs='?',
+        type=argparse.FileType('r'), default=sys.stdin,
+        help='file to read or stdin if not defined')
+    parser.add_argument('key',
+        help='comma seperated list of keynames or "." for all')
+
+    args = parser.parse_args()
+
+    with args.FILE as f:
         data = yaml.safe_load(f)
 
-    for i in sys.argv[1].split(','):
+    for i in args.key.split(','):
         keyroot = ''
         if i == '.':
-            result = sorted(flatten(data).items())
+            result = flatten(data).items()
         elif i in data:
-            result = sorted(flatten(data[i]).items())
+            result = flatten(data[i]).items()
             keyroot = i.upper()+ '_'
         else:
             print('Error: key "{}" not found in data'.format(i), file=sys.stderr)
             continue
 
-        for key, value in result:
+        for key, value in sorted(result):
             print('{prefix}{key}={value}{postfix}'.format(
-                prefix=prefix,
+                prefix=args.prefix,
                 key=keyroot+key.upper(),
-                value=value,
-                postfix=postfix))
+                value="\\n\\\n".join(value.split("\n")) if args.alt_multiline else value,
+                postfix=args.postfix))
 
 
 if __name__ == '__main__':

@@ -6,9 +6,6 @@ if test -z "$2"; then
     cat << EOF
 Usage: "$0 domain targetdir [optional parameter for salt-call]"
 
-todo: --developer-default add a user friendly way to get the default-env.yml
-
-
 EOF
     exit 1
 fi
@@ -19,7 +16,9 @@ shift 2
 appuser=$USER
 
 sudo salt-call state.sls common.env_gen \
-    pillar="{\"domain\": \"$domain\", \"targetdir\": \"$targetdir\", \"appuser\": \"$appuser\"}" $@
+    pillar="{\"domain\": \"$domain\", \
+    \"template\": \"salt://appliance/env.template.yml\", \
+    \"targetdir\": \"$targetdir\", \"appuser\": \"$appuser\"}" "$@"
 
 exit 0
 

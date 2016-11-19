@@ -1,0 +1,18 @@
+[Unit]
+Description=Environment Preparation
+
+PartOf=appliance.service
+ReloadPropagatedFrom=appliance.service
+
+After=network.target
+Before=prepare-appliance.service prepare-ecs.service appliance.service
+
+[Service]
+Type=oneshot
+Environment="UNITNAME=%n"
+ExecStart=/usr/local/sbin/prepare-env.sh
+ExecReload=/bin/true
+RemainAfterExit=on
+
+[Install]
+WantedBy=multi-user.target

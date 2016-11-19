@@ -13,7 +13,7 @@ env_gen_pkgs:
 {{ salt['pillar.get']('targetdir') }}/env.yml:
   file.managed:
     - template: jinja
-    - source: salt://common/env.template.yml
+    - source: {{ salt['pillar.get']('template') }}
     - user: {{ salt['pillar.get']('appuser') }}
     - mode: "0600"
     - makedirs: true
@@ -22,4 +22,3 @@ env_gen_pkgs:
     - require:
       - sls: qrcode
       - pkg: env_gen_pkgs
- 
