@@ -11,8 +11,9 @@ Before=appliance.service
 [Service]
 Type=oneshot
 Environment="UNITNAME=%n"
-EnvironmentFile=/app/active-env.env
-ExecStart=/usr/local/sbin/prepare-ecs.sh
+ExecStart=/bin/bash -c '. /usr/local/etc/env.include; \
+    ENV_YML=/app/active-env.yml userdata_to_env ecs,appliance; \
+    exec /usr/local/sbin/prepare-ecs.sh'
 ExecReload=/bin/true
 RemainAfterExit=on
 
