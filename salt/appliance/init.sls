@@ -8,16 +8,18 @@ include:
   - .postgresql
   - .backup
 
-{% for i in ['prepare-appliance.sh', 'prepare-ecs.sh', 'update-appliance.sh', 'update-ecs.sh'] %}
+
+/usr/local/etc/appliance.include:
+  file.managed:
+    - source: salt://appliance/scripts/appliance.include
+
+{% for i in ['prepare-env.sh', 'prepare-appliance.sh',
+  'prepare-ecs.sh', 'update-appliance.sh', 'update-ecs.sh'] %}
 /usr/local/sbin/{{ i }}:
   file.managed:
     - source: salt://appliance/scripts/{{ i }}
     - mode: "0755"
 {% endfor %}
-
-/usr/local/etc/appliance.include:
-  file.managed:
-    - source: salt://appliance/scripts/appliance.include
 
 /etc/appliance/ecs:
   file.recurse:
@@ -30,13 +32,19 @@ include:
         REDIS_URL=redis://ecs_redis_1:6379/0
         MEMCACHED_URL=memcached://ecs_memcached_1:11211
         SMTP_URL=smtp://{{ salt['pillar.get']('docker:ip') }}:25
-        DATABASE_URL=postgres://app:invalidpassword@{{ salt['pillar.get']('docker:ip') }}:5432/ecs
 
-{% for n in ['prepare-appliance.service', 'prepare-ecs.service', 'appliance.service'] %}
+/etc/appliance/ecs/database_url.env:
+  file.managed:
+    - contents: |
+        DATABASE_URL=postgres://app:invalidpassword@{{ salt['pillar.get']('docker:ip') }}:5432/ecs
+    - replace: false
+
+{% for n in ['prepare-env.service', 'prepare-appliance.service',
+  'prepare-ecs.service', 'appliance.service', 'cleanup-appliance.service'] %}
 install_{{ n }}:
   file.managed:
     - name: /etc/systemd/system/{{ n }}
-    - source: salt://appliance/{{ n }}
+    - source: salt://appliance/systemd/{{ n }}
   cmd.wait:
     - name: systemctl enable {{ n }}
     - watch:

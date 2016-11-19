@@ -1,0 +1,21 @@
+[Unit]
+Description=Appliance
+
+Requires=prepare-appliance.service prepare-ecs.service
+After=prepare-appliance.service prepare-ecs.service
+
+[Service]
+Type=simple
+Environment="UNITNAME=%n"
+EnvironmentFile=/app/active-env.env
+WorkingDirectory=/etc/appliance/ecs
+ExecStart=/usr/local/bin/docker-compose up --abort-on-container-exit
+ExecStartPost=/bin/bash -c "sleep 30; . /usr/local/etc/appliance.include; \
+  appliance_status --disable; \
+  printf '%s' $(docker images -q ecs/ecs:latest) > /app/last_running_ecs_image"
+ExecStop=/usr/local/bin/docker-compose -f /etc/appliance/ecs/docker-compose.yml stop
+ExecStopPost=/bin/bash -c " /usr/local/etc/appliance.include; appliance_exit_standby"
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -11,6 +11,7 @@ Before=appliance.service prepare-ecs.service
 [Service]
 Type=oneshot
 Environment="UNITNAME=%n"
+EnvironmentFile=/app/active-env.env
 ExecStart=/usr/local/sbin/prepare-appliance.sh
 ExecReload=/bin/true
 RemainAfterExit=on

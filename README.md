@@ -49,7 +49,7 @@ it is the same procedure as with the developer vm,
 but be aware that the appliance takes over the following services:
 
 + postgresql config, postgres user "app" and database "ecs"
-  + set password of user ecs for tcp connect to postgresql
+  + set password of user app for tcp connect to postgresql
   + does not drop any data, unless told
 + docker and docker container (stops all container at salt-call state.highstate, expects docker0 to be the default docker bridge with default ip values)
 + nginx configuration
@@ -74,36 +74,33 @@ but be aware that the appliance takes over the following services:
 
 Update Appliance (this includes also update ecs): `sudo update-appliance.sh`
 
-### commands of interest
+## other usage
 
-+ update ecs `sudo update-ecs.sh`
 + quick update appliance:
     + `cd ~/appliance; git pull; sudo salt-call state.highstate pillar='{"appliance": "enabled": true}}'`
-
++ update only ecs `sudo update-ecs.sh`
 + enter a running ecs container:
   + `sudo docker exec -it ecs_image[.startcommand]_1 /bin/bash`
   + image = ecs, mocca, pdfas, memcached, redis
   + ecs .startcommand = web, worker, beat, smtpd
 + enter a django shell_plus in a running (eg. ecs_ecs.web_1) container:
   + `sudo docker exec -it ecs_ecs.web_1 /start run ./manage.py shell_plus`
-+ run a new django shell `sudo docker-compose -f /etc/appliance/ecs/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
++ run a new django shell with correct environment but independent of other container
+  +  `sudo docker-compose -f /etc/appliance/ecs/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
 + follow the appliance log file (including web,beat,worker,smtp,redis,memcached,pdfas,mocca):
     + `sudo journalctl -u appliance -f`
-+ look at the last things happened in the journal: `sudo journalctl -xe`
 + follow whole journal: `sudo journalctl -f`
 + follow prepare-appliance: `sudo journalctl -u prepare-appliance -f`
-+ follow prepare-ecs: `sudo journalctl -u prepare-ecs`
++ follow prepare-ecs: `sudo journalctl -u prepare-ecs -f`
 
-+ read container details in yaml `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
++ read details of a container in yaml:
+  + `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
 + look at all appliance http status pages: `git grep "\(ecs\|appliance\)_\(exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort`
 + line and word count appliance:
-
-```
-wc `find . -regex ".*\.\(sls\|yml\|sh\|json\|conf\|template\|include\|md\|service\|identity\)" `
-```
+  + `wc $(find . -regex ".*\.\(sls\|yml\|sh\|json\|conf\|template\|include\|md\|service\|identity\)")`
 
 
-### files of interest
+### files
 
 Path | Description
 --- | ---

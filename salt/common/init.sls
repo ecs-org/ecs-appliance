@@ -66,6 +66,17 @@ set_locale:
     - watch:
       - file: /etc/default/locale
 
+# XXX double the default RateLimitBurst, appliance startup is noisy
+/etc/systemd/journald.conf:
+  file.replace:
+    - pattern: ^RateLimitBurst=.*
+    - repl: RateLimitBurst=2000
+    - append_if_not_found: true
+  cmd.run:
+    - name: systemctl restart systemd-journald
+    - onchanges:
+      - file: /etc/systemd/journald.conf
+
 python3-common-packages:
   pkg.installed:
     - pkgs:

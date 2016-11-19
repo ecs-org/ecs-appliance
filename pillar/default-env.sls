@@ -4,20 +4,21 @@ ssh_authorized_keys:
 ssh_deprecated_keys:
   # you can copy deprecated keys here,
   # state.highstate will remove these old keys from users
-meta:
+builder:
   #
-  encrypt: Your gpg public key
+  receiver:
+    - |
+        # your gpg key here
 appliance:
   # standby: true # optional, if set appliance will not activate
   domain: localhost
   allowed_hosts: localhost testecs
   ssl:
     letsencrypt:
-      # use snakeoil certs, because eg. 443 is behind ssh tunneling
+      # use snakeoil certs, because eg. 80,443 is behind ssh tunneling
       enabled: false
-      additional_hosts: false
-    client_certs_mandatory: true
-    # if true, always need a client certificate
+    # client_certs_mandatory: if true, always need a client certificate
+    client_certs_mandatory: false
     # key: filename-key.pem # optional, if set ssl key for https host will be used
     # cert: filename-cert.pem # optional, if set ssl key for https host will be used
   storage:
@@ -93,10 +94,13 @@ ecs:
       SMTPD_CONFIG['listen_addr'] = ('0.0.0.0', 8025)
       SMTPD_CONFIG['domain'] = DOMAIN
 
-      # EMAIL_BACKEND = all emails except EMAIL_BACKEND_UNFILTERED
-      # EMAIL_BACKEND_UNFILTERED = only registration/forgot-password/client-cert & UNFILTERED_DOMAINS
-      # do not sent email but log to console: django.core.mail.backends.console.EmailBackend
-      # send via EMAIL_* smtp settings: django.core.mail.backends.smtp.EmailBackend
+      # User registration, password reset, send client certificate and mail to
+      # receivers at a domain included in EMAIL_UNFILTERED_DOMAINS will be sent via
+      # EMAIL_BACKEND_UNFILTERED. All other mail will be sent via EMAIL_BACKEND.
+      # Use "django.core.mail.backends.console.EmailBackend"
+      #   to not sent email but log to console.
+      # use "django.core.mail.backends.smtp.EmailBackend"
+      #   to send email via smtp using the configured EMAIL_* settings.
 
   vault_encrypt: |
       -----BEGIN PGP PRIVATE KEY BLOCK-----

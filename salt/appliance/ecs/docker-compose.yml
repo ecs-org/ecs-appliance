@@ -18,6 +18,7 @@ services:
       - ECS_VAULT_SIGN=${ECS_VAULT_SIGN}
     env_file:
       - service_urls.env
+      - database_url.env
     ports:
       - "127.0.0.1:5000:5000"
     links:
@@ -38,6 +39,7 @@ services:
       - ECS_VAULT_SIGN=${ECS_VAULT_SIGN}
     env_file:
       - service_urls.env
+      - database_url.env
     links:
       - redis
       - memcached
@@ -50,6 +52,7 @@ services:
       - ECS_SETTINGS=${ECS_SETTINGS}
     env_file:
       - service_urls.env
+      - database_url.env
     ports:
       - "127.0.0.1:5025:8025"
     links:
@@ -64,6 +67,7 @@ services:
       - ECS_SETTINGS=${ECS_SETTINGS}
     env_file:
       - service_urls.env
+      - database_url.env
     links:
       - redis
       - memcached

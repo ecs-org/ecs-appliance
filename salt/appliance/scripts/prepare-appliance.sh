@@ -1,6 +1,5 @@
 #!/bin/bash
 
-. /usr/local/etc/env.include
 . /usr/local/etc/appliance.include
 
 ECS_DATABASE=${ECS_DATABASE:-ecs}
@@ -9,28 +8,6 @@ appliance_status_starting
 # enable and start nginx (may be disabled by devupate.sh if on the same machine)
 systemctl enable nginx
 systemctl start nginx
-
-# ### environment setup
-# read userdata
-userdata_yaml=$(get_userdata)
-if test $? -ne 0; then
-    appliance_exit "Appliance Error" "$(printf "Error reading userdata: %s" `echo "$userdata_yaml"| grep USERDATA_ERR`)"
-fi
-echo -n "found user-data type: "
-printf '%s' "$userdata_yaml" | grep USERDATA_TYPE
-echo "write userdata to /app/active-env.yml"
-printf "%s" "$userdata_yaml" > /app/active-env.yml
-
-# export active yaml into environment
-ENV_YML=/app/active-env.yml update_env_from_userdata ecs,appliance
-if test $? -ne 0; then
-    appliance_exit "Appliance Error" "Could not activate userdata environment"
-fi
-
-# check if standby is true
-if is_truestr "$APPLIANCE_STANDBY"; then
-    appliance_exit_standby
-fi
 
 # ### storage setup
 need_storage_setup=false
@@ -82,10 +59,17 @@ if ! $(gosu postgres psql ${ECS_DATABASE} -qtc "\dx" | grep -q pg_stat_statement
     # create pg_stat_statements extension
     gosu postgres psql ${ECS_DATABASE} -c "CREATE extension pg_stat_statements;"
 fi
-# modify app user postgresql password to random string (if not set) and write to service_urls.env
-pgpass=$(HOME=/root openssl rand -hex 8)
-gosu postgres psql -c "ALTER ROLE app WITH ENCRYPTED PASSWORD '"${pgpass}"';"
-sed -ri "s/(postgres:\/\/app:)[^@]+(@[^\/]+\/).+/\1${pgpass}\2${ECS_DATABASE}/" /etc/appliance/ecs/service_urls.env
+pgpass=$((cat /etc/appliance/ecs/datbase_url.env && \
+    grep DATABASE_URL= && \
+    sed -re "s/DATABASE_URL=postgres://[^:]+:([^@]+)@.+/\1/g" && \
+    grep -q -v invalid) || printf '%s' 'invalid')
+if test "$pgpass" = "invalid"; then
+    # set app user postgresql password to a random string and write to service_urls.env
+    pgpass=$(HOME=/root openssl rand -hex 8)
+    gosu postgres psql -c "ALTER ROLE app WITH ENCRYPTED PASSWORD '"${pgpass}"';"
+    sed -ri "s/(postgres:\/\/app:)[^@]+(@[^\/]+\/).+/\1${pgpass}\2${ECS_DATABASE}/" /etc/appliance/ecs/database_url.env
+    DATABASE_URL=postgres://app:invalidpassword@{{ salt['pillar.get']('docker:ip') }}:5432/ecs
+fi
 
 # ### backup setup
 # create ready to use /root/.gpg for backup being done using duplicity
