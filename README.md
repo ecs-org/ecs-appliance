@@ -98,11 +98,12 @@ Update Appliance (this includes also update ecs): `sudo update-appliance.sh`
   + `sudo docker exec -it ecs_ecs.web_1 /start run ./manage.py shell_plus`
 + run a new django shell with correct environment but independent of other container
   +  `sudo docker-compose -f /etc/appliance/ecs/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
-+ follow the appliance log file (including web,beat,worker,smtp,redis,memcached,pdfas,mocca):
++ follow the appliance log file (backend nginx, uwsgi, beat, worker, smtpd,redis, memcached, pdfas, mocca):
     + `sudo journalctl -u appliance -f`
 + follow whole journal: `sudo journalctl -f`
 + follow prepare-appliance: `sudo journalctl -u prepare-appliance -f`
 + follow prepare-ecs: `sudo journalctl -u prepare-ecs -f`
++ follow frontend nginx: `sudo journalctl -u nginx -f`
 
 + read details of a container in yaml:
   + `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
