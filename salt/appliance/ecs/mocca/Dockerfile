@@ -1,5 +1,6 @@
 FROM tomcat:8-jre8
 MAINTAINER felix@erkinger.at
+# to be used with an frontend ssl webserver, expects input is comming from https
 
 ENV HOSTNAME localhost
 
@@ -24,6 +25,10 @@ RUN printf "%s" '\
   </DataURLConnection>\
 </MoccaConfiguration>\
 ' > /app/mocca/bkuonline-configuration.xml.tmpl
+
+# tell connector that our uplink is a https proxy and reconnects should go to https
+RUN sed /usr/local/tomcat/conf/server.xml -r -i \
+-e 's/(<Connector port="8080" protocol="HTTP\/1.1").*$/\1 secure="true" scheme="https" proxyport="443"/'
 
 COPY mocca-catalina.sh /app/mocca/mocca-catalina.sh
 RUN chmod +x /app/mocca/mocca-catalina.sh
