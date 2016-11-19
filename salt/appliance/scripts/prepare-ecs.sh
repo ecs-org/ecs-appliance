@@ -96,7 +96,9 @@ if test -e /etc/appliance/rebuild_wanted_ecs -o \
         if "$last_running" = "invalid"; then
             ecs_exit "Appliance Error" "build $target failed and no old build found, standby"
         fi
-        ecs_status "Appliance Error" "build $target failed, restarting old build $last_running"
+        for n in "ecs_status" "sentry_entry"; do
+            $n "Appliance Error" "build $target failed, restarting old build $last_running"
+        done
         exit 0
     fi
     appliance_status "Appliance Update" "Build complete, starting ecs"

@@ -12,6 +12,8 @@ sentry_entry () {
         \"last_running_appliance\": \"$last_running_appliance\", \
         \"last_running_ecs_image\": \"$last_running_ecs_image\"}"
 
+    printf "Level: %s Group: %s Message: %s" "$3" "$1" "$2"
+
     if test -n "$APPLIANCE_SENTRY_DSN"; then
         SENTRY_DSN="$APPLIANCE_SENTRY_DSN" /usr/local/bin/raven-cli.py \
             --culprit ${UNITNAME:-shellscript} \
