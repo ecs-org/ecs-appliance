@@ -1,19 +1,25 @@
 #!/bin/bash
 
 sentry_entry () {
-    if test -n "$APPLIANCE_SENTRY_DSN"; then
-        last_running_ecs=$(cat /etc/appliance/last_running_ecs || echo "invalid" 2> /dev/null)
-        last_build_ecs=$(cat /etc/appliance/last_build_ecs || echo "invalid" 2> /dev/null)
-        last_running_appliance=$(cat /etc/appliance/last_running_appliance || echo "invalid" 2> /dev/null)
-        current_appliance=$(git -C /app/appliance rev-parse HEAD)
+    last_running_ecs=$(cat /etc/appliance/last_running_ecs || echo "invalid") 2> /dev/null
+    last_build_ecs=$(cat /etc/appliance/last_build_ecs || echo "invalid") 2> /dev/null
+    last_running_appliance=$(cat /etc/appliance/last_running_appliance || echo "invalid") 2> /dev/null
+    last_running_ecs_image=$(cat /etc/appliance/last_running_ecs_image || echo "invalid") 2> /dev/null
+    current_appliance=$(git -C /app/appliance rev-parse HEAD)
+    tags="{\"group\": \"$1\", \
+        \"last_running_ecs\": \"$last_running_ecs\", \
+        \"last_build_ecs\": \"$last_build_ecs\", \
+        \"last_running_appliance\": \"$last_running_appliance\", \
+        \"last_running_ecs_image\": \"$last_running_ecs_image\"}"
 
+    if test -n "$APPLIANCE_SENTRY_DSN"; then
         SENTRY_DSN="$APPLIANCE_SENTRY_DSN" /usr/local/bin/raven-cli.py \
             --culprit ${UNITNAME:-shellscript} \
             --logger appliance.status \
             --release "$current_appliance" \
             --site "$APPLIANCE_DOMAIN"  \
             --level "${3:-critical}" \
-            --tags "{\"group\": \"$1\", \"last_running_appliance\": \"$last_running_appliance\", \"last_running_ecs\": \"$last_running_ecs\", \"last_build_ecs\": \"$last_build_ecs\"}" \
+            --tags "$tags" \
             "$2"
     fi
 }

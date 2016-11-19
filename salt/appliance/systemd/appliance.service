@@ -10,9 +10,9 @@ Environment="UNITNAME=%n"
 EnvironmentFile=/app/active-env.env
 WorkingDirectory=/etc/appliance/ecs
 ExecStart=/usr/local/bin/docker-compose up --abort-on-container-exit
-ExecStartPost=/bin/bash -c "sleep 30; . /usr/local/etc/appliance.include; \
-  appliance_status --disable; \
-  printf '%s' $(docker images -q ecs/ecs:latest) > /app/last_running_ecs_image"
+ExecStartPost=/bin/bash -c "printf '%s' $(docker images -q ecs/ecs:latest) > \
+    /etc/appliance/last_running_ecs_image; \
+    sleep 30; . /usr/local/etc/appliance.include; appliance_status --disable"
 ExecStop=/usr/local/bin/docker-compose -f /etc/appliance/ecs/docker-compose.yml stop
 ExecStopPost=/bin/bash -c " /usr/local/etc/appliance.include; appliance_exit_standby"
 Restart=on-failure

@@ -125,7 +125,8 @@ if $use_snakeoil; then
 fi
 
 # rewrite postfix main.cf with APPLIANCE_DOMAIN, restart postfix with new domain and keys
-sed -i "s/^myhostname.*/myhostname = $APPLIANCE_DOMAIN/;s/^mydomain.*/mydomain = $APPLIANCE_DOMAIN/" /etc/postfix/main.cf
+sed -i  "s/^myhostname.*/myhostname = $APPLIANCE_DOMAIN/;" \
+        "s/^mydomain.*/mydomain = $APPLIANCE_DOMAIN/" /etc/postfix/main.cf
 systemctl restart postfix
 
 # restart stunnel with new keys
