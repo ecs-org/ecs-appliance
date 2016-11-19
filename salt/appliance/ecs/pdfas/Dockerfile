@@ -1,6 +1,7 @@
 FROM tomcat:8-jre8
 MAINTAINER felix@erkinger.at
 # to be used with an frontend ssl webserver, expects input is comming from https
+# run script expects a fullchain server ssl cert at /import/server.cert.pem
 
 ENV HOSTNAME localhost
 ENV CATALINA_OPTS "-Dpdf-as-web.conf=/app/pdf-as-web/pdf-as-web.properties"
@@ -16,6 +17,8 @@ RUN echo "d6a413702b4a73d056c2d8e61d815ed99b2743996998bebed86e4c4c5b64e665 */app
 RUN unzip /app/defaultConfig.zip -d /app/pdf-as-web; rm /app/defaultConfig.zip
 
 # tell connector that our uplink is a https proxy and reconnects should go to https
+# XXX proxyPort should get port from frontend server x-forwar
+# the frontend https port to 443 therefore DOMAIN=testecs.ep3.at:8043 does not work
 RUN sed /usr/local/tomcat/conf/server.xml -r -i \
 -e 's/(<Connector port="8080" protocol="HTTP\/1.1").*$/\1 secure="true" scheme="https" proxyPort="443"/'
 
@@ -23,5 +26,4 @@ COPY pdf-as-web.properties /app/pdf-as-web/pdf-as-web.properties.tmpl
 COPY pdfas-catalina.sh /app/pdf-as-web/pdfas-catalina.sh
 RUN  chmod +x /app/pdf-as-web/pdfas-catalina.sh
 
-# run script expects a fullchain server ssl cert at /import/server.cert.pem
 CMD ["/app/pdf-as-web/pdfas-catalina.sh", "run"]

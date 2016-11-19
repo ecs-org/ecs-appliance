@@ -1,6 +1,7 @@
 FROM tomcat:8-jre8
 MAINTAINER felix@erkinger.at
 # to be used with an frontend ssl webserver, expects input is comming from https
+# run script expects a fullchain server ssl cert at /app/import/server.cert.pem
 
 ENV HOSTNAME localhost
 
@@ -15,13 +16,13 @@ RUN printf "%s" '\
 <Context>\
     <Paramter name="configurationResource" value="file://app/mocca/bkuonline-configuration.xml" override="false"/>\
 </Context>\
-' > /usr/local/tomcat/conf/bkuonline.xml
+' > /usr/local/tomcat/conf/Catalina/localhost/bkuonline.xml
 
 RUN printf "%s" '\
 <?xml version="1.0" encoding="UTF-8"?>\
 <MoccaConfiguration version="1.0">\
   <DataURLConnection>\
-    <Whitelist>https://HOSTNAME.*</Whitelist>\
+    <Whitelist>^https://HOSTNAME.*</Whitelist>\
   </DataURLConnection>\
 </MoccaConfiguration>\
 ' > /app/mocca/bkuonline-configuration.xml.tmpl
@@ -36,5 +37,4 @@ RUN chmod +x /app/mocca/mocca-catalina.sh
 # extract bkuonline so we can add cert at runtime
 RUN mkdir -p /usr/local/tomcat/webapps/bkuonline; unzip /app/mocca/bkuonline.war -d /usr/local/tomcat/webapps/bkuonline
 
-# run script expects a fullchain server ssl cert at /app/import/server.cert.pem
 CMD ["/app/mocca/mocca-catalina.sh", "run"]
