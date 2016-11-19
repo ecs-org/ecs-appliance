@@ -14,7 +14,7 @@ RUN echo "f43f49cbd7ef4df56741097ff5f0637a83cf6cb64701bc484633257ec122dc6a */app
 RUN mkdir -p /usr/local/tomcat/conf/Catalina/localhost; printf "%s" '\
 <?xml version="1.0" encoding="UTF-8"?>\
 <Context>\
-    <Parameter name="configurationResource" value="file://app/mocca/bkuonline-configuration.xml" override="false"/>\
+    <Parameter name="configurationResource" value="file:///app/mocca/bkuonline-configuration.xml" override="false"/>\
 </Context>\
 ' > /usr/local/tomcat/conf/Catalina/localhost/bkuonline.xml
 
