@@ -68,7 +68,7 @@ if test "$pgpass" = "invalid"; then
     pgpass=$(HOME=/root openssl rand -hex 8)
     gosu postgres psql -c "ALTER ROLE app WITH ENCRYPTED PASSWORD '"${pgpass}"';"
     sed -ri "s/(postgres:\/\/app:)[^@]+(@[^\/]+\/).+/\1${pgpass}\2${ECS_DATABASE}/" /etc/appliance/ecs/database_url.env
-    DATABASE_URL=postgres://app:invalidpassword@{{ salt['pillar.get']('docker:ip') }}:5432/ecs
+    # DATABASE_URL=postgres://app:invalidpassword@1.2.3.4:5432/ecs
 fi
 
 # ### backup setup
