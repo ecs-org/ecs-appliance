@@ -14,10 +14,10 @@ WorkingDirectory=/etc/appliance/ecs
 ExecStart=/bin/bash -c '. /usr/local/etc/env.include; \
     ENV_YML=/app/active-env.yml userdata_to_env ecs,appliance; \
     exec /usr/local/bin/docker-compose up --abort-on-container-exit'
-ExecStartPost=/bin/bash -c '. /usr/local/etc/env.include; \
+ExecStartPost=/bin/bash -c 'sleep 30; . /usr/local/etc/env.include; \
     ENV_YML=/app/active-env.yml userdata_to_env ecs,appliance; \
     docker images -q ecs/ecs:latest || echo "invalid" > /etc/appliance/last_running_ecs_image; \
-    sleep 30; . /usr/local/etc/appliance.include; appliance_status --disable'
+    . /usr/local/etc/appliance.include; appliance_status --disable'
 ExecStop=/bin/bash -c '. /usr/local/etc/env.include; \
     ENV_YML=/app/active-env.yml userdata_to_env ecs,appliance; \
     /usr/local/bin/docker-compose -f /etc/appliance/ecs/docker-compose.yml stop'
