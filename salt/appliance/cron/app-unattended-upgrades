@@ -1,8 +1,3 @@
++ run after backup complete
 + local unattended all package update
-
-+ local: update aux container
-    + download all updated container
-    + stop ecs-*
-    + for every updated container:
-        + stop container, start container
-    + start ecs.*
++ update-appliance.sh

@@ -120,7 +120,7 @@ if $need_migration; then
         appliance_exit "Appliance Error" "Could not pgdump database $ECS_DATABASE before starting migration"
     fi
     appliance_status "Appliance Update" "Migrating ecs database"
-    printf "%s" "$(docker images -q ecs/ecs:latest)" > /etc/appliance/last_running_ecs_image
+    docker images -q ecs/ecs:latest || echo "invalid" > /etc/appliance/last_running_ecs_image
     docker-compose run --no-deps --rm --name ecs.migration ecs.web migrate
     err=$?
     if test $err -ne 0; then
