@@ -53,7 +53,7 @@ output sorted keys to stdout as {prefix}{KEY_NAME}={value}{postfix}
 + None is converted to an empty string
         ''')
 
-    parser.add_argument('-m --alt-multiline', action='store_true', default=False,
+    parser.add_argument('-m', '--alt-multiline', action='store_true', default=False,
         help='''add literal "\\n \\" to each newline of a multiline string''')
     parser.add_argument('--prefix', default='')
     parser.add_argument('--postfix', default='')
@@ -65,7 +65,7 @@ output sorted keys to stdout as {prefix}{KEY_NAME}={value}{postfix}
 
     args = parser.parse_args()
 
-    with args.FILE as f:
+    with args.file as f:
         data = yaml.safe_load(f)
 
     for i in args.key.split(','):
