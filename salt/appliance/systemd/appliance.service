@@ -14,7 +14,7 @@ ExecStart=/bin/bash -c '. /usr/local/etc/env.include; \
     exec /usr/local/bin/docker-compose up --abort-on-container-exit'
 ExecStartPost=/bin/bash -c '. /usr/local/etc/env.include; \
     ENV_YML=/app/active-env.yml userdata_to_env ecs,appliance; \
-    printf "%s" "$(docker images -q ecs/ecs:latest)" > /etc/appliance/last_running_ecs_image; \
+    printf "%s" "$(/usr/bin/docker images -q ecs/ecs:latest)" > /etc/appliance/last_running_ecs_image; \
     sleep 30; . /usr/local/etc/appliance.include; appliance_status --disable'
 ExecStop=/bin/bash -c '. /usr/local/etc/env.include; \
     ENV_YML=/app/active-env.yml userdata_to_env ecs,appliance; \
