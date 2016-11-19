@@ -17,7 +17,7 @@ RUN unzip /app/defaultConfig.zip -d /app/pdf-as-web; rm /app/defaultConfig.zip
 
 # tell connector that our uplink is a https proxy and reconnects should go to https
 RUN sed /usr/local/tomcat/conf/server.xml -r -i \
--e 's/(<Connector port="8080" protocol="HTTP\/1.1").*$/\1 secure="true" scheme="https" proxyport="443"/'
+-e 's/(<Connector port="8080" protocol="HTTP\/1.1").*$/\1 secure="true" scheme="https" proxyPort="443"/'
 
 COPY pdf-as-web.properties /app/pdf-as-web/pdf-as-web.properties.tmpl
 COPY pdfas-catalina.sh /app/pdf-as-web/pdfas-catalina.sh

@@ -28,7 +28,7 @@ RUN printf "%s" '\
 
 # tell connector that our uplink is a https proxy and reconnects should go to https
 RUN sed /usr/local/tomcat/conf/server.xml -r -i \
--e 's/(<Connector port="8080" protocol="HTTP\/1.1").*$/\1 secure="true" scheme="https" proxyport="443"/'
+-e 's/(<Connector port="8080" protocol="HTTP\/1.1").*$/\1 secure="true" scheme="https" proxyPort="443"/'
 
 COPY mocca-catalina.sh /app/mocca/mocca-catalina.sh
 RUN chmod +x /app/mocca/mocca-catalina.sh
