@@ -54,7 +54,7 @@ output sorted keys to stdout as {prefix}{KEY_NAME}={value}{postfix}
         ''')
 
     parser.add_argument('-m', '--alt-multiline', action='store_true', default=False,
-        help='''add literal "\\\\n\\" + to each newline of a multiline string''')
+        help='''add literal "\\n\\" to each newline of a multiline string''')
     parser.add_argument('--prefix', default='')
     parser.add_argument('--postfix', default='')
     parser.add_argument('--file', nargs='?',
