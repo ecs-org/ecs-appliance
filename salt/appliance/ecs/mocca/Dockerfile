@@ -21,7 +21,7 @@ RUN printf "%s" '\
 <?xml version="1.0" encoding="UTF-8"?>\
 <MoccaConfiguration version="1.0">\
   <DataURLConnection>\
-    <Whitelist>^https://HOSTNAME.*</Whitelist>\
+    <Whitelist>https://HOSTNAME.*</Whitelist>\
   </DataURLConnection>\
 </MoccaConfiguration>\
 ' > /app/mocca/bkuonline-configuration.xml.tmpl
