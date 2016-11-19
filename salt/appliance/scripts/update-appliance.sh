@@ -54,6 +54,8 @@ if test "$last_running" != "$target"; then
     touch /etc/appliance/rebuild_wanted_ecs
 fi
 salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
+# xxx check error code , take some of the salt log and appliance_exit
+
 # save executed commit
 printf "%s" "$target" > /etc/appliance/last_running_appliance
 

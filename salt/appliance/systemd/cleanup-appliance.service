@@ -10,9 +10,9 @@ After=appliance.service
 [Service]
 Type=oneshot
 Environment="UNITNAME=%n"
-ExecStart=/bin/bash -c 'sleep 30; \
+ExecStart=/bin/bash -c "sleep 30; \
   docker-compose -f /etc/appliance/ecs/docker-compose.yml rm -v -f; \
-  docker rmi $(docker images -q --filter "dangling=true")'
+  docker rmi $(docker images -q --filter 'dangling=true')"
 ExecReload=/bin/true
 RemainAfterExit=on
 
