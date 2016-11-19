@@ -39,7 +39,7 @@ prefix_relocate_{{ source }}:
     - onlyif: test -d {{ name }}
     - onchanges_in:
       - file: relocate_{{ source }}
-{% endif %}
+    {% endif %}
 relocate_{{ source }}:
   file.rename:
     - name: {{ name }}
@@ -47,13 +47,16 @@ relocate_{{ source }}:
     - force: true
     - unless: test -L {{ source }}
     - onlyif: test -d {{ name }}
-{% if post %}
+    {% if post %}
 postfix_relocate_{{ source }}:
   cmd.run:
     - name: {{ post }}
     - onchanges:
       - file: relocate_{{ source }}
-{% endif %}
+    {% endif %}
+  {% endfor %}
+{% endmacro %}
+
 
 # ### custom Storage Setup
 {% if (not salt['pillar.get']("appliance:storage:ignore:volatile", false) and

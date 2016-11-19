@@ -14,7 +14,7 @@ printf '%s' "$userdata_yaml" | grep USERDATA_TYPE
 echo "write userdata to /app/active-env.yml"
 printf "%s" "$userdata_yaml" > /app/active-env.yml
 chmod 0600 /app/active-env.yml
-echo "write userdata to /app/active-env.env"
+echo "write systemd EnvironmentFile to /app/active-env.env"
 ENV_YML=/app/active-env.yml userdata_to_envlist ecs,appliance --alt-multiline > /app/active-env.env
 chmod 0600 /app/active-env.env
 
