@@ -97,7 +97,7 @@ if test -e /etc/appliance/rebuild_wanted_ecs -o \
             ecs_exit "Appliance Error" "build $target failed and no old build found, standby"
         fi
         for n in "ecs_status" "sentry_entry"; do
-            $n "Appliance Error" "build $target failed, restarting old build $last_running"
+            $n "Appliance Error" "ecs build failed, restarting old image" error
         done
         exit 0
     fi
@@ -112,6 +112,9 @@ if $build_only; then
     exit 0
 fi
 
+# save next about to be executed commit
+printf "%s" "$target" > /etc/appliance/last_running_ecs
+
 if $need_migration; then
     docker-compose stop
     appliance_status "Appliance Update" "Pgdump ${ECS_DATABASE} database"
@@ -122,13 +125,10 @@ if $need_migration; then
         appliance_exit "Appliance Error" "Could not pgdump database $ECS_DATABASE before starting migration"
     fi
     appliance_status "Appliance Update" "Migrating ecs database"
-    docker images -q ecs/ecs:latest || echo "invalid" > /etc/appliance/last_running_ecs_image
+    (docker images -q ecs/ecs:latest || echo "invalid") > /etc/appliance/last_running_ecs_image
     docker-compose run --no-deps --rm --name ecs.migration ecs.web migrate
     err=$?
     if test $err -ne 0; then
         appliance_exit "Appliance Error" "Migration Error"
     fi
 fi
-
-# save next about to be executed commit
-printf "%s" "$target" > /etc/appliance/last_running_ecs
