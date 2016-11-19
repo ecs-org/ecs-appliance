@@ -36,7 +36,7 @@ include:
 /etc/appliance/ecs/database_url.env:
   file.managed:
     - contents: |
-        DATABASE_URL=postgres://app:invalidpassword@{{ salt['pillar.get']('docker:ip') }}:5432/ecs
+        DATABASE_URL=postgres://app:invalid@{{ salt['pillar.get']('docker:ip') }}:5432/ecs
     - replace: false
 
 {% for n in ['prepare-env.service', 'prepare-appliance.service',
