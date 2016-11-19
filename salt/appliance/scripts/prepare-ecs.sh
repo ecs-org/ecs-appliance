@@ -2,7 +2,14 @@
 
 . /usr/local/etc/appliance.include
 
-if test "$1" = "--build-only"; then build_only=true; shift; else build_only=false; fi
+build_only=false
+target="invalid"
+ECS_GIT_BRANCH="${ECS_GIT_BRANCH:-deployment_fixes}"
+ECS_GIT_SOURCE="${ECS_GIT_SOURCE:-ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs.git}"
+ECS_DATABASE=ecs
+if test "$1" = "--build-only"; then build_only=true; shift; fi
+
+cd /app/ecs
 
 ecs_status()
 {
@@ -21,12 +28,6 @@ ecs_exit()
         appliance_exit "$1" "$2"
     fi
 }
-
-target="invalid"
-ECS_GIT_BRANCH="${ECS_GIT_BRANCH:-deployment_fixes}"
-ECS_GIT_SOURCE="${ECS_GIT_SOURCE:-ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs.git}"
-ECS_DATABASE=ecs
-cd /app/ecs
 
 if $build_only; then
     ecs_status "Appliance Update" "Starting ecs update build"

@@ -2,6 +2,8 @@
 
 . /usr/local/etc/appliance.include
 
+APPLIANCE_GIT_BRANCH=${APPLIANCE_GIT_BRANCH:-master}
+
 is_cleanrepo(){
     local repo="${1:-.}"
     if ! git -C $repo diff-files --quiet --ignore-submodules --; then
@@ -26,8 +28,6 @@ is_cleanrepo(){
     fi
     return 0
 }
-
-APPLIANCE_GIT_BRANCH=${APPLIANCE_GIT_BRANCH:-master}
 
 appliance_status "Appliance Update" "Updating appliance"
 cd /app/appliance

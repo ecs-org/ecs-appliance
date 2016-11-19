@@ -2,6 +2,7 @@
 
 . /usr/local/etc/appliance.include
 
+set -o pipefail
 ECS_DATABASE=${ECS_DATABASE:-ecs}
 
 appliance_status_starting
@@ -59,10 +60,9 @@ if ! $(gosu postgres psql ${ECS_DATABASE} -qtc "\dx" | grep -q pg_stat_statement
     # create pg_stat_statements extension
     gosu postgres psql ${ECS_DATABASE} -c "CREATE extension pg_stat_statements;"
 fi
-pgpass=$((cat /etc/appliance/ecs/datbase_url.env && \
-    grep DATABASE_URL= && \
-    sed -re "s/DATABASE_URL=postgres://[^:]+:([^@]+)@.+/\1/g" && \
-    grep -q -v invalid) || printf '%s' 'invalid')
+pgpass=$((cat /etc/appliance/ecs/database_url.env 2> /dev/null | grep 'DATABASE_URL=' | \
+    sed -re 's/DATABASE_URL=postgres:\/\/[^:]+:([^@]+)@.+/\1/g' ) || \
+    printf '%s' 'invalid')
 if test "$pgpass" = "invalid"; then
     # set app user postgresql password to a random string and write to service_urls.env
     pgpass=$(HOME=/root openssl rand -hex 8)
@@ -125,8 +125,7 @@ if $use_snakeoil; then
 fi
 
 # rewrite postfix main.cf with APPLIANCE_DOMAIN, restart postfix with new domain and keys
-sed -i  "s/^myhostname.*/myhostname = $APPLIANCE_DOMAIN/;" \
-        "s/^mydomain.*/mydomain = $APPLIANCE_DOMAIN/" /etc/postfix/main.cf
+sed -i  "s/^myhostname.*/myhostname = $APPLIANCE_DOMAIN/;s/^mydomain.*/mydomain = $APPLIANCE_DOMAIN/" /etc/postfix/main.cf
 systemctl restart postfix
 
 # restart stunnel with new keys
