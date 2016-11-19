@@ -31,8 +31,8 @@ ecs_exit()
 
 if $build_only; then
     ecs_status "Appliance Update" "Starting ecs update build"
-    printf "%s" "invalid" > /etc/appliance/last_build_ecs
 fi
+printf "%s" "invalid" > /etc/appliance/last_build_ecs
 
 # get target commit hash
 if test -e /app/bin/devupdate.sh; then
@@ -105,8 +105,8 @@ else
     exit 0
 fi
 
+printf "%s" "$target" > /etc/appliance/last_build_ecs
 if $build_only; then
-    printf "%s" "$target" > /etc/appliance/last_build_ecs
     exit 0
 fi
 
