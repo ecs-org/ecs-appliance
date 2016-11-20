@@ -13,7 +13,7 @@ except ImportError as e:
     sys.exit(1)
 
 
-def flatten(d, parent_key='', sep='_'):
+def flatten(d, parent_key='', sep=''):
     items = []
 
     if isinstance(d, collections.MutableMapping):
@@ -45,18 +45,19 @@ def main():
         epilog='''
 read yaml from FILE or stdin, filter,
 flatten (combine name space with "_") & upper case key names
-output sorted keys to stdout as {prefix}{KEY_NAME}={value}{postfix}
+output sorted keys assigned with "=" to value on stdout as
+{prefix}{KEY_NAME_SPACE}={value}{postfix}
 
 + strings are modified with strip and shlex.quote
 + lists are converted to names using key_name_0, key_name_len as maxindex
 + bools are converted to repr(value).lower()
 + None is converted to an empty string
-        ''')
+''')
 
-    parser.add_argument('-m', '--alt-multiline', action='store_true', default=False,
-        help='''add escaping to each newline of a multiline string for systemd''')
     parser.add_argument('--prefix', default='')
     parser.add_argument('--postfix', default='')
+    parser.add_argument('--combine', default='_')
+    parser.add_argument('--assign', default='=')
     parser.add_argument('--file', nargs='?',
         type=argparse.FileType('r'), default=sys.stdin,
         help='file to read or stdin if not defined')
@@ -71,21 +72,22 @@ output sorted keys to stdout as {prefix}{KEY_NAME}={value}{postfix}
     for i in args.key.split(','):
         keyroot = ''
         if i == '.':
-            result = flatten(data).items()
+            result = flatten(data, sep=args.combine).items()
         elif i in data:
-            result = flatten(data[i]).items()
-            keyroot = i.upper()+ '_'
+            result = flatten(data[i], sep=args.combine).items()
+            keyroot = i.upper()+ args.combine
         else:
             print('Error: key "{}" not found in data'.format(i), file=sys.stderr)
             continue
 
         for key, value in sorted(result):
-            print('{prefix}{key}={value}{postfix}'.format(
+            print('{prefix}{key}{assign}{value}{postfix}'.format(
                 prefix=args.prefix,
                 key=keyroot+key.upper(),
-                value="'\\n\\\n'".join(value.split("\n")) if args.alt_multiline else value,
-                postfix=args.postfix))
-
+                assign=args.assign,
+                value=value,
+                postfix=args.postfix,
+                ))
 
 if __name__ == '__main__':
     main()

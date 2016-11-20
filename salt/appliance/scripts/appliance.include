@@ -15,7 +15,7 @@ sentry_entry () {
     printf "Level: %s Group: %s Message: %s" "$3" "$1" "$2"
 
     if test -n "$APPLIANCE_SENTRY_DSN"; then
-        SENTRY_DSN="$APPLIANCE_SENTRY_DSN" /usr/local/bin/raven-cli.py \
+        SENTRY_DSN="$APPLIANCE_SENTRY_DSN" /usr/local/bin/ravencat.py \
             --culprit ${UNITNAME:-shellscript} \
             --logger appliance.status \
             --release "$current_appliance" \

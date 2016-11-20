@@ -92,18 +92,17 @@ def main():
     parser.add_argument('--release', default='')
     parser.add_argument('--site', default='')
     parser.add_argument('--level', default='info', choices=logging_choices)
-    parser.add_argument('--tags', action=JsonAction)
+    parser.add_argument('--tags', action=JsonAction,
+        help='a json dictionary listening tag name and value')
+    parser.add_argument('--dsn', action=EnvDefault,
+        envvar='SENTRY_DSN', required=True,
+        help='specify a sentry dsn, will use env SENTRY_DSN if unset')
 
-    parser.add_argument('--dsn', action=EnvDefault, envvar='SENTRY_DSN',
-        required=True, help='Specify Sentry DSN, will use env SENTRY_DSN if unset')
-
-    group = parser.add_mutually_exclusive_group(required=False)
-    group.add_argument('--request', action=JsonAction, default={})
-    group.add_argument('--request-stdin', action='store_true', default=False)
-
-    input_group = parser.add_mutually_exclusive_group(required=True)
-    input_group.add_argument('message', nargs='?')
-    input_group.add_argument('--mbox', type=exist_file, metavar='FILE')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--mbox', type=exist_file, metavar='FILE',
+        help='mbox filename, will be read and send one message per mail')
+    group.add_argument('message', nargs='?',
+        help='the message to be sent; Will be used for grouping')
 
     args = parser.parse_args()
 
@@ -115,11 +114,11 @@ def main():
         )
 
     if not client.remote.is_active():
-        print('Error: DSN configuration is not valid!', file=sys.stderr)
+        print('Error: DSN configuration, client.remote.is_active <= false', file=sys.stderr)
         sys.exit(1)
 
     if not client.is_enabled():
-        print('Error: Client reports are disabled!', file=sys.stderr)
+        print('Error: Client reporting is disabled', file=sys.stderr)
         sys.exit(1)
 
     if args.mbox:
@@ -134,7 +133,7 @@ def main():
 
                 for k in message.walk():
                     if k.get_content_type() == 'text/plain':
-                        margs['extra'] = { 'content': k.get_payload().splitlines() }
+                        margs['extra'] = {'content': k.get_payload().splitlines()}
                         break
 
                 success, eventid = send_message(client, message['subject'], margs)

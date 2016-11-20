@@ -87,7 +87,7 @@ python3-common-packages:
 
 {{ pip3_install('raven') }}
 
-{% for n in ['flatten_yaml.py', 'raven-cli.py'] %}
+{% for n in ['flatyaml.py', 'ravencat.py'] %}
 /usr/local/bin/{{ n }}:
   file.managed:
     - source: salt://common/{{ n }}
