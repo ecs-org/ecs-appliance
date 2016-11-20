@@ -47,6 +47,8 @@ from salt.log import LOG_LEVELS
 try:
     import raven
     from raven.handlers.logging import SentryHandler
+    from raven.transport import TransportRegistry, default_transports
+    from raven.utils.urlparse import urlparse
     HAS_RAVEN = True
 except ImportError:
     HAS_RAVEN = False
@@ -73,45 +75,10 @@ def setup_handlers():
         return False
     options = {}
     dsn = get_config_value('dsn')
-    if dsn is not None:
-        try:
-            # support raven ver 5.5.0
-            from raven.transport import TransportRegistry, default_transports
-            from raven.utils.urlparse import urlparse
-            transport_registry = TransportRegistry(default_transports)
-            url = urlparse(dsn)
-            if not transport_registry.supported_scheme(url.scheme):
-                raise ValueError('Unsupported Sentry DSN scheme: {0}'.format(url.scheme))
-            dsn_config = {}
-            if (hasattr(transport_registry, 'compute_scope') and
-                    callable(transport_registry.compute_scope)):
-                conf_extras = transport_registry.compute_scope(url, dsn_config)
-                dsn_config.update(conf_extras)
-            options.update({
-                'project': dsn_config['SENTRY_PROJECT'],
-                'servers': dsn_config['SENTRY_SERVERS'],
-                'public_key': dsn_config['SENTRY_PUBLIC_KEY'],
-                'secret_key': dsn_config['SENTRY_SECRET_KEY']
-            })
-        except ValueError as exc:
-            log.info(
-                'Raven failed to parse the configuration provided '
-                'DSN: {0}'.format(exc)
-            )
-
-    # Allow options to be overridden if previously parsed, or define them
-    for key in ('project', 'servers', 'public_key', 'secret_key'):
-        config_value = get_config_value(key)
-        if config_value is None and key not in options:
-            log.debug(
-                'The required \'sentry_handler\' configuration key, '
-                '\'{0}\', is not properly configured. Not configuring '
-                'the sentry logging handler.'.format(key)
-            )
-            return
-        elif config_value is None:
-            continue
-        options[key] = config_value
+    transport_registry = TransportRegistry(default_transports)
+    url = urlparse(dsn)
+    if not transport_registry.supported_scheme(url.scheme):
+        raise ValueError('Unsupported Sentry DSN scheme: {0}'.format(url.scheme))
 
     # site: An optional, arbitrary string to identify this client installation.
     options.update({
