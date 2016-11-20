@@ -112,7 +112,7 @@ requests+https
         # START sentry config
 {%- if sentry_dsn %}
         sentry_handler:
-          dsn: {{ sentry_dsn|(replace("https:", "requests+https:")) }}
+          dsn: {{ sentry_dsn|replace("https:", "requests+https:") }}
           log_level: error
           site: {{ salt['pillar.get']('appliance:domain') }}
 {%- endif}
