@@ -116,7 +116,7 @@ def setup_handlers():
         'dsn': get_config_value('dsn'),
     })
 
-    client = raven.Client(**options, transport=RequestsHTTPTransport)
+    client = raven.Client(transport=RequestsHTTPTransport, **options)
 
     context = get_config_value('context')
     context_dict = {}
