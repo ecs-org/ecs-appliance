@@ -17,8 +17,6 @@ RUN echo "d6a413702b4a73d056c2d8e61d815ed99b2743996998bebed86e4c4c5b64e665 */app
 RUN unzip /app/defaultConfig.zip -d /app/pdf-as-web; rm /app/defaultConfig.zip
 
 # tell connector that our uplink is a https proxy and reconnects should go to https
-# XXX proxyPort should get port from frontend server x-forwar
-# the frontend https port to 443 therefore DOMAIN=testecs.ep3.at:8043 does not work
 RUN sed /usr/local/tomcat/conf/server.xml -r -i \
 -e 's/(<Connector port="8080" protocol="HTTP\/1.1").*$/\1 secure="true" scheme="https" proxyPort="443"/'
 

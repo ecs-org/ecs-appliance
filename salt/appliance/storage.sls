@@ -78,14 +78,14 @@ postfix_relocate_{{ source }}:
   ('docker', '', ''),
   ('ecs-backup-test', 'app', ''),
   ('ecs-cache', 1000, ''),
-  ('redis', 1000, '')
+  ('redis', 1000, ''),
   ], salt['pillar.get']("appliance:storage:ignore:volatile",false)) }}
 
 {{ relocate_setup([
   ('/volatile/docker', '/var/lib/docker',
     'systemctl stop cadvisor; docker kill $(docker ps -q); systemctl stop docker',
     'systemctl start docker; systemctl start cadvisor'),
-  ('/volatile/ecs-cache', '/app/ecs-cache', '', '')
+  ('/volatile/ecs-cache', '/app/ecs-cache', '', ''),
   ]) }}
 
 # ### Data Setup
@@ -98,7 +98,7 @@ postfix_relocate_{{ source }}:
   ('ecs-ca', 1000, '0700'),
   ('ecs-pgdump', '', ''),
   ('ecs-storage-vault', 1000, ''),
-  ('postgresql', 'postgres', '')
+  ('postgresql', 'postgres', ''),
   ], salt['pillar.get']("appliance:storage:ignore:data",false)) }}
 
 {{ relocate_setup([
@@ -106,5 +106,5 @@ postfix_relocate_{{ source }}:
     'systemctl stop postgresql', 'systemctl start postgresql'),
   ('/data/appliance', '/etc/appliance', '', ''),
   ('/data/ecs-ca', '/app/ecs-ca', '', ''),
-  ('/data/ecs-storage-vault/', '/app/ecs-storage-vault', '', '')
+  ('/data/ecs-storage-vault/', '/app/ecs-storage-vault', '', ''),
   ]) }}

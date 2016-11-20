@@ -3,8 +3,7 @@
 . /usr/local/etc/env.include
 . /usr/local/etc/appliance.include
 
-# ### environment setup
-# read userdata
+# ### environment setup, read userdata
 userdata_yaml=$(get_userdata)
 if test $? -ne 0; then
     appliance_exit "Appliance Error" "$(printf "Error reading userdata: %s" `echo "$userdata_yaml"| grep USERDATA_ERR`)"

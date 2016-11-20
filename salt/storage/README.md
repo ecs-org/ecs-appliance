@@ -10,8 +10,6 @@ Features:
  * format:      format partitions
  * mount:       mount partitions (persistent)
  * swap:        mount swap (persistent)
- * directories: skeleton directory creation
- * relocate:    relocate data and make a symlink from old to new location
 
 **Warning**: lvm makes a difference if you use "g" or "G" for gigabyte.
   * g=GiB (1024*1024*1024) , G= (1000*1000*1000)
@@ -26,7 +24,7 @@ lvm:
       vgname: vg0
       size: 2g
 {% endload %}
-{% from 'storage/lib.sls' import storage_setup with context %}
+{% from 'storage/lib.sls' import storage_setup %}
 {{ storage_setup(data) }}
 ```
 
@@ -131,104 +129,68 @@ storage:
   swap:
     - /dev/mapper/vg0-host_swap
 
-  directories:
-    /mnt/images:
-      names:
-        - "default"
-        - "templates"
-        - "iso"
-        - "tmp"
-      options: {# passed to file.directory #}
-        - group: libvirtd
-        - user: libvirt-qemu
-        - dir_mode: 775
-        - file_mode: 664
-      onlyif: mountpoint -q /mnt/images
-
-  relocate:
-    /var/lib/libvirt:
-      destination: /mnt/images
-      copy_content: True
-      watch_in: "service: apt-cacher-ng"
 ```
 
 ## Additional Parameter
 
-directory:
-  - "options" parameter: passed to file.directory
-mount:
-  - optional args for mount.mounted
-format:
-  - "options" parameter: passed to mkfs
-lvm vg:
-  - optional kwargs passed to lvm.vg_present
-lvm lv:
-  - optional kwargs passed to lvm.lv_present
-mdadm:
-  - optional kwargs passed to mdadm.raid_present
+### optional kwargs in mdadm, lvm:vg, lvm:lv, mount
+
+    mdadm:  passed to mdadm.raid_present
+    lvm vg: passed to lvm.vg_present
+    lvm lv: passed to lvm.lv_present
+    mount:  passed to mount.mounted
 
 Example:
 ```
-  lvm:
-    lv:
-      test:
-        vgname: vg0
-        size: 10g
-        wipesignatures: yes
+lvm:
+  lv:
+    test:
+      vgname: vg0
+      size: 10g
+      wipesignatures: yes
 ```
 
-### for "lvm: lv", "format", "directories", "relocate"
-  * parameter: watch_in/require_in/require/watch
+### "options" in format:
+
+    "options" parameter: list of options passed to mkfs
+
+Example:
+```
+format:
+  /dev/mapper/vg0-host_root:
+    fstype: ext4
+    options:
+      - "-L my_root"
+```
+
+### "watch_in/require_in/require/watch" in lvm:lv, format:
+
     if set will insert a "watch/require/_in" into the state
 
 Example:
 ```
-  relocate:
-    /var/cache/apt-cacher-ng:
-      destination: /mnt/cache
-      copy_content: false
-      watch_in: "service: apt-cacher-ng"
+format:
+  /var/cache/apt-cacher-ng:
+    destination: /mnt/cache
+    copy_content: false
+    watch_in: "service: apt-cacher-ng"
 ```
 
-### for "relocate"
-  * parameter: exec_before/exec_after
-    if set, will execute "exec_before" before relocation and "exec_after" after relocation
-    
-### for "directories"
-  * parameter: onlyif/unless
-    * will insert a onlyif/unless state requirement
+### parameter "expand" in lvm:lv:
 
-Example:
-```
-  directories:
-    /mnt/images:
-      options:
-        - user: libvirt-qemu
-        - group: libvirtd
-        - dir_mode: 2775
-      names:
-        - default
-        - iso
-        - templates
-        - tmp
-      onlyif: mountpoint -q /mnt/images
-```
-
-### for "lvm:lv"
-  * parameter: expand
-    * if set to true and volume exists,
-      it will try to expand the existing lv to the desired size,
-      ignoring any other parameters beside size and vgname.
-      if lv does not exist it will create it with all parameters attached.
-      if the lv exists and has a filesystem of ext2,ext3 or ext4 already on it,
-      the filesystem will be resized.
+    if set to true and volume exists,
+    it will try to expand the existing lv to the desired size,
+    ignoring any other parameters beside size and vgname.
+    if lv does not exist it will create it with all parameters attached.
+    if the lv exists and has a filesystem of ext2,ext3,ext4 already on it,
+    the filesystem will be resized.
 
 Example:
 ```
-  lvm:
-    lv:
-      cache:
-        vgname: vg0
-        size: 12g
-        expand: true
+lvm:
+  lv:
+    cache:
+      vgname: vg0
+      size: 12g
+      expand: true
 ```

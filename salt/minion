@@ -1,4 +1,5 @@
 file_client: local
+log_file: file:///dev/log
 
 fileserver_backend:
   - roots

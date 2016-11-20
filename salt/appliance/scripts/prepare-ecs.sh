@@ -9,8 +9,6 @@ ECS_GIT_SOURCE="${ECS_GIT_SOURCE:-ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs.g
 ECS_DATABASE=ecs
 if test "$1" = "--build-only"; then build_only=true; shift; fi
 
-cd /app/ecs
-
 ecs_status()
 {
     if $build_only; then
@@ -29,9 +27,9 @@ ecs_exit()
     fi
 }
 
-if $build_only; then
-    ecs_status "Appliance Update" "Starting ecs update build"
-fi
+
+# ### update source
+cd /app/ecs
 printf "%s" "invalid" > /etc/appliance/last_build_ecs
 
 # get target commit hash
@@ -40,29 +38,24 @@ if test -e /app/bin/devupdate.sh; then
 elif test "$ECS_GIT_COMMITID" != ""; then
     target="$ECS_GIT_COMMITID"
 fi
-
-# clone source if currently not existing
 if test ! -e /app/ecs/ecs/settings.py; then
+    # clone source if currently not existing
     gosu app git clone --branch $ECS_GIT_BRANCH $ECS_GIT_SOURCE /app/ecs
 fi
-
-# fetch all updates from origin, except if devserver
 if test "$target" != "devserver"; then
+    # fetch all updates from origin, except if devserver
     gosu app git fetch -a -p
 fi
-
-# if target still invalid, set target to latest branch commit
 if test "$target" = "invalid"; then
+    # if target still invalid, set target to latest branch commit
     target=$(gosu app git rev-parse origin/$ECS_GIT_BRANCH)
 fi
-
 # get last_running commit hash
 if test -e /etc/appliance/last_running_ecs; then
     last_running=$(cat /etc/appliance/last_running_ecs || echo "invalid")
 else
     last_running="invalid"
 fi
-
 need_migration=false
 if test $target != "devserver"; then
     if test "$last_running" = "invalid"; then
@@ -76,7 +69,7 @@ if test $target != "devserver"; then
     gosu app git reset --hard $target
 fi
 
-# rebuild images
+# ### rebuild images
 cd /etc/appliance/ecs
 
 ecs_status "Appliance Update" "Pulling base images"
@@ -93,12 +86,11 @@ if test -e /etc/appliance/rebuild_wanted_ecs -o \
     fi
     ecs_status "Appliance Update" "Building ecs $target (current= $last_running)"
     if ! docker-compose build mocca pdfas ecs.web; then
+        sentry_entry "Appliance Error" "ecs build failed" error
         if "$last_running" = "invalid"; then
             ecs_exit "Appliance Error" "build $target failed and no old build found, standby"
         fi
-        for n in "ecs_status" "sentry_entry"; do
-            $n "Appliance Error" "ecs build failed, restarting old image" error
-        done
+        ecs_status "Appliance Error" "ecs build failed, restarting old image"
         exit 0
     fi
     appliance_status "Appliance Update" "Build complete, starting ecs"
@@ -111,10 +103,11 @@ printf "%s" "$target" > /etc/appliance/last_build_ecs
 if $build_only; then
     exit 0
 fi
-
 # save next about to be executed commit
 printf "%s" "$target" > /etc/appliance/last_running_ecs
 
+
+# ### migrate database
 if $need_migration; then
     docker-compose stop
     appliance_status "Appliance Update" "Pgdump ${ECS_DATABASE} database"

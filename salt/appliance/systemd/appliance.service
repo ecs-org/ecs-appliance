@@ -5,11 +5,11 @@ Requires=prepare-env.service prepare-appliance.service prepare-ecs.service
 After=prepare-env.service prepare-appliance.service prepare-ecs.service
 Before=cleanup-appliance.service
 
-# workaround for systemd: manual include env because EnvironmentFile can not parse multiline vars
-
 [Service]
 Type=simple
 Environment="UNITNAME=%n"
+# EnvironmentFile=/app/active-env.env
+# XXX workaround for systemd: manual include env because EnvironmentFile can not parse multiline vars
 WorkingDirectory=/etc/appliance/ecs
 ExecStart=/bin/bash -c '. /usr/local/etc/env.include; \
     ENV_YML=/app/active-env.yml userdata_to_env ecs,appliance; \

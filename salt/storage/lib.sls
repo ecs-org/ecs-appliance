@@ -31,14 +31,6 @@
 {{ storage_swap(data.swap) }}
 {% endif %}
 
-{% if data['directories'] is defined %}
-{{ storage_directories(data.directories) }}
-{% endif %}
-
-{% if data['relocate'] is defined %}
-{{ storage_relocate(data.relocate) }}
-{% endif %}
-
 {% endmacro %}
 
 
@@ -299,95 +291,6 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
 "swap-{{ item }}":
   mount.swap:
     - name: {{ item }}
-  {% endfor %}
-
-{% endmacro %}
-
-
-# directories
-#######
-{% macro storage_directories(input_data) %}
-
-  {% for item, data in input_data.iteritems() %}
-    {% if input_data[item]['names']|d({}) %}
-      {% for child in input_data[item]['names'] %}
-
-"{{ item }}/{{ child }}-mkdir":
- file.directory:
-    - name: {{ item }}/{{ child }}
-    - makedirs: True
-        {%- if input_data[item]['options']|d({}) %}
-          {%- for option in input_data[item]['options'] %}
-    - {{ option }}
-          {%- endfor %}
-        {%- endif %}
-
-        {%- for a in ('onlyif', 'unless') %}
-          {%- if input_data[item][a] is defined %}
-    - {{ a }}: {{ input_data[item][a] }}
-          {%- endif %}
-        {%- endfor %}
-
-        {%- for a in ('watch_in', 'require_in', 'require', 'watch') %}
-          {%- if input_data[item][a] is defined %}
-    - {{ a }}:
-      - {{ input_data[item][a] }}
-          {%- endif %}
-        {%- endfor %}
-
-      {% endfor %}
-    {% endif %}
-  {% endfor %}
-
-{% endmacro %}
-
-
-
-# relocate
-##########
-
-{% macro storage_relocate(input_data) %}
-
-  {% for item, data in input_data.iteritems() %}
-
-    {% if data['exec_before'] is defined %}
-before-{{ item }}-{{ data['destination'] }}-relocate:
-  cmd.run:
-    - name: {{ data['exec_before'] }}
-    - require_in:
-      - cmd: {{ item }}-{{ data['destination'] }}-relocate
-    - unless: test -L {{ item }}
-    - onlyif: test -d {{ data['destination'] }}
-    {% endif %}
-
-{{ item }}-{{ data['destination'] }}-relocate:
-    {%- if data['copy_content']|d(true) %}
-  cmd.run:
-    - name: x={{ item }}; y=`basename $x`; if test -d $x; then cp -a -t {{ data['destination'] }} $x && rm -r $x; fi; ln -s -T {{ data['destination'] }}/$y {{ item }}
-    {%- else %}
-  cmd.run:
-    - name: rm -r {{ item }}; ln -s -T {{ data['destination'] }}/`basename {{ item }}` {{ item }}
-    {%- endif %}
-    - unless: test -L {{ item }}
-    - onlyif: test -d {{ data['destination'] }}
-
-    {%- for a in ('watch_in', 'require_in', 'require', 'watch') %}
-      {%- if input_data[item][a] is defined %}
-    - {{ a }}:
-      - {{ input_data[item][a] }}
-      {%- endif %}
-    {%- endfor %}
-
-    {% if data['exec_after'] is defined %}
-after-{{ item }}-{{ data['destination'] }}-relocate:
-  cmd.run:
-    - name: {{ data['exec_after'] }}
-    - require:
-      - cmd: {{ item }}-{{ data['destination'] }}-relocate
-    # TODO disabled: rewrite storage with only what we need ? - unless: test -L {{ item }}
-    - onlyif: test -d {{ data['destination'] }}
-    {% endif %}
-
   {% endfor %}
 
 {% endmacro %}

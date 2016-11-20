@@ -51,10 +51,10 @@ but be aware that the appliance takes over the following services:
 + postgresql config, postgres user "app" and database "ecs"
   + set password of user app for tcp connect to postgresql
   + does not drop any data, unless told
-+ docker and docker container (stops all container at salt-call state.highstate, expects docker0 to be the default docker bridge with default ip values)
++ docker and docker container (stops all container on salt-call state.highstate, expects docker0 to be the default docker bridge with default ip values)
 + nginx configuration
 + postfix configuration
-+ listens to port 25,80,443,465
++ listens to port 22,25,80,443,465
 
 
 ## configure appliance
@@ -123,12 +123,12 @@ Path | Description
 /salt/top.sls                   | defines the root of the state tree
 /salt/common/init.sls           | common install
 /salt/common/env.template.yml   | template used to generate a new env.yml
-/salt/common/generate-new-env.sh   | command line utility for env generation
+/salt/common/generate-new-env.sh    | command line utility for env generation
 /salt/appliance/init.sls            | ecs appliance install
-/salt/appliance/prepare-env.sh       | script started first to read environment
-/salt/appliance/prepare-appliance.sh | script started after prepare-env.sh
-/salt/appliance/prepare-ecs.sh      | script startet after prepare-appliance
-/salt/appliance/appliance.service   | systemd appliance service
+/salt/appliance/scripts/prepare-env.sh       | script started first to read environment
+/salt/appliance/scripts/prepare-appliance.sh | script started after prepare-env.sh
+/salt/appliance/scripts/prepare-ecs.sh       | script startet after prepare-appliance
+/salt/appliance/systemd/appliance.service    | systemd appliance service
 
 
 ### Environment
