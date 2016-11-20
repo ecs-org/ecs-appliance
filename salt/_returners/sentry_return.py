@@ -73,12 +73,12 @@ def returner(ret):
     '''
 
     def ret_is_not_error(result):
+        failed_states = {}
+        changed_states = {}
         if result.get('return') and isinstance(result['return'], dict):
             result_dict = result['return']
             is_staterun = all('-' in key for key in result_dict.keys())
             if is_staterun:
-                failed_states = {}
-                changed_states = {}
                 for state_id, state_result in six.iteritems(result_dict):
                     if not state_result['result']:
                         failed_states[state_id] = state_result
@@ -127,7 +127,7 @@ def returner(ret):
         else:
             logger.error('Sentry returner needs key raven:dsn in pillar')
 
-        has_error= ret_is_not_error(ret)
+        has_error= ret_is_not_error(result)
 
         if has_error:
             data['level'] = raven_config.get('error_level', 'error')

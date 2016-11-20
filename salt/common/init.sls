@@ -132,6 +132,12 @@ sentry_config:
             - os
             - saltversion
             - cpuarch
+        sentry_handler:
+          dsn: {{ sentry_dsn|replace("https:", "requests+https:") }}
+          context:
+            - os
+            - saltversion
+            - cpuarch
 {%- endif %}
 
     - append_if_not_found: True
