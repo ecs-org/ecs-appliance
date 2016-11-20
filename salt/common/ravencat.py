@@ -144,10 +144,10 @@ def main():
             if mbox:
                 mbox.close()
     else:
-        if args.request_stdin:
+        '''
             with codecs.open(sys.stdin, 'r', 'utf-8') as f:
                 args.request= json.loads(f.read())
-
+        '''
         success, eventid = send_message(client, args.message, args.__dict__)
 
 if __name__ == '__main__':
