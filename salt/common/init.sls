@@ -101,7 +101,6 @@ python{{ v }}-common-packages:
 # if we have a sentry_dsn set, to saltstack minon config
 {% set sentry_dsn = salt['pillar.get']("appliance:sentry_dsn", false) or
   salt['pillar.get']("appliance:sentry:dsn", false) %}
-requests+https
 
 /etc/salt/minion:
   file.managed:
@@ -114,14 +113,13 @@ sentry_config:
     - marker_start: "# START sentry config"
     - marker_end: "# END sentry config"
     - content: |
-        # START sentry config
 {%- if sentry_dsn %}
         sentry_handler:
           dsn: {{ sentry_dsn|replace("https:", "requests+https:") }}
           log_level: error
           site: {{ salt['pillar.get']('appliance:domain') }}
 {%- endif %}
-        # END sentry config
+
     - append_if_not_found: True
     - show_changes: True
 
