@@ -36,6 +36,7 @@ from __future__ import absolute_import
 import logging
 
 # Import Salt libs
+import salt.loader
 import salt.utils.jid
 import salt.ext.six as six
 
@@ -56,6 +57,8 @@ def __virtual__():
     if not has_raven:
         return False, 'Could not import sentry returner; ' \
                       'raven python client is not installed.'
+    __grains__ = salt.loader.grains(__opts__)
+    __salt__ = salt.loader.minion_mods(__opts__)
     return __virtualname__
 
 
@@ -72,29 +75,29 @@ def returner(ret):
     them as such. Changes will be reported at info level.
     '''
 
-    def ret_is_not_error(result):
+    def ret_is_success(result):
         failed_states = {}
         changed_states = {}
-        if result.get('return') and isinstance(result['return'], dict):
-            result_dict = result['return']
-            is_staterun = all('-' in key for key in result_dict.keys())
-            if is_staterun:
-                for state_id, state_result in six.iteritems(result_dict):
+        success = False
+
+        if result.get('success') and result.get('retcode', 0) == 0:
+            success = True
+
+        if result.get('return'):
+            if isinstance(result['return'], dict):
+                for state_id, state_result in six.iteritems(result['return']):
                     if not state_result['result']:
                         failed_states[state_id] = state_result
                     if (state_result['result'] and
-                        len(state_result['return'][data]['changes']) > 0):
+                        len(state_result['changes']) > 0):
                         changed_states[state_id] = state_result
+            else:
+                if not result.get('success') or result.get('retcode', 0) != 0:
+                    failed_states[result['fun']] = result['return']
 
-                result['changed_states'] = changed_states
-                result['failed_states'] = failed_states
-                if failed_states:
-                    return False
-
-        if result.get('success') and result.get('retcode', 0) == 0:
-            return True
-
-        return False
+        result['changed_states'] = changed_states
+        result['failed_states'] = failed_states
+        return success
 
     def get_message():
         return 'func: {fun}, jid: {jid}'.format(fun=ret['fun'], jid=ret['jid'])
@@ -127,7 +130,7 @@ def returner(ret):
         else:
             logger.error('Sentry returner needs key raven:dsn in pillar')
 
-        has_error= ret_is_not_error(result)
+        has_error= not ret_is_success(result)
 
         if has_error:
             data['level'] = raven_config.get('error_level', 'error')

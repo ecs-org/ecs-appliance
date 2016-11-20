@@ -47,8 +47,7 @@ from salt.log import LOG_LEVELS
 try:
     import raven
     from raven.handlers.logging import SentryHandler
-    from raven.transport import TransportRegistry, default_transports
-    from raven.utils.urlparse import urlparse
+    from raven.transport.requests import RequestsHTTPTransport
     HAS_RAVEN = True
 except ImportError:
     HAS_RAVEN = False
@@ -74,13 +73,6 @@ def setup_handlers():
         log.debug('No \'sentry_handler\' key was found in the configuration')
         return False
     options = {}
-    dsn = get_config_value('dsn')
-    transport_registry = TransportRegistry(default_transports)
-    url = urlparse(dsn)
-    if not transport_registry.supported_scheme(url.scheme):
-        raise ValueError('Unsupported Sentry DSN scheme: {0}'.format(url.scheme))
-
-    # site: An optional, arbitrary string to identify this client installation.
     options.update({
         # site: An optional, arbitrary string to identify this client
         # installation
@@ -121,10 +113,11 @@ def setup_handlers():
         'processors': get_config_value('processors'),
 
         # dsn: Ensure the DSN is passed into the client
-        'dsn': dsn
+        'dsn': get_config_value('dsn'),
     })
 
-    client = raven.Client(**options)
+    client = raven.Client(**options, transport=RequestsHTTPTransport)
+
     context = get_config_value('context')
     context_dict = {}
     if context is not None:
