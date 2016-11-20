@@ -118,7 +118,7 @@ python-common-packages:
 # replace https in sentry_dsn with requests+https to force transport via requests
 sentry_config:
   file.blockreplace:
-    - name: /etc/salt/minon
+    - name: /etc/salt/minion
     - marker_start: "# START sentry config"
     - marker_end: "# END sentry config"
     - content: |
