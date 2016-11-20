@@ -116,8 +116,9 @@ python-common-packages:
 {% set sentry_dsn = salt['pillar.get']("appliance:sentry_dsn", false) or
   salt['pillar.get']("appliance:sentry:dsn", false) %}
 # replace https in sentry_dsn with requests+https to force transport via requests
-# curent saltstack 2016.3.1 has issue with non standard transport:
+# curent saltstack 2016.3.1 has bug in raven setup:
 #   https://github.com/saltstack/salt/pull/34157
+#   https://github.com/saltstack/salt/issues/34152
 sentry_config:
   file.blockreplace:
     - name: /etc/salt/minion
@@ -131,10 +132,6 @@ sentry_config:
             - os
             - saltversion
             - cpuarch
-        sentry_handler_disabled:
-          dsn: {{ sentry_dsn|replace("https:", "requests+https:") }}
-          log_level: error
-          site: {{ salt['pillar.get']('appliance:domain') }}
 {%- endif %}
 
     - append_if_not_found: True

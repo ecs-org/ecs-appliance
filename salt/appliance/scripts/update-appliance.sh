@@ -40,9 +40,9 @@ target=$(gosu app git rev-parse origin/$APPLIANCE_GIT_BRANCH)
 
 # get current running commit id
 last_running=$(gosu app git rev-parse HEAD)
-appliance_status "Appliance Update" "Updating appliance from $last_running to $target"
 
 if is_cleanrepo; then
+    appliance_status "Appliance Update" "Updating appliance from $last_running to $target"
     gosu app git checkout -f $APPLIANCE_GIT_BRANCH
     gosu app git reset --hard origin/$APPLIANCE_GIT_BRANCH
 else
@@ -53,9 +53,9 @@ if test "$last_running" != "$target"; then
     # appliance code has updated, we need a rebuild of ecs container
     touch /etc/appliance/rebuild_wanted_ecs
 fi
-salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
-err=$?
 
+salt-call state.highstate pillar='{"appliance": {"enabled": true}}' --retcode-passthrough
+err=$?
 if test $err -ne 0; then
     appliance_exit "Appliance Error" "Error: salt-call state.highstate failed with error $err"
 fi
