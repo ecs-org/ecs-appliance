@@ -1,4 +1,4 @@
-{% from "python/lib.sls" import pip3_install %}
+{% from "python/lib.sls" import pip_install %}
 
 include:
   - .user
@@ -77,15 +77,19 @@ set_locale:
     - onchanges:
       - file: /etc/systemd/journald.conf
 
-python3-common-packages:
+# python3 packages needed for flatyaml and ravencat
+# python2 packages needed for saltstack raven
+{% for v in ['2', '3'] %}
+python{{ v }}-common-packages:
   pkg.installed:
     - pkgs:
-      - python3-yaml
-      - python3-requests
+      - python{{ v }}-yaml
+      - python{{ v }}-requests
     - require:
       - sls: python
 
-{{ pip3_install('raven') }}
+{{ pip_install('raven', v) }}
+{% endfor %}
 
 {% for n in ['flatyaml.py', 'ravencat.py'] %}
 /usr/local/bin/{{ n }}:
@@ -93,6 +97,28 @@ python3-common-packages:
     - source: salt://common/{{ n }}
     - mode: "0755"
 {% endfor %}
+
+# if we have a sentry_dsn set, to saltstack minon config
+{% set sentry_dsn = salt['pillar.get']("appliance:sentry_dsn", false) or
+  salt['pillar.get']("appliance:sentry:dsn", false) %}
+requests+https
+
+# replace https in sentry_dsn with requests+https to force transport via requests
+/etc/salt/minion:
+  file.blockreplace:
+    - marker_start: "# START sentry config"
+    - marker_end: "# END sentry config"
+    - content: |
+        # START sentry config
+{%- if sentry_dsn %}
+        sentry_handler:
+          dsn: {{ sentry_dsn|(replace("https:", "requests+https:")) }}
+          log_level: error
+          site: {{ salt['pillar.get']('appliance:domain') }}
+{%- endif}
+        # END sentry config
+    - append_if_not_found: True
+    - show_changes: True
 
 /usr/local/etc/env.include:
   file.managed:
