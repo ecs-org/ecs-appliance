@@ -1,4 +1,4 @@
-{% from "python/lib.sls" import pip_install %}
+{% from "python/lib.sls" import pip2_install, pip3_install %}
 
 include:
   - .user
@@ -77,19 +77,28 @@ set_locale:
     - onchanges:
       - file: /etc/systemd/journald.conf
 
+/usr/local/etc/env.include:
+  file.managed:
+    - source: salt://common/env.include
+
+/usr/local/sbin/generate-new-env.sh:
+  file.managed:
+    - source: salt://common/generate-new-env.sh
+    - mode: "0755"
+
 # python3 packages needed for flatyaml and ravencat
 # python2 packages needed for saltstack raven
-{% for v in ['2', '3'] %}
-python{{ v }}-common-packages:
+python-common-packages:
   pkg.installed:
     - pkgs:
-      - python{{ v }}-yaml
-      - python{{ v }}-requests
+      - python-yaml
+      - python-requests
+      - python3-yaml
+      - python3-requests
     - require:
       - sls: python
-
-{{ pip_install('raven', v) }}
-{% endfor %}
+{{ pip2_install('raven') }}
+{{ pip3_install('raven') }}
 
 {% for n in ['flatyaml.py', 'ravencat.py'] %}
 /usr/local/bin/{{ n }}:
@@ -98,14 +107,14 @@ python{{ v }}-common-packages:
     - mode: "0755"
 {% endfor %}
 
-# if we have a sentry_dsn set, to saltstack minon config
-{% set sentry_dsn = salt['pillar.get']("appliance:sentry_dsn", false) or
-  salt['pillar.get']("appliance:sentry:dsn", false) %}
-
+# standalone salt config, should be identical to the version used to bootstrap
 /etc/salt/minion:
   file.managed:
     - source: salt://minion
 
+# if we have a sentry_dsn set, add sentry to saltstack minon config
+{% set sentry_dsn = salt['pillar.get']("appliance:sentry_dsn", false) or
+  salt['pillar.get']("appliance:sentry:dsn", false) %}
 # replace https in sentry_dsn with requests+https to force transport via requests
 sentry_config:
   file.blockreplace:
@@ -122,12 +131,3 @@ sentry_config:
 
     - append_if_not_found: True
     - show_changes: True
-
-/usr/local/etc/env.include:
-  file.managed:
-    - source: salt://common/env.include
-
-/usr/local/sbin/generate-new-env.sh:
-  file.managed:
-    - source: salt://common/generate-new-env.sh
-    - mode: "0755"
