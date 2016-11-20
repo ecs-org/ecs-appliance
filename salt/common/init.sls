@@ -103,9 +103,14 @@ python{{ v }}-common-packages:
   salt['pillar.get']("appliance:sentry:dsn", false) %}
 requests+https
 
-# replace https in sentry_dsn with requests+https to force transport via requests
 /etc/salt/minion:
+  file.managed:
+    - source: salt://minion
+
+# replace https in sentry_dsn with requests+https to force transport via requests
+sentry_config:
   file.blockreplace:
+    - name: /etc/salt/minon
     - marker_start: "# START sentry config"
     - marker_end: "# END sentry config"
     - content: |
