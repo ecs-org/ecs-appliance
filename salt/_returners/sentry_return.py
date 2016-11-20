@@ -130,7 +130,7 @@ def returner(ret):
         has_error= ret_is_not_error(ret)
 
         if has_error:
-            data['level'] = raven_config.get('error_level', 'error)
+            data['level'] = raven_config.get('error_level', 'error')
             message = "Salt error on " + result['id']
             sentry_data['result'] = result['failed_states']
 
