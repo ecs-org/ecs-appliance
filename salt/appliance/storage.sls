@@ -102,7 +102,8 @@ postfix_relocate_{{ source }}:
   ], salt['pillar.get']("appliance:storage:ignore:data",false)) }}
 
 {{ relocate_setup([
-  ('/data/postgresql', '/var/lib/postgresql', 'systemctl stop postgresql', 'systemctl start postgresql')
+  ('/data/postgresql', '/var/lib/postgresql',
+    'systemctl stop postgresql', 'systemctl start postgresql'),
   ('/data/appliance', '/etc/appliance', '', ''),
   ('/data/ecs-ca', '/app/ecs-ca', '', ''),
   ('/data/ecs-storage-vault/', '/app/ecs-storage-vault', '', '')
