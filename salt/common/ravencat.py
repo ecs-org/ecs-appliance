@@ -84,8 +84,9 @@ def main():
     root = logging.getLogger('sentry.errors')
     root.setLevel(logging.DEBUG)
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--version', action='version', version=get_version())
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog='grouping by sentry uses the first line of the message')
     parser.add_argument('--verbose', action='store_true', default=True)
     parser.add_argument('--culprit', default='raven.scripts.runner')
     parser.add_argument('--logger', default='raven.cli')
@@ -94,15 +95,20 @@ def main():
     parser.add_argument('--level', default='info', choices=logging_choices)
     parser.add_argument('--tags', action=JsonAction,
         help='a json dictionary listening tag name and value')
+    parser.add_argument('--request', action=JsonAction, default={},
+        help='a json dictionary of the request')
     parser.add_argument('--dsn', action=EnvDefault,
         envvar='SENTRY_DSN', required=True,
         help='specify a sentry dsn, will use env SENTRY_DSN if unset')
-
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--mbox', type=exist_file, metavar='FILE',
-        help='mbox filename, will be read and send one message per mail')
+    group.add_argument('--mbox-message', type=exist_file, metavar='FILE',
+        help='mbox filename to parse,split and send all')
+    group.add_argument('--message', type=argparse.FileType(mode='r', encoding='utf-8'),
+        dest='message_file',
+        metavar='FILE',
+        help='filename to read message from, use "-" for stdin')
     group.add_argument('message', nargs='?',
-        help='the message to be sent; Will be used for grouping')
+        help='the message string to be sent')
 
     args = parser.parse_args()
 
@@ -121,9 +127,9 @@ def main():
         print('Error: Client reporting is disabled', file=sys.stderr)
         sys.exit(1)
 
-    if args.mbox:
+    if args.mbox_message:
         try:
-            mbox = mailbox.mbox(args.mbox)
+            mbox = mailbox.mbox(args.mbox_message)
             margs = args.__dict__
 
             for message in mbox:
@@ -144,12 +150,10 @@ def main():
             if mbox:
                 mbox.close()
     else:
-        '''
-            with codecs.open(sys.stdin, 'r', 'utf-8') as f:
-                args.request= json.loads(f.read())
-        '''
+        if args.message_file:
+            args.message= args.message_file.read()
+
         success, eventid = send_message(client, args.message, args.__dict__)
 
 if __name__ == '__main__':
-    sys.argv[0] = re.sub(r'(-script\.pyw?|\.exe)?$', '', sys.argv[0])
     main()
