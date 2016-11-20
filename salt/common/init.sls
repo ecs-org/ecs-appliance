@@ -115,7 +115,7 @@ requests+https
           dsn: {{ sentry_dsn|replace("https:", "requests+https:") }}
           log_level: error
           site: {{ salt['pillar.get']('appliance:domain') }}
-{%- endif}
+{%- endif %}
         # END sentry config
     - append_if_not_found: True
     - show_changes: True
