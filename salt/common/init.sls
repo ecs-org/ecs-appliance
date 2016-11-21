@@ -127,13 +127,13 @@ sentry_config:
     - content: |
 {%- if sentry_dsn %}
         raven:
-          dsn: {{ sentry_dsn|replace("https:", "requests+https:") }}
+          dsn: {{ sentry_dsn }}
           tags:
             - os
             - saltversion
             - cpuarch
-        sentry_handler:
-          dsn: {{ sentry_dsn|replace("https:", "requests+https:") }}
+        sentry_handler_disabled:
+          dsn: {{ sentry_dsn }}
           context:
             - os
             - saltversion

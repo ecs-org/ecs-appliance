@@ -9,7 +9,8 @@ Pillar needs something like:
 
     raven:
       dsn: https://aaaa:bbbb@app.getsentry.com/12345
-      hide_pillar: false
+      hide_pillar: true
+      hide_grains: true
       report_errors_only: true
       change_level: info
       error_level: error
@@ -22,12 +23,10 @@ Pillar needs something like:
 https://pypi.python.org/pypi/raven and
 https://pypi.python.org/pypi/requests must be installed.
 
-The pillar can be hidden on sentry return by setting hide_pillar: true.
-
 The tags list (optional) specifies grains items that will be used as sentry
 tags, allowing tagging of events in the sentry ui.
 
-To report only errors to sentry, set report_errors_only: true.
+To report only errors (but no changes) to sentry, set report_errors_only: true.
 
 '''
 from __future__ import absolute_import
@@ -57,6 +56,10 @@ def __virtual__():
     if not has_raven:
         return False, 'Could not import sentry returner; ' \
                       'raven python client is not installed.'
+    if 'raven' not in __opts__:
+        return False, 'No \'raven\' key was found in the configuration'
+    if 'dns' not in __opts__['raven']:
+        return False, 'Sentry returner needs key raven:dsn in the configuration')
     __grains__ = salt.loader.grains(__opts__)
     __salt__ = salt.loader.minion_mods(__opts__)
     return __virtualname__
@@ -108,12 +111,13 @@ def returner(ret):
         '''
         pillar_data = __salt__['pillar.raw']()
         grains = __salt__['grains.items']()
-        raven_config = pillar_data['raven']
-        hide_pillar = raven_config.get('hide_pillar')
+        raven_config = __opts__['raven']
+        hide_pillar = raven_config.get('hide_pillar', True)
+        hide_grains = raven_config.get('hide_grains', True)
         sentry_data = {
             'result': result,
             'pillar': 'HIDDEN' if hide_pillar else pillar_data,
-            'grains': grains
+            'grains': 'HIDDEN' if hide_grains else grains,
         }
         data = {
             'platform': 'python',
@@ -125,11 +129,7 @@ def returner(ret):
             for tag in raven_config['tags']:
                 tags[tag] = grains[tag]
 
-        if raven_config.get('dsn'):
-            client = Client(raven_config.get('dsn'), transport=RequestsHTTPTransport)
-        else:
-            logger.error('Sentry returner needs key raven:dsn in pillar')
-
+        client = Client(raven_config.get('dsn'), transport=RequestsHTTPTransport)
         has_error= not ret_is_success(result)
 
         if has_error:
