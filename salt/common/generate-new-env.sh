@@ -17,7 +17,7 @@ appuser=$USER
 
 sudo salt-call state.sls common.env_gen \
     pillar="{\"domain\": \"$domain\", \
-    \"template\": \"salt://appliance/env.template.yml\", \
+    \"template\": \"salt://appliance/common/env.template.yml\", \
     \"targetdir\": \"$targetdir\", \"appuser\": \"$appuser\"}" "$@"
 
 exit 0

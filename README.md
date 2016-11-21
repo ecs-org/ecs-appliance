@@ -98,6 +98,7 @@ Update Appliance (this includes also update ecs): `sudo update-appliance.sh`
   + `sudo docker exec -it ecs_ecs.web_1 /start run ./manage.py shell_plus`
 + run a new django shell with correct environment but independent of other container
   +  `sudo docker-compose -f /etc/appliance/ecs/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
++ search for salt-call output: `journalctl $(which salt-call)`
 + follow the appliance log file (backend nginx, uwsgi, beat, worker, smtpd,redis, memcached, pdfas, mocca):
     + `sudo journalctl -u appliance -f`
 + follow whole journal: `sudo journalctl -f`

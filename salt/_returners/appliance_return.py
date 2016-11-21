@@ -35,7 +35,7 @@ https://pypi.python.org/pypi/requests must be installed.
 The tags list (optional) specifies grains items that will be used as sentry
 tags, allowing tagging of events in the sentry ui.
 
-To report only errors (but no changes) to sentry, set report_errors_only: true.
+To also report changes to states in addition to errors set report_errors_only to false.
 
 '''
 from __future__ import absolute_import
@@ -70,35 +70,11 @@ def __virtual__():
     __salt__ = salt.loader.minion_mods(__opts__)
     return __virtualname__
 
-
 def get_config_value(name, default=None):
     return __salt__['pillar.get'](name, default)
 
-
-def ret_is_success(result):
-    failed_states = {}
-    changed_states = {}
-    success = False
-
-    if result.get('success') and result.get('retcode', 0) == 0:
-        success = True
-
-    if result.get('return'):
-        if isinstance(result['return'], dict):
-            for state_id, state_result in six.iteritems(result['return']):
-                if not state_result['result']:
-                    failed_states[state_id] = state_result
-                if (state_result['result'] and
-                    len(state_result['changes']) > 0):
-                    changed_states[state_id] = state_result
-        else:
-            if not result.get('success') or result.get('retcode', 0) != 0:
-                failed_states[result['fun']] = result['return']
-
-    result['changed_states'] = changed_states
-    result['failed_states'] = failed_states
-    return success
-
+def has_failed(result):
+    return not (result.get('success') and result.get('retcode', 0) == 0)
 
 def connect_sentry(result):
     '''
@@ -123,13 +99,26 @@ def connect_sentry(result):
     for tag in raven_config.get('tags', ['os', 'master', 'saltversion', 'cpuarch']):
         tags[tag] = __salt__['grains.get'](tag)
 
-    client = Client(raven_config.get('dsn'), transport=RequestsHTTPTransport)
-    has_error= not ret_is_success(result)
+    failed_states = {}
+    changed_states = {}
+    if result.get('return'):
+        if isinstance(result['return'], dict):
+            for state_id, state_result in six.iteritems(result['return']):
+                if not state_result['result']:
+                    failed_states[state_id] = state_result
+                if (state_result['result'] and
+                    len(state_result['changes']) > 0):
+                    changed_states[state_id] = state_result
+        else:
+            if not result.get('success') or result.get('retcode', 0) != 0:
+                failed_states[result['fun']] = result['return']
 
-    if has_error:
+    client = Client(raven_config.get('dsn'), transport=RequestsHTTPTransport)
+
+    if has_failed(result):
         data['level'] = raven_config.get('error_level', 'error')
         message = "Salt error on " + result['id']
-        sentry_data['result'] = result['failed_states']
+        sentry_data['result'] = failed_states
 
         try:
             msgid = client.capture('raven.events.Message',
@@ -144,7 +133,7 @@ def connect_sentry(result):
     if result['changed_states']:
         data['level'] = raven_config.get('change_level', 'info')
         message = "Salt change(s) on " + result['id']
-        sentry_data['result'] = result['changed_states']
+        sentry_data['result'] = changed_states
 
         try:
             msgid = client.capture('raven.events.Message',

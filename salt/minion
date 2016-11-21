@@ -11,6 +11,3 @@ pillar_roots:
 file_roots:
   base:
     - /app/appliance/salt
-
-# START sentry config
-# END sentry config
