@@ -129,6 +129,7 @@ Path | Description
 /salt/appliance/scripts/prepare-appliance.sh | script started after prepare-env.sh
 /salt/appliance/scripts/prepare-ecs.sh       | script startet after prepare-appliance
 /salt/appliance/systemd/appliance.service    | systemd appliance service
+/salt/appliance/ecs/docker-compose.yml       | main container group definition
 
 
 ### Environment
