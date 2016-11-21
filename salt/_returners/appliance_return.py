@@ -121,7 +121,7 @@ def connect_sentry(result):
     }
     tags = {}
     for tag in raven_config.get('tags', ['os', 'master', 'saltversion', 'cpuarch']):
-        tags[tag] = __salt__['grains.get'](grains[tag])
+        tags[tag] = __salt__['grains.get'](tag)
 
     client = Client(raven_config.get('dsn'), transport=RequestsHTTPTransport)
     has_error= not ret_is_success(result)
