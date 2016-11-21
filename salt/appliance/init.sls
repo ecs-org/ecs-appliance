@@ -39,8 +39,8 @@ include:
         DATABASE_URL=postgres://app:invalid@{{ salt['pillar.get']('docker:ip') }}:5432/ecs
     - replace: false
 
-{% for n in ['prepare-env.service', 'prepare-appliance.service',
-  'prepare-ecs.service', 'appliance.service', 'cleanup-appliance.service'] %}
+{% for n in ['prepare-env.service', 'prepare-appliance.service', 'prepare-ecs.service',
+  'appliance.service', 'appliance-cleanup.service', 'appliance-error.service'] %}
 install_{{ n }}:
   file.managed:
     - name: /etc/systemd/system/{{ n }}
