@@ -24,7 +24,7 @@ application_user:
     )
 }}
 
-{% for n in ['ecs', 'appliance'] %}
+{% for n in ['ecs', 'appliance', '.ssh'] %}
 ensure_app_user_on_{{ n }}:
   file.directory:
     - name: /app/{{ n }}

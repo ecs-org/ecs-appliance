@@ -10,9 +10,10 @@ OnFailure=appliance-error@%.service
 Type=simple
 Restart=always
 TimeoutStartSec=5min
-# if service is restartet 3 times within 5 minutes it enters failed state
-# use systemctl reset-failed to restart rate counter
-StartLimitInterval=5min
+# one minor change service restart takes 3min30sec
+# if service is restartet 3 times within 12 minutes it enters failed state
+# use `systemctl reset-failed` to restart rate counter
+StartLimitInterval=12min
 StartLimitBurst=3
 Environment=UNITNAME=%n
 # XXX manual include env because EnvironmentFile is missing multiline var support
