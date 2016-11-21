@@ -7,7 +7,7 @@ python{{ version }}-{{ package }}:
   pip.installed:
     - name: {{ package }}
   {% if version %}
-    - bin_env: {{ '/usr/local/bin/pip'+ version }}
+    - bin_env: {{ '/usr/bin/pip'+ version }}
   {% endif %}
     - require:
       - sls: python
