@@ -58,8 +58,8 @@ def __virtual__():
                       'raven python client is not installed.'
     if 'raven' not in __opts__:
         return False, 'No \'raven\' key was found in the configuration'
-    if 'dns' not in __opts__['raven']:
-        return False, 'Sentry returner needs key raven:dsn in the configuration')
+    if 'dsn' not in __opts__['raven']:
+        return False, 'Sentry returner needs key raven:dsn in the configuration'
     __grains__ = salt.loader.grains(__opts__)
     __salt__ = salt.loader.minion_mods(__opts__)
     return __virtualname__
