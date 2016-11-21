@@ -10,6 +10,11 @@ salt-minion:
     - enable: False
     - order: 10
 
+# standalone salt config, should be identical to the version used to bootstrap
+/etc/salt/minion:
+  file.managed:
+    - source: salt://minion
+
 ubuntu_ppa_support:
   pkg.installed:
     - pkgs:
@@ -106,39 +111,3 @@ python-common-packages:
     - source: salt://common/{{ n }}
     - mode: "0755"
 {% endfor %}
-
-# standalone salt config, should be identical to the version used to bootstrap
-/etc/salt/minion:
-  file.managed:
-    - source: salt://minion
-
-# if we have a sentry_dsn set, add sentry to saltstack minon config
-{% set sentry_dsn = salt['pillar.get']("appliance:sentry_dsn", false) or
-  salt['pillar.get']("appliance:sentry:dsn", false) %}
-# replace https in sentry_dsn with requests+https to force transport via requests
-# curent saltstack 2016.3.1 has bug in raven setup:
-#   https://github.com/saltstack/salt/pull/34157
-#   https://github.com/saltstack/salt/issues/34152
-sentry_config:
-  file.blockreplace:
-    - name: /etc/salt/minion
-    - marker_start: "# START sentry config"
-    - marker_end: "# END sentry config"
-    - content: |
-{%- if sentry_dsn %}
-        raven:
-          dsn: {{ sentry_dsn }}
-          tags:
-            - os
-            - saltversion
-            - cpuarch
-        sentry_handler_disabled:
-          dsn: {{ sentry_dsn }}
-          context:
-            - os
-            - saltversion
-            - cpuarch
-{%- endif %}
-
-    - append_if_not_found: True
-    - show_changes: True

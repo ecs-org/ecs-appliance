@@ -34,7 +34,7 @@ if test "$(findmnt -S "LABEL=ecs-data" -f -l -n -o "TARGET")" = ""; then
 fi
 if $need_storage_setup; then
     echo "calling appliance.storage setup"
-    salt-call state.sls appliance.storage --retcode-passthrough
+    salt-call state.sls appliance.storage --retcode-passthrough --return appliance
     err=$?
     if test "$err" -ne 0; then
         appliance_exit "Appliance Error" "Storage Setup: Error, appliance.storage setup failed with error: $err"

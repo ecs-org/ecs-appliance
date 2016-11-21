@@ -1,14 +1,14 @@
+meta:
+  env:
+    receivers:
+      - |
+          # your gpg key here
 ssh_authorized_keys:
   # you can put your ssh keys here, this is also used by cloud-init
   # - "ssh-rsa and some long glibberish somebody@somewhere"
 ssh_deprecated_keys:
   # you can copy deprecated keys here,
   # state.highstate will remove these old keys from users
-builder:
-  #
-  receiver:
-    - |
-        # your gpg key here
 appliance:
   # standby: true # optional, if set appliance will not activate
   domain: localhost
@@ -28,7 +28,8 @@ appliance:
       volatile: true
       data: true
   # # set to your sentry url, must be the same as ecs_settings: SENTRY_DSN
-  # sentry_dsn: 'https://url'
+  # sentry:
+  #   dsn: 'https://url'
   backup:
     url: ssh://app@localhost/volatile/ecs-backup-test/
     encrypt: |

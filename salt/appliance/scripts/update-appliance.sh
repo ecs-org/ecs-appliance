@@ -54,7 +54,7 @@ if test "$last_running" != "$target"; then
     touch /etc/appliance/rebuild_wanted_ecs
 fi
 
-salt-call state.highstate pillar='{"appliance": {"enabled": true}}' --retcode-passthrough
+salt-call state.highstate pillar='{"appliance": {"enabled": true}}' --retcode-passthrough --return appliance
 err=$?
 if test $err -ne 0; then
     appliance_exit "Appliance Error" "Error: salt-call state.highstate failed with error $err"
