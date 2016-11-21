@@ -1,0 +1,13 @@
+[Unit]
+Description=Appliance Error
+
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/bin/bash -c '. /usr/local/etc/env.include; userdata_to_env ecs,appliance; \
+    . /usr/local/etc/appliance.include; \
+    appliance_exit "Appliance Error" "Appliance (%I) failed to start, system in standby"'
+
+[Install]
+WantedBy=multi-user.target

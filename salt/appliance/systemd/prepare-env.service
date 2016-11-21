@@ -9,10 +9,10 @@ Before=prepare-appliance.service prepare-ecs.service appliance.service
 
 [Service]
 Type=oneshot
+RemainAfterExit=on
+TimeoutStartSec=30
 Environment="UNITNAME=%n"
 ExecStart=/usr/local/sbin/prepare-env.sh
-ExecReload=/bin/true
-RemainAfterExit=on
 
 [Install]
 WantedBy=multi-user.target

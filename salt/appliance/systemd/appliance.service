@@ -3,28 +3,32 @@ Description=Appliance
 
 Requires=prepare-env.service prepare-appliance.service prepare-ecs.service
 After=prepare-env.service prepare-appliance.service prepare-ecs.service
-Before=cleanup-appliance.service
+Before=appliance-cleanup.service
+OnFailure=appliance-error@%.service
 
 [Service]
 Type=simple
-Environment="UNITNAME=%n"
+Restart=always
+TimeoutStartSec=5min
+# if service is restartet 3 times within 5 minutes it enters failed state
+# use systemctl reset-failed to restart rate counter
+StartLimitInterval=5min
+StartLimitBurst=3
+Environment=UNITNAME=%n
+# XXX manual include env because EnvironmentFile is missing multiline var support
 # EnvironmentFile=/app/active-env.env
-# XXX workaround for systemd: manual include env because EnvironmentFile can not parse multiline vars
+Environment=ENV_YML=/app/active-env.yml
 WorkingDirectory=/etc/appliance/ecs
-ExecStart=/bin/bash -c '. /usr/local/etc/env.include; \
-    ENV_YML=/app/active-env.yml userdata_to_env ecs,appliance; \
+ExecStart=/bin/bash -c '. /usr/local/etc/env.include; userdata_to_env ecs,appliance; \
     exec /usr/local/bin/docker-compose up --abort-on-container-exit'
-ExecStartPost=/bin/bash -c 'sleep 30; . /usr/local/etc/env.include; \
-    ENV_YML=/app/active-env.yml userdata_to_env ecs,appliance; \
+ExecStartPost=/bin/bash -c '. /usr/local/etc/env.include; userdata_to_env ecs,appliance; \
+    sleep 30; \
     (docker images -q ecs/ecs:latest || echo "invalid") > /etc/appliance/last_running_ecs_image; \
     . /usr/local/etc/appliance.include; appliance_status --disable'
-ExecStop=/bin/bash -c '. /usr/local/etc/env.include; \
-    ENV_YML=/app/active-env.yml userdata_to_env ecs,appliance; \
+ExecStop=/bin/bash -c '. /usr/local/etc/env.include; userdata_to_env ecs,appliance; \
     /usr/local/bin/docker-compose -f /etc/appliance/ecs/docker-compose.yml stop'
-ExecStopPost=/bin/bash -c '. /usr/local/etc/env.include; \
-    ENV_YML=/app/active-env.yml userdata_to_env ecs,appliance; \
+ExecStopPost=/bin/bash -c '. /usr/local/etc/env.include; userdata_to_env ecs,appliance; \
     . /usr/local/etc/appliance.include; appliance_exit_standby'
-Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target

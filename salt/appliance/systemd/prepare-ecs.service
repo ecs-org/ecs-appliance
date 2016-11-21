@@ -10,12 +10,13 @@ Before=appliance.service
 
 [Service]
 Type=oneshot
-Environment="UNITNAME=%n"
-ExecStart=/bin/bash -c '. /usr/local/etc/env.include; \
-    ENV_YML=/app/active-env.yml userdata_to_env ecs,appliance; \
-    exec /usr/local/sbin/prepare-ecs.sh'
-ExecReload=/bin/true
 RemainAfterExit=on
+TimeoutStartSec=45min
+Environment=UNITNAME=%n
+Environment=ENV_YML=/app/active-env.yml
+ExecStart=/bin/bash -c '. /usr/local/etc/env.include; \
+    userdata_to_env ecs,appliance; \
+    exec /usr/local/sbin/prepare-ecs.sh'
 
 [Install]
 WantedBy=multi-user.target
