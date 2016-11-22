@@ -13,34 +13,15 @@ docker-grub-settings:
     - watch:
       - file: docker-grub-settings
 
-docker-defaults:
-  file.replace:
-    - name: /etc/default/docker
-    - pattern: |
-        ^#?DOCKER_OPTIONS=.*
-    - repl: |
-        DOCKER_OPTIONS="{{ salt['pillar.get']('docker:options', '') }}"
-    - backup: False
-    - append_if_not_found: True
-
-{% if salt['pillar.get']('http_proxy', '') != '' %}
-  {% for a in ['http_proxy', 'HTTP_PROXY'] %}
-docker-defaults-{{ a }}:
-  file.replace:
-    - name: /etc/default/docker
-    - pattern: |
-        ^#?export {{ a }}=.*
-    - repl: |
-        export {{ a }}="{{ salt['pillar.get']('http_proxy') }}"
-    - backup: False
-    - append_if_not_found: True
-  {% endfor %}
-{% endif %}
-
-docker-service:
+/etc/default/docker:
   file.managed:
-    - name: /etc/systemd/system/docker.service
-    - source: salt://docker/docker.service
+    - contents: |
+        DOCKER_OPTIONS="{{ salt['pillar.get']('docker:options', '') }}"
+{%- if salt['pillar.get']('http_proxy', '') != '' %}
+  {%- for a in ['http_proxy', 'HTTP_PROXY'] %}
+        {{ a }}="{{ salt['pillar.get']('http_proxy') }}"
+  {%- endfor %}
+{%- endif %}
 
 docker-requisites:
   pkg.installed:
@@ -64,6 +45,13 @@ docker-network:
     - require:
       - pkg: docker-requisites
 
+docker-service:
+  file.managed:
+    - name: /etc/systemd/system/docker.service
+    - source: salt://docker/docker.service
+    - require:
+      - pkg: docker
+
 docker:
   pkgrepo.managed:
     - name: 'deb http://apt.dockerproject.org/repo ubuntu-xenial main'
@@ -86,6 +74,7 @@ docker:
       - cmd: docker-grub-settings
       - pip: docker-compose
       - file: /etc/default/docker
+      - file: docker-service
     - watch:
       - file: /etc/default/docker
       - file: docker-service

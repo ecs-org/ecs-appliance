@@ -29,6 +29,7 @@ update_system:
     - name: /etc/update-manager/release-upgrades
     - pattern: "^Prompt=.*$"
     - repl: Prompt=never
+    - onlyif: test -e /etc/update-manager/release-upgrades
   pkg.uptodate:
     - refresh: True
 

@@ -6,9 +6,9 @@ include:
 python{{ version }}-{{ package }}:
   pip.installed:
     - name: {{ package }}
-  {% if version %}
+  {%- if version %}
     - bin_env: {{ '/usr/bin/pip'+ version }}
-  {% endif %}
+  {%- endif %}
     - require:
       - sls: python
 {% endmacro %}
