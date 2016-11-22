@@ -11,7 +11,7 @@ mount-{{ name }}:
     - unless: test ! -b /dev/disk/by-label/ecs-{{ name }}
 {% endmacro %}
 
-{% macro dir_setup(base, dirlist, check_for_mountpoint) %}
+{% macro dir_setup(base, dirlist, ignore_mountpoint) %}
   {% for (name, owner, mode) in dirlist %}
 {{ base }}/{{ name }}:
   file.directory:
@@ -23,7 +23,7 @@ mount-{{ name }}:
     {% if mode %}
     - dir_mode: {{ mode }}
     {% endif %}
-    {% if check_for_mountpoint %}
+    {% if not ignore_mountpoint %}
     - onlyif: mountpoint -q {{ base }}
     {% endif %}
   {% endfor %}

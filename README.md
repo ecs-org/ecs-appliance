@@ -19,10 +19,13 @@ scp env.yml root@testecs.ep3.at:/app/env.yml
 ```
 apt-get update
 apt-get -y install git
+
 GIT_SSH_COMMAND="ssh -i /app/.ssh/id_ed25519 " git clone ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs-appliance.git /app/appliance
 
+cd /app
 mkdir -p /etc/salt
 cp /app/appliance/salt/minion /etc/salt/minion
+curl -o /app/bootstrap_salt.sh -L https://bootstrap.saltstack.com
 chmod +x /app/bootstrap_salt.sh
 /app/bootstrap_salt.sh -X
 systemctl stop salt-minion
@@ -31,6 +34,10 @@ systemctl disable salt-minion
 cp /app/env.yml /app/active-env.yml
 salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
 
+gosu postgres createdb ecs -T template0 -l de_DE.utf8
+update-appliance.sh
+
+if test -e /var/run/reboot-required; then reboot now; fi
 ```
 
 

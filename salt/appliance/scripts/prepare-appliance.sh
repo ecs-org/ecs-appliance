@@ -8,6 +8,7 @@ ECS_DATABASE=${ECS_DATABASE:-ecs}
 
 # set hostname from env
 if test "$APPLIANCE_DOMAIN" != "$(hostname -f)"; then
+    echo "setting hostname to $APPLIANCE_DOMAIN"
     hostnamectl set-hostname $APPLIANCE_DOMAIN
     printf "%s" "$APPLIANCE_DOMAIN" > /etc/salt/minion_id
 fi
@@ -20,7 +21,7 @@ systemctl start nginx
 # ### storage setup
 need_storage_setup=false
 if test ! -d "/volatile/ecs-cache"; then
-    echo "Warning: cloud not find directory ecs-cache on /volatile"
+    echo "Warning: could not find directory ecs-cache on /volatile"
     need_storage_setup=true
 fi
 if test ! -d "/data/ecs-storage-vault"; then
