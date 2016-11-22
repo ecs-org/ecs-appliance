@@ -13,7 +13,11 @@ application_user:
     - name: /app/.ssh
     - user: app
     - group: app
-    - mode: 700
+    - dir_mode: 700
+    - recurse:
+      - user
+      - group
+      - mode
     - require:
       - user: application_user
 
@@ -24,7 +28,7 @@ application_user:
     )
 }}
 
-{% for n in ['ecs', 'appliance', '.ssh'] %}
+{% for n in ['ecs', 'appliance'] %}
 ensure_app_user_on_{{ n }}:
   file.directory:
     - name: /app/{{ n }}
