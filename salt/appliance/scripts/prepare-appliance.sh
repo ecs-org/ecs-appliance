@@ -5,6 +5,13 @@
 set -o pipefail
 ECS_DATABASE=${ECS_DATABASE:-ecs}
 
+
+# set hostname from env
+if test "$APPLIANCE_DOMAIN" != "$(hostname -f)"; then
+    hostnamectl set-hostname $APPLIANCE_DOMAIN
+    printf "%s" "$APPLIANCE_DOMAIN" > /etc/salt/minion_id
+fi
+
 appliance_status_starting
 # enable and start nginx (may be disabled by devupate.sh if on the same machine)
 systemctl enable nginx
