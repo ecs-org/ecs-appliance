@@ -23,7 +23,7 @@ ubuntu_ppa_support:
       - apt-transport-https
     - order: 10
 
-# upgrade everything, but stay on same release
+# upgrade everything
 update_system:
   file.replace:
     - name: /etc/update-manager/release-upgrades
@@ -52,13 +52,6 @@ system_timezone:
     - name: {{ salt['pillar.get']('timezone') }}
     - utc: True
 
-/etc/sudoers.d/ssh_auth:
-  file.managed:
-    - makedirs: True
-    - mode: "0440"
-    - contents: |
-        Defaults env_keep += "SSH_AUTH_SOCK"
-
 /etc/default/locale:
   file.managed:
     - contents: |
@@ -82,6 +75,13 @@ set_locale:
     - name: systemctl restart systemd-journald
     - onchanges:
       - file: /etc/systemd/journald.conf
+
+/etc/sudoers.d/ssh_auth:
+  file.managed:
+    - makedirs: True
+    - mode: "0440"
+    - contents: |
+        Defaults env_keep += "SSH_AUTH_SOCK"
 
 /usr/local/etc/env.include:
   file.managed:

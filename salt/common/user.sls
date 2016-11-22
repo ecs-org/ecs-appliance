@@ -21,6 +21,24 @@ application_user:
     - require:
       - user: application_user
 
+{% for i in ".bash_logout", ".bashrc", ".profile" %}
+application_skeleton_{{ i }}:
+  file.copy:
+    - name: /app/{{ i }}
+    - source: /etc/skel/{{ i }}
+    - user: app
+    - group: app
+    - unless: test /app/{{ i }} -nt /etc/skel/{{ i }}
+    - require:
+      - user: application_user
+{% endfor %}
+
+/etc/sudoers.d/90-app-sudo:
+  file.managed:
+    - makedirs: True
+    - mode: "0440"
+    - contents: |
+        app ALL=(ALL) NOPASSWD:ALL
 
 {{ ssh_keys_update('app',
     salt['pillar.get']('ssh_authorized_keys', False),
@@ -37,18 +55,6 @@ ensure_app_user_on_{{ n }}:
     - recurse:
       - user
       - group
-    - require:
-      - user: application_user
-{% endfor %}
-
-{% for i in ".bash_logout", ".bashrc", ".profile" %}
-application_skeleton_{{ i }}:
-  file.copy:
-    - name: /app/{{ i }}
-    - source: /etc/skel/{{ i }}
-    - user: app
-    - group: app
-    - unless: test /app/{{ i }} -nt /etc/skel/{{ i }}
     - require:
       - user: application_user
 {% endfor %}
