@@ -40,7 +40,7 @@ include:
     - replace: false
 
 {% for n in ['prepare-env.service', 'prepare-appliance.service', 'prepare-ecs.service',
-  'appliance.service', 'appliance-cleanup.service', 'appliance-error.service'] %}
+  'appliance.service', 'appliance-cleanup.service', 'appliance-failed@.service'] %}
 install_{{ n }}:
   file.managed:
     - name: /etc/systemd/system/{{ n }}

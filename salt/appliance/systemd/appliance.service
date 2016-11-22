@@ -4,7 +4,7 @@ Description=Appliance
 Requires=prepare-env.service prepare-appliance.service prepare-ecs.service
 After=prepare-env.service prepare-appliance.service prepare-ecs.service
 Before=appliance-cleanup.service
-OnFailure=appliance-error@%.service
+OnFailure=appliance-failed@%n.service
 
 [Service]
 Type=simple
