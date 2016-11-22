@@ -4,8 +4,8 @@ Description=ECS Preparation
 PartOf=appliance.service
 ReloadPropagatedFrom=appliance.service
 
-Requires=prepare-appliance.service
-After=prepare-appliance.service
+Requires=prepare-appliance.service docker.service
+After=prepare-appliance.service docker.service
 Before=appliance.service
 
 [Service]
