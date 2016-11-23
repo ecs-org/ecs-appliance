@@ -32,7 +32,7 @@ postgresql:
     - pattern: |
         ^host.*{{ salt['pillar.get']('docker:net') }}.*
     - repl: |
-        host     ecs             app             {{ salt['pillar.get']('docker:net') }}           md5
+        host     all             app             {{ salt['pillar.get']('docker:net') }}           md5
     - append_if_not_found: true
     - require:
       - pkg: postgresql
