@@ -16,14 +16,23 @@ appliance:
     client_certs_mandatory: false
     # key: filename-key.pem # optional, if set ssl key for https host will be used
     # cert: filename-cert.pem # optional, if set ssl key for https host will be used
+
   # # set to your sentry url, must be the same as ecs_settings: SENTRY_DSN
   # sentry:
   #   dsn: 'https://url'
   # git:
-  #   branch: stable # defaults to master
-  #   source: ssh://git@gogs.omoikane.ep3.at:10022/ecs-appliance/ecs.git
+  #   branch: master # default see appliance.include
+  #   source: git_url # default see appliance.include
+  #   ssh_command: ssh -i /app/.ssh/git-source.id # default is "ssh"
+  # extra:  # write out extra files on appliance configure
+  #   files:
+  #     - path: /path/of/filename
+  #       content: |
+  #           # Your content here
+  #       owner: user:group
+  #       permissions: "0600"
   # env:
-  #   recipients: # these user will get the gpg encrypted tar.gz archive of the new env
+  #   recipients: # list of user that get the gpg encrypted tar.gz archive of the new env
   #     key_name@another.domain.name: |
   #         # your public gpg key here
   storage:
@@ -70,9 +79,10 @@ appliance:
         =ix16
         -----END PGP PRIVATE KEY BLOCK-----
 ecs:
-  git:
-    # branch: deployment_fixes , defaults to master
-    # source: ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs.git
+  # git:
+  #   branch: stable # default see appliance.include
+  #   source: git_url # default see appliance.include
+  #   ssh_command: ssh -i /app/.ssh/git-source.id # default is "ssh"
   # database: # default: ecs , used internal for service
   migrate:
     auto: true
