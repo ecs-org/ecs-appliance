@@ -10,12 +10,12 @@ if test $? -ne 0; then
 fi
 echo -n "found user-data type: "
 printf '%s' "$userdata_yaml" | grep USERDATA_TYPE
-echo "write userdata to /app/active-env.yml"
-printf "%s" "$userdata_yaml" > /app/active-env.yml
-chmod 0600 /app/active-env.yml
+echo "write userdata to /run/active-env.yml"
+printf "%s" "$userdata_yaml" > /run/active-env.yml
+chmod 0600 /run/active-env.yml
 
 # test: export active yaml into environment
-ENV_YML=/app/active-env.yml userdata_to_env ecs,appliance
+ENV_YML=/run/active-env.yml userdata_to_env ecs,appliance
 if test $? -ne 0; then
     appliance_exit "Appliance Error" "Could not activate userdata environment"
 fi

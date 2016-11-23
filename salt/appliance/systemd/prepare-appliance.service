@@ -13,7 +13,7 @@ Type=oneshot
 RemainAfterExit=on
 TimeoutStartSec=30min
 Environment=UNITNAME=%n
-Environment=ENV_YML=/app/active-env.yml
+Environment=ENV_YML=/run/active-env.yml
 ExecStart=/bin/bash -c '. /usr/local/etc/env.include; \
     userdata_to_env ecs,appliance; \
     exec /usr/local/sbin/prepare-appliance.sh'

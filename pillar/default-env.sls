@@ -1,8 +1,3 @@
-meta:
-  env:
-    receivers:
-      - |
-          # your gpg key here
 ssh_authorized_keys:
   # you can put your ssh keys here, this is also used by cloud-init
   # - "ssh-rsa and some long glibberish somebody@somewhere"
@@ -21,15 +16,24 @@ appliance:
     client_certs_mandatory: false
     # key: filename-key.pem # optional, if set ssl key for https host will be used
     # cert: filename-cert.pem # optional, if set ssl key for https host will be used
+  # # set to your sentry url, must be the same as ecs_settings: SENTRY_DSN
+  # sentry:
+  #   dsn: 'https://url'
+  # git:
+  #   branch: stable # defaults to master
+  #   source: ssh://git@gogs.omoikane.ep3.at:10022/ecs-appliance/ecs.git
+  # env:
+  #   recipients: # these user will get the gpg encrypted tar.gz archive of the new env
+  #     key_name@another.domain.name: |
+  #         # your public gpg key here
   storage:
     # setup: | # optional, will be executed if volatile or data can not be found
     # ignore_(volatile|data) # optional, if set, will not look for ecs-volatile or ecs-data filesystem
     ignore:
       volatile: true
       data: true
-  # # set to your sentry url, must be the same as ecs_settings: SENTRY_DSN
-  # sentry:
-  #   dsn: 'https://url'
+    # proxy_cache: false # proxy_cache: if true 10 additional GB are used
+    # for operating polipo, a http proxy cache
   backup:
     url: ssh://app@localhost/volatile/ecs-backup-test/
     encrypt: |
@@ -66,6 +70,10 @@ appliance:
         =ix16
         -----END PGP PRIVATE KEY BLOCK-----
 ecs:
+  git:
+    # branch: deployment_fixes , defaults to master
+    # source: ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs.git
+  # database: # default: ecs , used internal for service
   migrate:
     auto: true
   userswitcher:

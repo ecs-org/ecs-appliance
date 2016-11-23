@@ -17,8 +17,8 @@ StartLimitInterval=12min
 StartLimitBurst=3
 Environment=UNITNAME=%n
 # XXX manual include env because EnvironmentFile is missing multiline var support
-# EnvironmentFile=/app/active-env.env
-Environment=ENV_YML=/app/active-env.yml
+# EnvironmentFile=/run/active-env.env
+Environment=ENV_YML=/run/active-env.yml
 WorkingDirectory=/etc/appliance/ecs
 ExecStart=/bin/bash -c '. /usr/local/etc/env.include; userdata_to_env ecs,appliance; \
     exec /usr/local/bin/docker-compose up --abort-on-container-exit'

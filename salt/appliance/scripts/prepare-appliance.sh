@@ -3,8 +3,6 @@
 . /usr/local/etc/appliance.include
 
 set -o pipefail
-ECS_DATABASE=${ECS_DATABASE:-ecs}
-
 
 # set hostname from env
 if test "$APPLIANCE_DOMAIN" != "$(hostname -f)"; then

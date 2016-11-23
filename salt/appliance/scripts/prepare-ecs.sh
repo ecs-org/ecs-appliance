@@ -4,9 +4,7 @@
 
 build_only=false
 target="invalid"
-ECS_GIT_BRANCH="${ECS_GIT_BRANCH:-deployment_fixes}"
-ECS_GIT_SOURCE="${ECS_GIT_SOURCE:-ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs.git}"
-ECS_DATABASE=ecs
+
 if test "$1" = "--build-only"; then build_only=true; shift; fi
 
 ecs_status()
