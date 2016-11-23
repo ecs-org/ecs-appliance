@@ -31,15 +31,13 @@ mount-{{ name }}:
 
 {% macro relocate_setup(dirlist) %}
   {% for (name, source, pre, post) in dirlist %}
-    {% if pre %}
+    {%- if pre %}
 prefix_relocate_{{ source }}:
   cmd.run:
     - name: {{ pre }}
     - unless: test -L {{ source }}
     - onlyif: test -d {{ name }}
-    - onchanges_in:
-      - file: relocate_{{ source }}
-    {% endif %}
+    {%- endif %}
 relocate_{{ source }}:
   file.rename:
     - name: {{ name }}
@@ -47,7 +45,21 @@ relocate_{{ source }}:
     - force: true
     - unless: test -L {{ source }}
     - onlyif: test -d {{ name }}
-    {% if post %}
+    {%- if pre %}
+    - require:
+      - cmd: prefix_relocate_{{ source }}
+    {%- endif %}
+symlink_{{ source }}:
+  file.symlink:
+    - name: {{ source }}
+    - target: {{ name }}
+    - unless: test -L {{ source }}
+    - onlyif: test -d {{ name}}
+    {%- if pre %}
+    - require:
+      - file: relocate_{{ source }}
+    {%- endif %}
+    {%- if post %}
 postfix_relocate_{{ source }}:
   cmd.run:
     - name: {{ post }}
