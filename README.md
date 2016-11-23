@@ -31,7 +31,7 @@ chmod +x /app/bootstrap_salt.sh
 systemctl stop salt-minion
 systemctl disable salt-minion
 
-cp /app/env.yml /app/active-env.yml
+cp /app/env.yml /run/active-env.yml
 salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
 
 gosu postgres createdb ecs -T template0 -l de_DE.utf8
@@ -149,7 +149,10 @@ Update Appliance (this includes also update ecs): `sudo update-appliance.sh`
   + `wc $(find . -regex ".*\.\(sls\|yml\|sh\|json\|conf\|template\|include\|service\|identity\)")`
 
 
-### files
+### files sourcecode
+
++ Sourcecode from appliance is at /app/appliance on vm
++ Sourcecode from ecs is at /app/ecs on vm
 
 Path | Description
 --- | ---
@@ -163,23 +166,36 @@ Path | Description
 /salt/common/generate-new-env.sh    | command line utility for env generation
 /salt/appliance/init.sls            | ecs appliance install
 /salt/appliance/scripts/prepare-env.sh       | script started first to read environment
-/salt/appliance/scripts/prepare-appliance.sh | script started after prepare-env.sh
-/salt/appliance/scripts/prepare-ecs.sh       | script startet after prepare-appliance
-/salt/appliance/systemd/appliance.service    | systemd appliance service
+/salt/appliance/scripts/prepare-appliance.sh | script started next to setup services
+/salt/appliance/scripts/prepare-ecs.sh       | script startet mext to build container
 /salt/appliance/ecs/docker-compose.yml       | main container group definition
+/salt/appliance/systemd/appliance.service    | systemd appliance service that ties all together
+
+### startup order
+
++ prepare-env
++ prepare-appliance
++ prepare-ecs
++ appliance
 
 
 ### Environment
 
+Path | Description
+--- | ---
+/app/env.yml        | one possible local env configuration location to be read by prepare-env
+/run/active-env.yml | current activated configuration
+
 #### Buildtime Environment Usage
 
-* salt-call state.highstate (the install part) does not need an environment, but has a default one
+* salt-call state.highstate (the install part) does not need an environment,
+    but has a default one and will use any /active environment for sentry logging
 
 #### VM Runtime Environment Usage
 * prepare-appliance tries to get a environment yaml from all local and network sources
-  * writes the filtered result ("ecs,appliance") to /app/active-env.yml
-  * Storage Setup (`salt-call state.sls storage.sls`) expects /app/active-env.yml
-* prepare-ecs and the appliance.service both parse /app/active-env.yml
+  * writes the filtered result ("ecs,appliance") to /run/active-env.yml
+  * Storage Setup (`salt-call state.sls storage.sls`) expects /run/active-env.yml
+* prepare-ecs and the appliance.service both parse /run/active-env.yml
 * appliance.service calls docker-compose up with active-env
   * docker compose passes the following to the ecs/ecs* container
       * service_urls.env,
