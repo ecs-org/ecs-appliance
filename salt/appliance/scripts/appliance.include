@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ECS_DATABASE="${ECS_DATABASE:-ecs}"
-ECS_GIT_BRANCH="${ECS_GIT_BRANCH:-deployment_fixes}"
+ECS_GIT_BRANCH="${ECS_GIT_BRANCH:-master}"
 ECS_GIT_SOURCE="${ECS_GIT_SOURCE:-ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs.git}"
 APPLIANCE_GIT_BRANCH=${APPLIANCE_GIT_BRANCH:-master}
 APPLIANCE_GIT_SOURCE=${APPLIANCE_GIT_SOURCE:-ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs-appliance.git}
@@ -18,6 +18,7 @@ sentry_entry () {
         \"last_running_appliance\": \"$last_running_appliance\", \
         \"last_running_ecs_image\": \"$last_running_ecs_image\"}"
 
+    printf "Level: %s Group: %s Message: %s" "$3" "$1" "$2"
     if test -n "$APPLIANCE_SENTRY_DSN"; then
         SENTRY_DSN="$APPLIANCE_SENTRY_DSN" /usr/local/bin/ravencat.py \
             --culprit ${UNITNAME:-shellscript} \
