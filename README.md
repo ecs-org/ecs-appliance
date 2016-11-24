@@ -118,6 +118,12 @@ but be aware that the appliance takes over the following services:
 
 Update Appliance (this includes also update ecs): `sudo update-appliance.sh`
 
+## recover from failed state
+
+if the appliance.service enters fail state, it creates a file named
+"/run/appliance_failed", which you have to remove using `rm /run/appliance_failed`
+before running the service again using `sudo update-appliance.sh` or `systemctl start appliance.service`
+
 ## other usage
 
 + quick update appliance:
