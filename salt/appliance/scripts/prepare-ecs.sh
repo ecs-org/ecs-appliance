@@ -25,7 +25,7 @@ ecs_exit()
 
 
 # ### update source
-last_running=$((cat /etc/appliance/last_running_ecs || echo "invalid") 2> /dev/null)
+last_running=$(cat /etc/appliance/last_running_ecs 2> /dev/null || echo "invalid")
 need_migration=false
 target="invalid"
 if test ! -e /app/ecs; then gosu app mkdir -p /app/ecs; fi

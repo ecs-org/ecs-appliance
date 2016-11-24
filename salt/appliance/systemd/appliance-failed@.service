@@ -10,6 +10,3 @@ ExecStart=/bin/bash -c '. /usr/local/etc/env.include; userdata_to_env ecs,applia
     rm -f /etc/appliance/last_running_ecs; \
     touch /run/appliance-failed; \
     appliance_exit "Appliance Error" "Appliance (%I) failed to start, system in standby"'
-
-[Install]
-WantedBy=multi-user.target

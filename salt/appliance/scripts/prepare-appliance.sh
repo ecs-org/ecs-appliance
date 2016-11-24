@@ -66,15 +66,28 @@ if ! $(gosu postgres psql ${ECS_DATABASE} -qtc "\dx" | grep -q pg_stat_statement
     # create pg_stat_statements extension
     gosu postgres psql ${ECS_DATABASE} -c "CREATE extension pg_stat_statements;"
 fi
-pgpass=$((cat /etc/appliance/ecs/database_url.env 2> /dev/null | grep 'DATABASE_URL=' | \
-    sed -re 's/DATABASE_URL=postgres:\/\/[^:]+:([^@]+)@.+/\1/g' ) || \
-    printf '%s' 'invalid')
+pgpass=$(cat /etc/appliance/ecs/database_url.env 2> /dev/null | grep 'DATABASE_URL=' | \
+    sed -re 's/DATABASE_URL=postgres:\/\/[^:]+:([^@]+)@.+/\1/g')
+if test "$pgpass" = ""; then pgpass="invalid"; fi
 if test "$pgpass" = "invalid"; then
     # set app user postgresql password to a random string and write to service_urls.env
     pgpass=$(HOME=/root openssl rand -hex 8)
     gosu postgres psql -c "ALTER ROLE app WITH ENCRYPTED PASSWORD '"${pgpass}"';"
     sed -ri "s/(postgres:\/\/app:)[^@]+(@[^\/]+\/).+/\1${pgpass}\2${ECS_DATABASE}/" /etc/appliance/ecs/database_url.env
     # DATABASE_URL=postgres://app:invalidpassword@1.2.3.4:5432/ecs
+fi
+
+# ### extra files
+if test "$APPLIANCE_EXTRA_FILES_LEN" != ""; then
+    for i in $(seq 0 $(( $APPLIANCE_EXTRA_FILES_LEN -1 )) ); do
+        fieldname="APPLIANCE_EXTRA_FILES_${i}_PATH"; fname="${!fieldname}"
+        fieldname="APPLIANCE_EXTRA_FILES_${i}_OWNER"; fowner="${!fieldname}"
+        fieldname="APPLIANCE_EXTRA_FILES_${i}_PERMISSIONS"; fperm="${!fieldname}"
+        fieldname="APPLIANCE_EXTRA_FILES_${i}_CONTENT"; fcontent="${!fieldname}"
+        printf "%s" "$fcontent" > $fname
+        if test "$fowner" != ""; then chown $fowner $fname; fi
+        if test "$fperm" != ""; then chmod $fperm $fname; fi
+    done
 fi
 
 # ### backup setup

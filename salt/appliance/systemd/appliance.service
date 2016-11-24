@@ -7,13 +7,15 @@ After=prepare-env.service prepare-appliance.service prepare-ecs.service
 Before=appliance-cleanup.service
 OnFailure=appliance-failed@%n.service
 
+# service enters failed state if:
+#   it is restarted 3 times within 15 minutes (one minor-change service restart takes 3min30sec)
+#   appliance_failed is called
+# use `rm /run/appliance-failed; systemctl reset-failed` to recover from a failed state
+
 [Service]
 Type=simple
 Restart=always
 TimeoutStartSec=5min
-# one minor change service restart takes 3min30sec
-# if service is restartet 3 times within 15 minutes it enters failed state
-# use `systemctl reset-failed` to restart rate counter
 StartLimitInterval=15min
 StartLimitBurst=3
 Environment=UNITNAME=%n
@@ -26,6 +28,7 @@ ExecStart=/bin/bash -c '. /usr/local/etc/env.include; userdata_to_env ecs,applia
 ExecStartPost=/bin/bash -c '. /usr/local/etc/env.include; userdata_to_env ecs,appliance; \
     sleep 30; \
     (docker images -q ecs/ecs:latest || echo "invalid") > /etc/appliance/last_running_ecs_image; \
+    rm -f /etc/appliance/last_failed_ecs; \
     . /usr/local/etc/appliance.include; appliance_status --disable'
 ExecStop=/bin/bash -c '. /usr/local/etc/env.include; userdata_to_env ecs,appliance; \
     /usr/local/bin/docker-compose -f /etc/appliance/ecs/docker-compose.yml stop'

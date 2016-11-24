@@ -7,11 +7,11 @@ APPLIANCE_GIT_BRANCH=${APPLIANCE_GIT_BRANCH:-master}
 APPLIANCE_GIT_SOURCE=${APPLIANCE_GIT_SOURCE:-ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs-appliance.git}
 
 sentry_entry () {
-    last_running_ecs=$((cat /etc/appliance/last_running_ecs || echo "invalid") 2> /dev/null)
-    last_build_ecs=$((cat /etc/appliance/last_build_ecs || echo "invalid") 2> /dev/null)
-    last_running_appliance=$((cat /etc/appliance/last_running_appliance || echo "invalid") 2> /dev/null)
-    last_running_ecs_image=$((cat /etc/appliance/last_running_ecs_image || echo "invalid") 2> /dev/null)
-    last_failed_ecs=$((cat /etc/appliance/last_failed_ecs || echo "invalid") 2> /dev/null)
+    last_running_ecs=$(cat /etc/appliance/last_running_ecs 2> /dev/null || echo "invalid")
+    last_build_ecs=$(cat /etc/appliance/last_build_ecs 2> /dev/null || echo "invalid")
+    last_running_appliance=$(cat /etc/appliance/last_running_appliance 2> /dev/null || echo "invalid")
+    last_running_ecs_image=$(cat /etc/appliance/last_running_ecs_image 2> /dev/null || echo "invalid")
+    last_failed_ecs=$(cat /etc/appliance/last_failed_ecs 2> /dev/null || echo "invalid")
     current_appliance=$(gosu app git -C /app/appliance rev-parse HEAD)
     tags="{\"group\": \"$1\", \
         \"last_running_ecs\": \"$last_running_ecs\", \
@@ -77,7 +77,7 @@ appliance_failed()
 }
 
 appliance_exit_standby () {
-    appliance_exit "Appliance Standby" "Appliance is in standby" "warning"
+    appliance_exit "Appliance Standby" "Appliance is in standby" "debug"
 }
 
 is_truestr () {
