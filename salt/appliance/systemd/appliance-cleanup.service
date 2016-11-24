@@ -1,11 +1,10 @@
 [Unit]
 Description=Appliance Cleanup
 
-PartOf=appliance.service
-ReloadPropagatedFrom=appliance.service
-
 Requires=docker.service appliance.service
+PartOf=appliance.service
 After=appliance.service
+ReloadPropagatedFrom=appliance.service
 
 [Service]
 Type=oneshot
