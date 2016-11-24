@@ -10,7 +10,7 @@ it can be stacked on top of the developer vm, but is independend of it.
 
 + on work laptop:
 
-ssh root@target.vm.ip /bin/bash -c "mkdir -p /app/.ssh"
+ssh root@target.vm.ip '/bin/bash -c "mkdir -p /app/.ssh"'
 scp cloneecs_id_ed25519 root@target.vm.ip:/app/.ssh/id_ed25519
 scp target.domain.name.env.yml root@target.vm.ip:/app/env.yml
 

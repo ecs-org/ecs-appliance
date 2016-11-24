@@ -42,7 +42,7 @@ else
     current_source=$(gosu app git config --get remote.origin.url || echo "")
     if test "$ECS_GIT_SOURCE" != "$current_source"; then
         sentry_entry "Appliance Update" "Warning: ecs has different upstream sources, will re-clone. Current: \"$current_source\", new: \"$ECS_GIT_SOURCE\""
-        cd /; rm -r /app/ecs; gosu app mkdir -p /app/ecs; cd /app/ecs
+        cd /; rm -r /app/ecs; mkdir -p /app/ecs; chown app:app /app/ecs; cd /app/ecs
     fi
     # clone source if currently not existing
     if test ! -e /app/ecs/ecs/settings.py; then
