@@ -4,48 +4,54 @@
 
 is_cleanrepo(){
     local repo="${1:-.}"
-    if ! git -C $repo diff-files --quiet --ignore-submodules --; then
+    if ! gosu app git -C $repo diff-files --quiet --ignore-submodules --; then
         echo "Error: abort, your working directory is not clean."
-        git  -C $repo --no-pager diff-files --name-status -r --ignore-submodules --
+        gosu app git -C $repo --no-pager diff-files --name-status -r --ignore-submodules --
         return 1
     fi
-    if ! git -C $repo diff-index --cached --quiet HEAD --ignore-submodules --; then
+    if ! gosu app git -C $repo diff-index --cached --quiet HEAD --ignore-submodules --; then
         echo "Error: abort, you have cached and or staged changes"
-        git -C $repo --no-pager diff-index --cached --name-status -r --ignore-submodules HEAD --
+        gosu app git -C $repo --no-pager diff-index --cached --name-status -r --ignore-submodules HEAD --
         return 1
     fi
-    if test "$(git -C $repo ls-files --other --exclude-standard --directory)" != ""; then
+    if test "$(gosu app git -C $repo ls-files --other --exclude-standard --directory)" != ""; then
         echo "Error: abort, working directory has extra files"
-        git -C $repo --no-pager ls-files --other --exclude-standard --directory
+        gosu app git -C $repo --no-pager ls-files --other --exclude-standard --directory
         return 1
     fi
-    if test "$(git -C $repo log --branches --not --remotes --pretty=format:'%H')" != ""; then
+    if test "$(gosu app git -C $repo log --branches --not --remotes --pretty=format:'%H')" != ""; then
         echo "Error: abort, there are unpushed changes"
-        git -C $repo --no-pager log --branches --not --remotes --pretty=oneline
+        gosu app git -C $repo --no-pager log --branches --not --remotes --pretty=oneline
         return 1
     fi
     return 0
 }
 
-appliance_status "Appliance Update" "Updating appliance"
+if test ! -e /app/appliance; then gosu app mkdir -p /app/appliance; fi
 cd /app/appliance
+if ! is_cleanrepo; then
+    appliance_exit "Appliance Error" "Appliance directory not clean, can not update"
+fi
+appliance_status "Appliance Update" "Updating appliance"
+# if APPLIANCE_GIT_SOURCE is different to current remote repository,
+#   or if current source dir is empty: delete source, re-clone
+current_source=$(gosu app git config --get remote.origin.url || echo "")
+if test "$APPLIANCE_GIT_SOURCE" != "$current_source"; then
+    sentry_entry "Appliance Update" "Warning: appliance has different upstream sources, will re-clone. Current: \"$current_source\", new: \"$APPLIANCE_GIT_SOURCE\""
+    cd /; rm -r /app/appliance; gosu app mkdir -p /app/appliance; cd /app/appliance
+    gosu app git clone --branch $APPLIANCE_GIT_BRANCH $APPLIANCE_GIT_SOURCE /app/appliance
+fi
 
 # fetch all updates from origin
 gosu app git fetch -a -p
-
 # set target to latest branch commit id
 target=$(gosu app git rev-parse origin/$APPLIANCE_GIT_BRANCH)
-
 # get current running commit id
 last_running=$(gosu app git rev-parse HEAD)
-
-if is_cleanrepo; then
-    appliance_status "Appliance Update" "Updating appliance from $last_running to $target"
-    gosu app git checkout -f $APPLIANCE_GIT_BRANCH
-    gosu app git reset --hard origin/$APPLIANCE_GIT_BRANCH
-else
-    appliance_exit "Appliance Error" "Error: appliance directory not clean, can not update"
-fi
+# hard update source
+appliance_status "Appliance Update" "Updating appliance from $last_running to $target"
+gosu app git checkout -f $APPLIANCE_GIT_BRANCH
+gosu app git reset --hard origin/$APPLIANCE_GIT_BRANCH
 
 if test "$last_running" != "$target"; then
     # appliance code has updated, we need a rebuild of ecs container
@@ -55,7 +61,7 @@ fi
 salt-call state.highstate pillar='{"appliance": {"enabled": true}}' --retcode-passthrough --return appliance
 err=$?
 if test $err -ne 0; then
-    appliance_exit "Appliance Error" "Error: salt-call state.highstate failed with error $err"
+    appliance_exit "Appliance Error" "salt-call state.highstate failed with error $err"
 fi
 
 # save executed commit

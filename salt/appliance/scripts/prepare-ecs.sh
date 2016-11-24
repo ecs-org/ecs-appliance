@@ -3,8 +3,6 @@
 . /usr/local/etc/appliance.include
 
 build_only=false
-target="invalid"
-
 if test "$1" = "--build-only"; then build_only=true; shift; fi
 
 ecs_status()
@@ -27,35 +25,36 @@ ecs_exit()
 
 
 # ### update source
+last_running=$((cat /etc/appliance/last_running_ecs || echo "invalid") 2> /dev/null)
+need_migration=false
+target="invalid"
+if test ! -e /app/ecs; then gosu app mkdir -p /app/ecs; fi
 cd /app/ecs
-printf "%s" "invalid" > /etc/appliance/last_build_ecs
 
-# get target commit hash
 if test -e /app/bin/devupdate.sh; then
     target="devserver"
-elif test "$ECS_GIT_COMMITID" != ""; then
-    target="$ECS_GIT_COMMITID"
-fi
-if test ! -e /app/ecs/ecs/settings.py; then
-    # clone source if currently not existing
-    gosu app git clone --branch $ECS_GIT_BRANCH $ECS_GIT_SOURCE /app/ecs
-fi
-if test "$target" != "devserver"; then
-    # fetch all updates from origin, except if devserver
-    gosu app git fetch -a -p
-fi
-if test "$target" = "invalid"; then
-    # if target still invalid, set target to latest branch commit
-    target=$(gosu app git rev-parse origin/$ECS_GIT_BRANCH)
-fi
-# get last_running commit hash
-if test -e /etc/appliance/last_running_ecs; then
-    last_running=$(cat /etc/appliance/last_running_ecs || echo "invalid")
 else
-    last_running="invalid"
-fi
-need_migration=false
-if test $target != "devserver"; then
+    if test "$ECS_GIT_COMMITID" != ""; then
+        target="$ECS_GIT_COMMITID"
+    fi
+    # if ECS_GIT_SOURCE is different to current remote repository,
+    #   or if current source dir is empty: delete source
+    current_source=$(gosu app git config --get remote.origin.url || echo "")
+    if test "$ECS_GIT_SOURCE" != "$current_source"; then
+        sentry_entry "Appliance Update" "Warning: ecs has different upstream sources, will re-clone. Current: \"$current_source\", new: \"$ECS_GIT_SOURCE\""
+        cd /; rm -r /app/ecs; gosu app mkdir -p /app/ecs; cd /app/ecs
+    fi
+    # clone source if currently not existing
+    if test ! -e /app/ecs/ecs/settings.py; then
+        gosu app git clone --branch $ECS_GIT_BRANCH $ECS_GIT_SOURCE /app/ecs
+    fi
+    # fetch all updates from origin
+    gosu app git fetch -a -p
+    # if target still invalid, set target to latest branch commit
+    if test "$target" = "invalid"; then
+        target=$(gosu app git rev-parse origin/$ECS_GIT_BRANCH)
+    fi
+    # check if migration is needed
     if test "$last_running" = "invalid"; then
         need_migration=true
     else
@@ -67,8 +66,10 @@ if test $target != "devserver"; then
     gosu app git reset --hard $target
 fi
 
+
 # ### rebuild images
 cd /etc/appliance/ecs
+printf "%s" "invalid" > /etc/appliance/last_build_ecs
 
 ecs_status "Appliance Update" "Pulling base images"
 for n in redis:3 memcached tomcat:8-jre8 ubuntu:xenial; do
@@ -82,21 +83,20 @@ if test -e /etc/appliance/rebuild_wanted_ecs -o \
     if test -e /etc/appliance/rebuild_wanted_ecs; then
         rm /etc/appliance/rebuild_wanted_ecs
     fi
-    ecs_status "Appliance Update" "Building ecs $target (current= $last_running)"
+    ecs_status "Appliance Update" "Building ECS $target (current= $last_running)"
     if ! docker-compose build mocca pdfas ecs.web; then
-        sentry_entry "Appliance Update" "ecs build failed" error
+        sentry_entry "Appliance Update" "ECS build failed" error
         if "$last_running" = "invalid"; then
-            ecs_exit "Appliance Error" "build $target failed and no old build found, standby"
+            ecs_exit "Appliance Error" "ECS build $target failed and no old build found, standby"
         fi
-        ecs_status "Appliance Update" "ecs build failed, restarting old image"
+        ecs_status "Appliance Update" "ECS build failed, restarting old image"
         exit 0
     fi
-    appliance_status "Appliance Update" "Build complete, starting ecs"
+    appliance_status "Appliance Update" "ECS build complete, starting ecs"
 else
-    ecs_status "Appliance Update" "Last version = current version = $last_running, skipping build"
+    ecs_status "Appliance Update" "ECS Last version = current version = $last_running, skipping build"
     exit 0
 fi
-
 printf "%s" "$target" > /etc/appliance/last_build_ecs
 if $build_only; then
     exit 0
