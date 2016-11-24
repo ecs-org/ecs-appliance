@@ -108,7 +108,7 @@ postfix_relocate_{{ source }}:
 {{ dir_setup ('/data', [
   ('appliance', 'app', ''),
   ('ecs-ca', 1000, '0700'),
-  ('ecs-pgdump', '', ''),
+  ('ecs-pgdump', 'app', ''),
   ('ecs-storage-vault', 1000, ''),
   ('postgresql', 'postgres', ''),
   ], salt['pillar.get']("appliance:storage:ignore:data",false)) }}
