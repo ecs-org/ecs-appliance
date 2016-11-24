@@ -86,7 +86,7 @@ if test -e /etc/appliance/rebuild_wanted_ecs -o \
     ecs_status "Appliance Update" "Building ECS $target (current= $last_running)"
     if ! docker-compose build mocca pdfas ecs.web; then
         sentry_entry "Appliance Update" "ECS build failed" error
-        if "$last_running" = "invalid"; then
+        if test "$last_running" = "invalid"; then
             ecs_exit "Appliance Error" "ECS build $target failed and no old build found, standby"
         fi
         ecs_status "Appliance Update" "ECS build failed, restarting old image"
