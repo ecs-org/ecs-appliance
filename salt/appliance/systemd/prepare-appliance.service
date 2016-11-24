@@ -1,5 +1,6 @@
 [Unit]
 Description=Appliance Preparation
+ConditionPathExists=!/run/appliance-failed
 ConditionFileNotEmpty=/run/active-env.yml
 Requires=prepare-env.service
 Wants=postgresql.service nginx.service

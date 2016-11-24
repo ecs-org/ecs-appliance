@@ -30,7 +30,8 @@ is_cleanrepo(){
 if test ! -e /app/appliance; then gosu app mkdir -p /app/appliance; fi
 cd /app/appliance
 if ! is_cleanrepo; then
-    appliance_exit "Appliance Error" "Appliance directory not clean, can not update"
+    echo "Error: Appliance directory not clean, can not update /app/appliance"
+    exit 1
 fi
 appliance_status "Appliance Update" "Updating appliance"
 # if APPLIANCE_GIT_SOURCE is different to current remote repository,

@@ -43,14 +43,14 @@ if $need_storage_setup; then
     salt-call state.sls appliance.storage --retcode-passthrough --return appliance
     err=$?
     if test "$err" -ne 0; then
-        appliance_exit "Appliance Error" "Storage Setup: Error, appliance.storage setup failed with error: $err"
+        appliance_failed "Appliance Error" "Storage Setup: Error, appliance.storage setup failed with error: $err"
     fi
 fi
 
 # ### database setup
 gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw "$ECS_DATABASE"
 if test $? -ne 0; then
-    appliance_exit "Appliance Standby" "Appliance is in standby, no postgresql database named $ECS_DATABASE"
+    appliance_failed "Appliance Standby" "Appliance is in standby, no postgresql database named $ECS_DATABASE"
 fi
 if ! $(gosu postgres psql -c "\dg;" | grep app -q); then
     # create role app

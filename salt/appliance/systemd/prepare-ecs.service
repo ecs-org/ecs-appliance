@@ -1,5 +1,6 @@
 [Unit]
 Description=ECS Preparation
+ConditionPathExists=!/run/appliance-failed
 ConditionFileNotEmpty=/run/active-env.yml
 Requires=prepare-appliance.service
 Wants=docker.service

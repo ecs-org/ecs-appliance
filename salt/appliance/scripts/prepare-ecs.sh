@@ -114,13 +114,13 @@ if $need_migration; then
         mv ${dbdump}.new ${dbdump}
     else
         rm /etc/appliance/last_running_ecs
-        appliance_exit "Appliance Error" "Could not pgdump database $ECS_DATABASE before starting migration"
+        appliance_failed "Appliance Error" "Could not pgdump database $ECS_DATABASE before starting migration"
     fi
     appliance_status "Appliance Update" "Migrating ecs database"
     (docker images -q ecs/ecs:latest || echo "invalid") > /etc/appliance/last_running_ecs_image
     docker-compose run --no-deps --rm --name ecs.migration ecs.web migrate
     err=$?
     if test $err -ne 0; then
-        appliance_exit "Appliance Error" "Migration Error"
+        appliance_failed "Appliance Error" "Migration Error"
     fi
 fi

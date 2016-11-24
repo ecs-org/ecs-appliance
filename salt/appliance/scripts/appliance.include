@@ -66,6 +66,14 @@ appliance_exit()
     exit 1
 }
 
+appliance_failed()
+{
+    appliance_status "$1" "$2"
+    sentry_entry "$1" "$2" "$3"
+    touch /run/appliance-failed
+    exit 1
+}
+
 appliance_exit_standby () {
     appliance_exit "Appliance Standby" "Appliance is in standby" "warning"
 }

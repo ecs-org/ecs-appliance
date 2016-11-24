@@ -1,5 +1,6 @@
 [Unit]
 Description=Appliance
+ConditionPathExists=!/run/appliance-failed
 ConditionFileNotEmpty=/run/active-env.yml
 Requires=prepare-env.service prepare-appliance.service prepare-ecs.service
 After=prepare-env.service prepare-appliance.service prepare-ecs.service
@@ -11,9 +12,9 @@ Type=simple
 Restart=always
 TimeoutStartSec=5min
 # one minor change service restart takes 3min30sec
-# if service is restartet 3 times within 12 minutes it enters failed state
+# if service is restartet 3 times within 15 minutes it enters failed state
 # use `systemctl reset-failed` to restart rate counter
-StartLimitInterval=12min
+StartLimitInterval=15min
 StartLimitBurst=3
 Environment=UNITNAME=%n
 # XXX manual include env because EnvironmentFile is missing multiline var support
