@@ -28,7 +28,7 @@ ecs_exit()
 last_running=$(cat /etc/appliance/last_running_ecs 2> /dev/null || echo "invalid")
 need_migration=false
 target="invalid"
-if test ! -e /app/ecs; then gosu app mkdir -p /app/ecs; fi
+if test ! -e /app/ecs; then mkdir -p /app/ecs; chown app:app /app/ecs; fi
 cd /app/ecs
 
 if test -e /app/bin/devupdate.sh; then
