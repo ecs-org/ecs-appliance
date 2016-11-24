@@ -1,9 +1,10 @@
 ssh_authorized_keys:
-  # you can put your ssh keys here, this is also used by cloud-init
   # - "ssh-rsa and some long glibberish somebody@somewhere"
+  # # you can put your ssh keys here, this is also used by cloud-init
 ssh_deprecated_keys:
-  # you can copy deprecated keys here,
-  # state.highstate will remove these old keys from users
+  # - "ssh-rsa and some long glibberish somebody@somewhere"
+  # # you can copy deprecated keys here,
+  # # state.highstate will remove these old keys from users
 appliance:
   # standby: true # optional, if set appliance will not activate
   domain: localhost
@@ -12,18 +13,22 @@ appliance:
     letsencrypt:
       # use snakeoil certs, because eg. 80,443 is behind ssh tunneling
       enabled: false
-    # client_certs_mandatory: if true, always need a client certificate
+    # client_certs_mandatory: true
+    # # if true, always need a client certificate, default false
     client_certs_mandatory: false
-    # key: filename-key.pem # optional, if set ssl key for https host will be used
-    # cert: filename-cert.pem # optional, if set ssl key for https host will be used
+    # key: filename-key.pem
+    # # if set ssl key for https host will be used, default empty
+    # cert: filename-cert.pem
+    # # if set ssl key for https host will be used, default empty
 
   # # set to your sentry url, must be the same as ecs_settings: SENTRY_DSN
   # sentry:
   #   dsn: 'https://url'
   # git:
-  #   branch: master # default see appliance.include
-  #   source: git_url # default see appliance.include
-  #   ssh_command: ssh -i /app/.ssh/git-source.id # default is "ssh"
+  #   # default see appliance.include
+  #   branch: master
+  #   source: git_url
+  #   ssh_command: ssh -i /app/.ssh/git-source.id
   # extra:  # write out extra files on appliance configure
   #   files:
   #     - path: /path/of/filename
@@ -36,13 +41,15 @@ appliance:
   #     key_name@another.domain.name: |
   #         # your public gpg key here
   storage:
-    # setup: | # optional, will be executed if volatile or data can not be found
-    # ignore_(volatile|data) # optional, if set, will not look for ecs-volatile or ecs-data filesystem
-    ignore:
+    # setup: |
+    # # optional, will be executed if volatile or data can not be found
+    # proxy_cache: true
+    # # default false, if true 10 additional GB diskspace are used
+    # # for operating polipo, a http proxy cache
+    ignore: # default false, if true: will not look for ecs-volatile or ecs-data filesystem
       volatile: true
       data: true
-    # proxy_cache: false # proxy_cache: if true 10 additional GB are used
-    # for operating polipo, a http proxy cache
+
   backup:
     url: ssh://app@localhost/volatile/ecs-backup-test/
     encrypt: |
@@ -79,10 +86,10 @@ appliance:
         =ix16
         -----END PGP PRIVATE KEY BLOCK-----
 ecs:
-  # git:
-  #   branch: stable # default see appliance.include
-  #   source: git_url # default see appliance.include
-  #   ssh_command: ssh -i /app/.ssh/git-source.id # default is "ssh"
+  # git: # default see appliance.include
+  #   branch: stable
+  #   source: git_url
+  #   ssh_command: ssh -i /app/.ssh/git-source.id
   # database: # default: ecs , used internal for service
   migrate:
     auto: true
