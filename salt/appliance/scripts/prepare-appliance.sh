@@ -84,7 +84,7 @@ if test "$APPLIANCE_EXTRA_FILES_LEN" != ""; then
         fieldname="APPLIANCE_EXTRA_FILES_${i}_OWNER"; fowner="${!fieldname}"
         fieldname="APPLIANCE_EXTRA_FILES_${i}_PERMISSIONS"; fperm="${!fieldname}"
         fieldname="APPLIANCE_EXTRA_FILES_${i}_CONTENT"; fcontent="${!fieldname}"
-        printf "%s" "$fcontent" > $fname
+        echo "$fcontent" > $fname
         if test "$fowner" != ""; then chown $fowner $fname; fi
         if test "$fperm" != ""; then chmod $fperm $fname; fi
     done
