@@ -101,9 +101,6 @@ printf "%s" "$target" > /etc/appliance/last_build_ecs
 if $build_only; then
     exit 0
 fi
-# save next about to be executed commit
-printf "%s" "$target" > /etc/appliance/last_running_ecs
-
 
 # ### migrate database
 if $need_migration; then
@@ -113,14 +110,16 @@ if $need_migration; then
     if gosu app pg_dump --encoding="utf-8" --format=custom -Z6 -f ${dbdump}.new -d $ECS_DATABASE; then
         mv ${dbdump}.new ${dbdump}
     else
-        rm /etc/appliance/last_running_ecs
         appliance_failed "Appliance Error" "Could not pgdump database $ECS_DATABASE before starting migration"
     fi
     appliance_status "Appliance Update" "Migrating ecs database"
     (docker images -q ecs/ecs:latest || echo "invalid") > /etc/appliance/last_running_ecs_image
+    printf "%s" "$target" > /etc/appliance/last_running_ecs
     docker-compose run --no-deps --rm --name ecs.migration ecs.web migrate
     err=$?
     if test $err -ne 0; then
         appliance_failed "Appliance Error" "Migration Error"
     fi
+else
+    printf "%s" "$target" > /etc/appliance/last_running_ecs
 fi
