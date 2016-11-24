@@ -1,12 +1,12 @@
 [Unit]
 Description=ECS Preparation
-
+ConditionFileNotEmpty=/run/active-env.yml
+Requires=prepare-appliance.service
+Wants=docker.service
 PartOf=appliance.service
-ReloadPropagatedFrom=appliance.service
-
-Requires=prepare-appliance.service docker.service
 After=prepare-appliance.service docker.service
 Before=appliance.service
+ReloadPropagatedFrom=appliance.service
 
 [Service]
 Type=oneshot

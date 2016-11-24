@@ -1,6 +1,5 @@
 [Unit]
 Description=Appliance Cleanup
-
 Requires=docker.service appliance.service
 PartOf=appliance.service
 After=appliance.service

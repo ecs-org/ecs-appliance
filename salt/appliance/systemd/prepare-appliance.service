@@ -1,12 +1,12 @@
 [Unit]
 Description=Appliance Preparation
-
+ConditionFileNotEmpty=/run/active-env.yml
+Requires=prepare-env.service
+Wants=postgresql.service nginx.service
 PartOf=appliance.service
+After=network.target postgresql.service nginx.service prepare-env.service
+Before=prepare-ecs.service appliance.service
 ReloadPropagatedFrom=appliance.service
-
-Requires=postgresql.service nginx.service prepare-env.service
-After=network.target postgresql.service prepare-env.service
-Before=appliance.service prepare-ecs.service
 
 [Service]
 Type=oneshot

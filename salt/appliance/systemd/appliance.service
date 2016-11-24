@@ -1,6 +1,6 @@
 [Unit]
 Description=Appliance
-
+ConditionFileNotEmpty=/run/active-env.yml
 Requires=prepare-env.service prepare-appliance.service prepare-ecs.service
 After=prepare-env.service prepare-appliance.service prepare-ecs.service
 Before=appliance-cleanup.service
