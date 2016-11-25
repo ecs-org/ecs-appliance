@@ -128,7 +128,6 @@ before running the service again using `sudo update-appliance.sh` or `systemctl 
 
 + quick update appliance:
     + `cd ~/appliance; git pull; sudo salt-call state.highstate pillar='{"appliance": "enabled": true}}'`
-+ update only ecs `sudo update-ecs.sh`
 + enter a running ecs container:
   + `sudo docker exec -it ecs_image[.startcommand]_1 /bin/bash`
   + image = ecs, mocca, pdfas, memcached, redis

@@ -14,7 +14,7 @@ include:
     - source: salt://appliance/scripts/appliance.include
 
 {% for i in ['prepare-env.sh', 'prepare-appliance.sh',
-  'prepare-ecs.sh', 'update-appliance.sh', 'update-ecs.sh'] %}
+  'prepare-ecs.sh', 'update-appliance.sh'] %}
 /usr/local/sbin/{{ i }}:
   file.managed:
     - source: salt://appliance/scripts/{{ i }}
