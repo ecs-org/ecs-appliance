@@ -1,38 +1,9 @@
 #!/bin/bash
-
 . /usr/local/etc/appliance.include
 
-is_cleanrepo(){
-    local repo="${1:-.}"
-    if ! gosu app git -C $repo diff-files --quiet --ignore-submodules --; then
-        echo "Error: abort, your working directory is not clean."
-        gosu app git -C $repo --no-pager diff-files --name-status -r --ignore-submodules --
-        return 1
-    fi
-    if ! gosu app git -C $repo diff-index --cached --quiet HEAD --ignore-submodules --; then
-        echo "Error: abort, you have cached and or staged changes"
-        gosu app git -C $repo --no-pager diff-index --cached --name-status -r --ignore-submodules HEAD --
-        return 1
-    fi
-    if test "$(gosu app git -C $repo ls-files --other --exclude-standard --directory)" != ""; then
-        echo "Error: abort, working directory has extra files"
-        gosu app git -C $repo --no-pager ls-files --other --exclude-standard --directory
-        return 1
-    fi
-    if test "$(gosu app git -C $repo log --branches --not --remotes --pretty=format:'%H')" != ""; then
-        echo "Error: abort, there are unpushed changes"
-        gosu app git -C $repo --no-pager log --branches --not --remotes --pretty=oneline
-        return 1
-    fi
-    return 0
-}
-
-if test ! -e /app/appliance; then gosu app mkdir -p /app/appliance; fi
+if test ! -e /app/appliance; then mkdir -p /app/appliance; chown app:app /app/appliance; fi
 cd /app/appliance
-if ! is_cleanrepo; then
-    echo "Error: Appliance directory not clean, can not update /app/appliance"
-    exit 1
-fi
+
 appliance_status "Appliance Update" "Updating appliance"
 # if APPLIANCE_GIT_SOURCE is different to current remote repository,
 #   or if current source dir is empty: delete source, re-clone

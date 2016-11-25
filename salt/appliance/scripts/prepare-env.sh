@@ -1,5 +1,4 @@
 #!/bin/bash
-
 . /usr/local/etc/env.include
 . /usr/local/etc/appliance.include
 

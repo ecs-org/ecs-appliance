@@ -1,44 +1,20 @@
 #!/bin/bash
-
 . /usr/local/etc/appliance.include
 
-build_only=false
-if test "$1" = "--build-only"; then build_only=true; shift; fi
-
-ecs_status()
-{
-    if $build_only; then
-        echo "INFO: muted appliance status: $1 : $2"
-    else
-        appliance_status "$1" "$2"
-    fi
-}
-ecs_exit()
-{
-    if $build_only; then
-        echo "INFO: muted appliance status: $1 : $2"
-        exit 1
-    else
-        appliance_exit "$1" "$2"
-    fi
-}
-
-
-# ### update source
 last_running=$(cat /etc/appliance/last_running_ecs 2> /dev/null || echo "invalid")
 need_migration=false
 target="invalid"
 if test ! -e /app/ecs; then mkdir -p /app/ecs; chown app:app /app/ecs; fi
 cd /app/ecs
 
+# ### update source
 if test -e /app/bin/devupdate.sh; then
     target="devserver"
 else
     if test "$ECS_GIT_COMMITID" != ""; then
         target="$ECS_GIT_COMMITID"
     fi
-    # if ECS_GIT_SOURCE is different to current remote repository,
-    #   or if current source dir is empty: delete source
+    # if ECS_GIT_SOURCE is different to current remote repository: delete source
     current_source=$(gosu app git config --get remote.origin.url || echo "")
     if test "$ECS_GIT_SOURCE" != "$current_source"; then
         sentry_entry "Appliance Update" "Warning: ecs has different upstream sources, will re-clone. Current: \"$current_source\", new: \"$ECS_GIT_SOURCE\""
@@ -46,6 +22,7 @@ else
     fi
     # clone source if currently not existing
     if test ! -e /app/ecs/ecs/settings.py; then
+        last_running="invalid"
         gosu app git clone --branch $ECS_GIT_BRANCH $ECS_GIT_SOURCE /app/ecs
     fi
     # fetch all updates from origin
@@ -71,7 +48,7 @@ fi
 cd /etc/appliance/ecs
 printf "%s" "invalid" > /etc/appliance/last_build_ecs
 
-ecs_status "Appliance Update" "Pulling base images"
+appliance_status "Appliance Update" "Pulling base images"
 for n in redis:3 memcached tomcat:8-jre8 ubuntu:xenial; do
     docker pull $n
 done
@@ -83,24 +60,22 @@ if test -e /etc/appliance/rebuild_wanted_ecs -o \
     if test -e /etc/appliance/rebuild_wanted_ecs; then
         rm /etc/appliance/rebuild_wanted_ecs
     fi
-    ecs_status "Appliance Update" "Building ECS $target (current= $last_running)"
+    appliance_status "Appliance Update" "Building ECS $target (current= $last_running)"
     if ! docker-compose build mocca pdfas ecs.web; then
         sentry_entry "Appliance Update" "ECS build failed" error
         if test "$last_running" = "invalid"; then
-            ecs_exit "Appliance Error" "ECS build $target failed and no old build found, standby"
+            appliance_exit "Appliance Error" "ECS build $target failed and no old build found, standby"
         fi
-        ecs_status "Appliance Update" "ECS build failed, restarting old image"
+        appliance_status "Appliance Update" "ECS build failed, restarting old image"
         exit 0
     fi
     appliance_status "Appliance Update" "ECS build complete, starting ecs"
 else
-    ecs_status "Appliance Update" "ECS Last version = current version = $last_running, skipping build"
+    appliance_status "Appliance Update" "ECS Last version = current version = $last_running, skipping build"
     exit 0
 fi
 printf "%s" "$target" > /etc/appliance/last_build_ecs
-if $build_only; then
-    exit 0
-fi
+
 
 # ### migrate database
 if $need_migration; then
