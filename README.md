@@ -6,7 +6,7 @@ it can be stacked on top of the developer vm, but is independend of it.
 ## installing
 
 
-### install to an empty xenial machine
+### install to an empty xenial vm
 
 + on work laptop:
 
@@ -99,7 +99,7 @@ but be aware that the appliance takes over the following services:
 
 ### production prepare
 + vagrant up
-+ make a new env.yml: `generate-new-env.sh domainname.domain /app/env.yml`
++ make a new env.yml: `generate-new-env.sh domainname.domain /app/`
 + edit your settings in /app/env.yml
 + build env into different formats: `build-env.sh /app/env.yml`
 + print out /app/env.yml.pdf
@@ -169,11 +169,12 @@ Path | Description
 /salt/appliance/init.sls            | ecs appliance install
 /salt/appliance/scripts/prepare-env.sh       | script started first to read environment
 /salt/appliance/scripts/prepare-appliance.sh | script started next to setup services
-/salt/appliance/scripts/prepare-ecs.sh       | script startet mext to build container
+/salt/appliance/scripts/prepare-ecs.sh       | script started next to build container
+/salt/appliance/scripts/update-appliance.sh  | user script to trigger appliance/ecs update
 /salt/appliance/ecs/docker-compose.yml       | main container group definition
 /salt/appliance/systemd/appliance.service    | systemd appliance service that ties all together
 
-### startup order
+### systemd startup order
 
 + prepare-env
 + prepare-appliance
@@ -181,12 +182,13 @@ Path | Description
 + appliance
 
 
-### Environment
+### Environment & Flags
 
 Path | Description
 --- | ---
 /app/env.yml        | one possible local env configuration location to be read by prepare-env
 /run/active-env.yml | current activated configuration
+/run/appliance-failed | flag to be cleared after a failed appliance start
 
 #### Buildtime Environment Usage
 
