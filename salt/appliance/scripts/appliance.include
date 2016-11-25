@@ -57,10 +57,6 @@ appliance_status () {
     fi
 }
 
-appliance_status_starting () {
-    appliance_status "Appliance Startup" "Starting up"
-}
-
 appliance_exit()
 {
     appliance_status "$1" "$2"
@@ -74,10 +70,6 @@ appliance_failed()
     sentry_entry "$1" "$2" "$3"
     touch /run/appliance-failed
     exit 1
-}
-
-appliance_exit_standby () {
-    appliance_exit "Appliance Standby" "Appliance is in standby" "debug"
 }
 
 is_truestr () {

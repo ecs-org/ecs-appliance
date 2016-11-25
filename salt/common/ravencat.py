@@ -9,6 +9,7 @@ import time
 import argparse
 import mailbox
 import email
+import pwd
 
 from raven import Client, get_version
 from raven.transport.requests import RequestsHTTPTransport
@@ -49,10 +50,6 @@ def exist_file(x):
     return x
 
 def get_uid():
-    try:
-        import pwd
-    except ImportError:
-        return None
     return pwd.getpwuid(os.geteuid())[0]
 
 def send_message(client, message, options):
@@ -88,8 +85,8 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='grouping by sentry uses the first line of the message')
     parser.add_argument('--verbose', action='store_true', default=True)
-    parser.add_argument('--culprit', default='raven.scripts.runner')
-    parser.add_argument('--logger', default='raven.cli')
+    parser.add_argument('--culprit', default='ravencat.send_message')
+    parser.add_argument('--logger', default='ravencat.main')
     parser.add_argument('--release', default='')
     parser.add_argument('--site', default='')
     parser.add_argument('--level', default='info', choices=logging_choices)
@@ -154,6 +151,7 @@ def main():
             args.message= args.message_file.read()
 
         success, eventid = send_message(client, args.message, args.__dict__)
+        sys.exit(0 if success else 1)
 
 if __name__ == '__main__':
     main()

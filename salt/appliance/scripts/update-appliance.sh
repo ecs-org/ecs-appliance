@@ -5,8 +5,7 @@ if test ! -e /app/appliance; then mkdir -p /app/appliance; chown app:app /app/ap
 cd /app/appliance
 
 appliance_status "Appliance Update" "Updating appliance"
-# if APPLIANCE_GIT_SOURCE is different to current remote repository,
-#   or if current source dir is empty: delete source, re-clone
+# if APPLIANCE_GIT_SOURCE is different to current remote, delete source, re-clone
 current_source=$(gosu app git config --get remote.origin.url || echo "")
 if test "$APPLIANCE_GIT_SOURCE" != "$current_source"; then
     sentry_entry "Appliance Update" "Warning: appliance has different upstream sources, will re-clone. Current: \"$current_source\", new: \"$APPLIANCE_GIT_SOURCE\""
@@ -38,6 +37,5 @@ fi
 
 # save executed commit
 printf "%s" "$target" > /etc/appliance/last_running_appliance
-
 appliance_status "Appliance Update" "Restarting appliance"
 systemctl restart appliance

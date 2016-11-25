@@ -7,9 +7,8 @@ userdata_yaml=$(get_userdata)
 if test $? -ne 0; then
     appliance_exit "Appliance Error" "$(printf "Error reading userdata: %s" `echo "$userdata_yaml"| grep USERDATA_ERR`)"
 fi
-echo -n "found user-data type: "
-printf '%s' "$userdata_yaml" | grep USERDATA_TYPE
-echo "write userdata to /run/active-env.yml"
+printf "found user-data: %s\n" "$(printf "%s" "$userdata_yaml" | grep USERDATA_TYPE)"
+printf "write userdata to /run/active-env.yml\n"
 printf "%s" "$userdata_yaml" > /run/active-env.yml
 chmod 0600 /run/active-env.yml
 
@@ -21,5 +20,5 @@ fi
 
 # check if standby is true
 if is_truestr "$APPLIANCE_STANDBY"; then
-    appliance_exit_standby
+    appliance_exit "Appliance Standby" "Appliance is in standby" "debug"
 fi

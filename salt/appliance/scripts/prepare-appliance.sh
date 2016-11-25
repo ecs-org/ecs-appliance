@@ -9,21 +9,22 @@ if test "$APPLIANCE_DOMAIN" != "$(hostname -f)"; then
     printf "%s" "$APPLIANCE_DOMAIN" > /etc/salt/minion_id
 fi
 
-appliance_status_starting
+appliance_status "Appliance Startup" "Starting up"
 # enable and start nginx (may be disabled by devupate.sh if on the same machine)
 systemctl enable nginx
 systemctl start nginx
 
 # ### storage setup
 need_storage_setup=false
-if test ! -d "/volatile/ecs-cache"; then
-    echo "Warning: could not find directory ecs-cache on /volatile"
-    need_storage_setup=true
-fi
-if test ! -d "/data/ecs-storage-vault"; then
-    echo "Warning: could not find directory ecs-storage-vault on /data"
-    need_storage_setup=true
-fi
+for d in /data/appliance /data/ecs-ca /data/ecs-pgdump \
+    /data/ecs-storage-vault /data/postgresql \
+    /volatile/docker /volatile/ecs-backup-test \
+    /volatile/ecs-cache /volatile/redis; do
+    if test ! -d $d ; then
+        echo "Warning: could not find directory $d"
+        need_storage_setup=true
+    fi
+done
 if test "$(findmnt -S "LABEL=ecs-volatile" -f -l -n -o "TARGET")" = ""; then
     if is_falsestr "$APPLIANCE_STORAGE_IGNORE_VOLATILE"; then
         echo "Warning: could not find mount for ecs-volatile filesystem"
@@ -157,4 +158,3 @@ fi
 cat /etc/appliance/template.identity |
     sed "s/##ALLOWED_HOSTS##/$APPLIANCE_DOMAIN/g;s/##VERIFY_CLIENT##/$client_certs/g" > /etc/appliance/server.identity
 systemctl reload-or-restart nginx
-appliance_status_starting
