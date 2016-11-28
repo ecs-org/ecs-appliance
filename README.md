@@ -10,9 +10,11 @@ it can be stacked on top of the developer vm, but is independend of it.
 
 + on work laptop:
 
+```
 ssh root@target.vm.ip '/bin/bash -c "mkdir -p /app/.ssh"'
 scp cloneecs_id_ed25519 root@target.vm.ip:/app/.ssh/id_ed25519
 scp target.domain.name.env.yml root@target.vm.ip:/app/env.yml
+```
 
 + on empty machine:
 
@@ -20,7 +22,8 @@ scp target.domain.name.env.yml root@target.vm.ip:/app/env.yml
 apt-get -y update
 apt-get -y install git
 
-GIT_SSH_COMMAND="ssh -i /app/.ssh/id_ed25519 " git clone ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs-appliance.git /app/appliance
+GIT_SSH_COMMAND="ssh -i /app/.ssh/id_ed25519 " git clone \
+    ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs-appliance.git /app/appliance
 
 cd /
 mkdir -p /etc/salt
@@ -121,8 +124,10 @@ Update Appliance (this includes also update ecs): `sudo update-appliance.sh`
 ## recover from failed state
 
 if the appliance.service enters fail state, it creates a file named
-"/run/appliance_failed", which you have to remove using `rm /run/appliance_failed`
-before running the service again using `sudo update-appliance.sh` or `systemctl start appliance.service`
+"/run/appliance_failed".
+
+You have to remove this file using `rm /run/appliance_failed` before running
+the service again using `sudo update-appliance.sh` or `sudo systemctl start appliance.service`
 
 ## other usage
 
