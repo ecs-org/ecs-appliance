@@ -102,7 +102,7 @@ ecs:
       ALLOWED_HOSTS = [DOMAIN, 'testecs']
       PDFAS_SERVICE = ABSOLUTE_URL_PREFIX+ '/pdf-as-web/'
       SECURE_PROXY_SSL = True
-      CLIENT_CERTS_REQUIRED = True
+      ECS_REQUIRE_CLIENT_CERTS = True
       DEBUG = False
 
       # SENTRY_DSN = 'https://url' # set to sentry url if available
