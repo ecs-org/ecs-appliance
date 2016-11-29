@@ -7,8 +7,7 @@ mount-{{ name }}:
     - device: /dev/disk/by-label/ecs-{{ name }}
     - mkmnt: true
     - fstype: ext4
-    - onlyif: test "$(blkid -p -s TYPE -o value /dev/disk/by-label/ecs-{{ name }})" == "ext4"
-    - unless: test ! -b /dev/disk/by-label/ecs-{{ name }}
+    - onlyif: test -b /dev/disk/by-label/ecs-{{ name }} -a "$(blkid -p -s TYPE -o value /dev/disk/by-label/ecs-{{ name }})" == "ext4"
 {% endmacro %}
 
 {% macro dir_setup(base, dirlist, ignore_mountpoint) %}
@@ -35,16 +34,14 @@ mount-{{ name }}:
 prefix_relocate_{{ source }}:
   cmd.run:
     - name: {{ pre }}
-    - unless: test -L {{ source }}
-    - onlyif: test -d {{ name }}
+    - onlyif: test -d {{ name }} -a ! -L {{ source }}
     {%- endif %}
 relocate_{{ source }}:
   file.rename:
     - name: {{ name }}
     - source: {{ source }}
     - force: true
-    - unless: test -L {{ source }}
-    - onlyif: test -d {{ name }}
+    - onlyif: test -d {{ name }} -a ! -L {{ source }}
     {%- if pre %}
     - require:
       - cmd: prefix_relocate_{{ source }}
@@ -53,8 +50,7 @@ symlink_{{ source }}:
   file.symlink:
     - name: {{ source }}
     - target: {{ name }}
-    - unless: test -L {{ source }}
-    - onlyif: test -d {{ name}}
+    - onlyif: test -d {{ name }} -a ! -L {{ source }}
     {%- if pre %}
     - require:
       - file: relocate_{{ source }}

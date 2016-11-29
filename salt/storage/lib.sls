@@ -50,6 +50,7 @@
   cmd.run:
     - name: parted --script {{ item }} mklabel {{ part_type }}
     - onlyif: 'test "$(blkid -p -s PTTYPE -o value {{ item }})" == ""'
+    error onlyif and unless is broken including salt-stack 2016.11.0 (Carbon)
     - unless: 'test "$(blkid -p -s PTTYPE -o value {{ item }})" == "{{ blkid_type }}"'
     - require:
       - pkg: "parted-{{ item }}"
@@ -253,6 +254,8 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
   cmd.run:
     - name: '{{ mkfs }} {%- for option in options %}{{ option }} {%- endfor %} {{ item }}'
     - onlyif: 'test "$(blkid -p -s TYPE -o value {{ item }})" == ""'
+    error onlyif and unless is broken including salt-stack 2016.11.0 (Carbon)
+
     - unless: 'test "$(blkid -p -s TYPE -o value {{ item }})" == "{{ data.fstype }}"'
     {%- for a in ('watch_in', 'require_in', 'require', 'watch') %}
       {%- if input_data[item][a] is defined %}
@@ -277,6 +280,8 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
     - {{ sub }}{% if subvalue|d('') %}: {{ subvalue }}{% endif %}
     {%- endfor %}
     - onlyif: 'test "$(blkid -p -s TYPE -o value {{ data['device'] }})" == "{{ data['fstype'] }}"'
+    error onlyif and unless is broken including salt-stack 2016.11.0 (Carbon)
+
     - unless: 'test ! -b {{ data['device'] }}'
   {% endfor %}
 
