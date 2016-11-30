@@ -33,7 +33,7 @@ ExecStartPost=/bin/bash -c '. /usr/local/etc/env.include; userdata_to_env ecs,ap
 ExecStop=/bin/bash -c '. /usr/local/etc/env.include; userdata_to_env ecs,appliance; \
     /usr/local/bin/docker-compose -f /etc/appliance/ecs/docker-compose.yml stop'
 ExecStopPost=/bin/bash -c '. /usr/local/etc/env.include; userdata_to_env ecs,appliance; \
-    . /usr/local/etc/appliance.include; appliance_status "Appliance Standby" "Appliance is stopped"
+    . /usr/local/etc/appliance.include; appliance_status "Appliance Standby" "Appliance is stopped"'
 
 [Install]
 WantedBy=multi-user.target

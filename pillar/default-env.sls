@@ -1,27 +1,30 @@
 ssh_authorized_keys:
+  # # put ssh keys here, this is also used by cloud-init
   # - "ssh-rsa and some long glibberish somebody@somewhere"
-  # # you can put your ssh keys here, this is also used by cloud-init
 ssh_deprecated_keys:
-  # - "ssh-rsa and some long glibberish somebody@somewhere"
-  # # you can copy deprecated keys here,
+  # # copy deprecated ssh keys here,
   # # state.highstate will remove these old keys from users
+  # - "ssh-rsa and some long glibberish somebody@somewhere"
 appliance:
-  # standby: true # optional, if set appliance will not activate
+  # # standby: default false, if set appliance will not activate
+  # standby: true
   domain: localhost
   allowed_hosts: localhost testecs
   ssl:
     letsencrypt:
       # use snakeoil certs, because eg. 80,443 is behind ssh tunneling
       enabled: false
+    # # client_certs_mandatory default false,
+    # #   if true, always need a client certificate
     # client_certs_mandatory: true
-    # # if true, always need a client certificate, default false
     client_certs_mandatory: false
+    # # key default empty, if set, ssl key for https host will be used
     # key: filename-key.pem
-    # # if set ssl key for https host will be used, default empty
+    # # cert default empty, if set, ssl cert for https host will be used
     # cert: filename-cert.pem
-    # # if set ssl key for https host will be used, default empty
 
-  # # set to your sentry url, must be the same as ecs_settings: SENTRY_DSN
+  # # sentry_dsn (the sentry target url) default empty, if set will report errors to sentry
+  # #   must be the same as ecs_settings: SENTRY_DSN
   # sentry:
   #   dsn: 'https://url'
   # git:
@@ -33,19 +36,23 @@ appliance:
   #   files:
   #     - path: /path/of/filename
   #       content: |
-  #           # Your content here
+  #           # content here
   #       owner: user:group
   #       permissions: "0600"
   # env:
   #   recipients: # list of user that get the gpg encrypted tar.gz archive of the new env
   #     key_name@another.domain.name: |
-  #         # your public gpg key here
+  #         # public gpg key here
   storage:
+    # # setup default empty, will be executed if volatile or data can not be found
     # setup: |
-    # # optional, will be executed if volatile or data can not be found
+    # # proxy_cache default false, if true 10 additional GB diskspace are used
+    # #   for operating polipo, a http proxy cache which is than used as http proxy
     # proxy_cache: true
-    # # default false, if true 10 additional GB diskspace are used
-    # # for operating polipo, a http proxy cache
+    # # growroot default false, if true a additional initrd packet will be
+    # #   installed, which will grow the root partition to maximum
+    # #   available space on next boot
+    # grow_root: false
     ignore: # default false, if true: will not look for ecs-volatile or ecs-data filesystem
       volatile: true
       data: true
@@ -90,7 +97,7 @@ ecs:
   #   branch: stable
   #   source: git_url
   #   ssh_command: ssh -i /app/.ssh/git-source.id
-  # database: # default: ecs , used internal for service
+  # database: # default: ecs , used internal for appliance service
   migrate:
     auto: true
   userswitcher:
