@@ -31,8 +31,8 @@ nginx:
     - source: /etc/appliance/snakeoil.identity
     - replace: false
     - require:
-      - file: /etc/appliance/ssl-cert-snakeoil.key
-      - file: /etc/appliance/ssl-cert-snakeoil.pem
+      - file: /etc/appliance/snakeoil/ssl-cert-snakeoil.key
+      - file: /etc/appliance/snakeoil/ssl-cert-snakeoil.pem
       - file: /etc/appliance/snakeoil.identity
 
 /var/www/html/503.html:

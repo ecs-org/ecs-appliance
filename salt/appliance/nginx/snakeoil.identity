@@ -1,6 +1,6 @@
 server_name localhost;
-ssl_certificate /etc/appliance/ssl-cert-snakeoil.pem;
-ssl_certificate_key /etc/appliance/ssl-cert-snakeoil.key;
+ssl_certificate /etc/appliance/snakeoil/ssl-cert-snakeoil.pem;
+ssl_certificate_key /etc/appliance/snakeoil/ssl-cert-snakeoil.key;
 # client certificate setup
 ssl_verify_client off;
 

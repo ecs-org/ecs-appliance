@@ -50,3 +50,16 @@ install_{{ n }}:
     - watch:
       - file: install_{{ n }}
 {% endfor %}
+
+/etc/systemd/system/watch_ecs_ca.service:
+  file.managed:
+    - source: salt://appliance/systemd/watch_ecs_ca.service
+
+/etc/systemd/system/watch_ecs_ca.path:
+  file.managed:
+    - source: salt://appliance/systemd/watch_ecs_ca.path
+  cmd.wait:
+    - name: systemctl enable watch_ecs_ca.path
+    - watch:
+        - file: /etc/systemd/system/watch_ecs_ca.path
+        - file: /etc/systend/system/watch_ecs_ca.service

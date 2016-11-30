@@ -1,0 +1,8 @@
+[Unit]
+Description=watch for /data/ecs-ca/crl.pem changes (eg. empty ecs-ca or revoke certificate)
+
+[Path]
+PathChanged=/data/ecs-ca/crl.pem
+
+[Install]
+WantedBy=prepare-ecs.service

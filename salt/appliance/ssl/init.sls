@@ -1,5 +1,6 @@
 include:
   - common.user
+  - ssl.snakeoil
 
 # dehydrated is a letsencrypt shell client
 /usr/local/bin/dehydrated:
@@ -43,49 +44,3 @@ include:
     - contents: |
         app ALL=(ALL) NOPASSWD: /usr/local/sbin/deploy_cert_as_root.sh
         app ALL=(ALL) NOPASSWD: /usr/local/sbin/unchanged_cert_as_root.sh
-
-generate_snakeoil:
-  pkg.installed:
-    - name: ssl-cert
-  cmd.run:
-    - name: make-ssl-cert generate-default-snakeoil --force-overwrite
-    - unless: test -f /etc/ssl/private/ssl-cert-snakeoil.key
-    - require:
-      - pkg: generate_snakeoil
-
-/etc/appliance/ssl-cert-snakeoil.key:
-  file.copy:
-    - source: /etc/ssl/private/ssl-cert-snakeoil.key
-    - mode: "0644"
-    - require:
-      - cmd: generate_snakeoil
-
-/etc/appliance/ssl-cert-snakeoil.pem:
-  file.copy:
-    - source: /etc/ssl/certs/ssl-cert-snakeoil.pem
-    - mode: "0644"
-    - require:
-      - cmd: generate_snakeoil
-
-/etc/appliance/server.key.pem:
-  file.copy:
-    - replace: false
-    - source: /etc/appliance/ssl-cert-snakeoil.key
-
-/etc/appliance/server.cert.pem:
-  file.copy:
-    - replace: false
-    - source: /etc/appliance/ssl-cert-snakeoil.pem
-
-/etc/appliance/server.cert.dhparam.pem:
-  file.copy:
-    - replace: false
-    - source: /etc/appliance/ssl-cert-snakeoil.pem
-
-/etc/appliance/ca.cert.pem:
-  file.symlink:
-    - target: /app/ecs-ca/ca.cert.pem
-
-/etc/appliance/crl.pem:
-  file.symlink:
-    - target: /app/ecs-ca/crl.pem

@@ -2,7 +2,7 @@
 . /usr/local/etc/appliance.include
 set -o pipefail
 
-# set hostname from env
+# set hostname and minion_id from env
 if test "$APPLIANCE_DOMAIN" != "$(hostname -f)"; then
     echo "setting hostname to $APPLIANCE_DOMAIN"
     hostnamectl set-hostname $APPLIANCE_DOMAIN
@@ -137,8 +137,8 @@ if is_falsestr "${APPLIANCE_SSL_LETSENCRYPT_ENABLED:-true}"; then
 fi
 if $use_snakeoil; then
     echo "Warning: couldnt setup server certificate, copy snakeoil.* to appliance/server*"
-    cp /etc/appliance/ssl-cert-snakeoil.pem /etc/appliance/server.cert.pem
-    cp /etc/appliance/ssl-cert-snakeoil.key /etc/appliance/server.key.pem
+    cp /etc/appliance/snakeoil/ssl-cert-snakeoil.pem /etc/appliance/server.cert.pem
+    cp /etc/appliance/snakeoil/ssl-cert-snakeoil.key /etc/appliance/server.key.pem
     cat /etc/appliance/server.cert.pem /etc/appliance/dhparam.pem > /etc/appliance/server.cert.dhparam.pem
 fi
 
