@@ -66,9 +66,8 @@ generate_snakeoil:
 
 
 /etc/appliance/snakeoil/index.txt:
-  file.managed:
-    - contents: ""
-    - replace: false
+  file:
+    - touch
 
 /etc/appliance/snakeoil/crlnumber:
   file.managed:
