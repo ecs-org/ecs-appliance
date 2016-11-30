@@ -62,4 +62,4 @@ install_{{ n }}:
     - name: systemctl enable watch_ecs_ca.path
     - watch:
         - file: /etc/systemd/system/watch_ecs_ca.path
-        - file: /etc/systend/system/watch_ecs_ca.service
+        - file: /etc/systemd/system/watch_ecs_ca.service
