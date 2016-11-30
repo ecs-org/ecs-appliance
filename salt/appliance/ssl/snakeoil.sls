@@ -108,12 +108,16 @@ generate_snakeoil:
     - replace: false
     - makedirs: true
     - source: /etc/appliance/snakeoil/ssl-ca-snakeoil.cert.pem
+    - group: 1000
+    - user: 1000
 
 /app/ecs-ca/crl.pem:
   file.copy:
     - replace: false
     - makedirs: true
     - source: /etc/appliance/snakeoil/ssl-crl-snakeoil.pem
+    - group: 1000
+    - user: 1000
 
 /etc/appliance/server.key.pem:
   file.copy:
