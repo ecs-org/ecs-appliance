@@ -1,6 +1,6 @@
 include:
   - common.user
-  - ssl.snakeoil
+  - .snakeoil
 
 # dehydrated is a letsencrypt shell client
 /usr/local/bin/dehydrated:
