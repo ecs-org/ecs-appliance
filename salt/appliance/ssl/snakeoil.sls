@@ -7,7 +7,8 @@ generate_snakeoil:
     - name: ssl-cert
   cmd.run:
     - name: make-ssl-cert generate-default-snakeoil --force-overwrite
-    - onlyif: test ! -e /etc/ssl/private/ssl-cert-snakeoil.key -o "$(openssl x509 -in /etc/ssl/certs/ssl-cert-snakeoil.pem -noout -text | grep Subject: | sed -re 's/.*Subject: .*CN=([^,]+).*/\1/')" != "$(hostname -f)"
+    - onlyif: |
+        test ! -e /etc/ssl/private/ssl-cert-snakeoil.key -o "$(openssl x509 -in /etc/ssl/certs/ssl-cert-snakeoil.pem -noout -text | grep Subject: | sed -re 's/.*Subject: .*CN=([^,]+).*/\1/')" != "$(hostname -f)"
     - require:
       - pkg: generate_snakeoil
 
