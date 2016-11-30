@@ -148,6 +148,9 @@
       "minion_config": "salt/minion"
     },{
       "type": "shell",
+      "script": "cleanup.sh"
+    },{
+      "type": "shell",
       "execute_command": "{{ .Vars }} sudo -E sh '{{ .Path }}'",
       "inline": [
         "echo 'Zero out the free space to save space in the final image'",

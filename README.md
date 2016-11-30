@@ -81,16 +81,21 @@ sudo salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance
 
 ### upgrade your xenial desktop
 
-it is the same procedure as with the developer vm,
-but be aware that the appliance takes over the following services:
+This is the same procedure as for the developer vm,
+but be aware that compared to a typical desktop the appliance
+configures strange things, enables and take over services.
 
++ postgres data is relocated to /data/postgresql
++ docker data is relocated to /volatile/docker
++ a app user is created with homedir /app
 + postgresql config, postgres user "app" and database "ecs"
-  + set password of user app for tcp connect to postgresql
-  + does not drop any data, unless told
-+ docker and docker container (stops all container on salt-call state.highstate, expects docker0 to be the default docker bridge with default ip values)
-+ nginx configuration
-+ postfix configuration
-+ listens to port 22,25,80,443,465
+    + set password of user app for tcp connect to postgresql
+    + does not drop any data, unless told
++ docker and docker container
+    + stops all container on relocate
+    + expects docker0 to be the default docker bridge with default ip values
++ [partly]overwrites nginx, postfix, postgresql, stunnel configuration
++ listens on default route interface on ports 22,25,80,443,465
 
 
 ## configure appliance
