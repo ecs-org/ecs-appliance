@@ -6,7 +6,7 @@ it can be stacked on top of the developer vm, but is independend of it.
 ## installing
 
 
-### install to an empty xenial vm
+### to empty xenial vm via ssh
 
 + on work laptop:
 
@@ -35,36 +35,36 @@ chmod +x /tmp/bootstrap_salt.sh
 chmod 0600 /app/env.yml
 cp /app/env.yml /run/active-env.yml
 salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
-
 gosu postgres createdb ecs -T template0 -l de_DE.utf8
-update-appliance.sh
-
-if test -e /var/run/reboot-required; then reboot now; fi
+# look at appliance service, if not starting
+reboot
 ```
 
+### using vagrant
 
-### upgrade your developer-vm
++ copy env.yml to the git repository root
++ Execute `vagrant up`
++ login into machine using `vagrant ssh`
++ become root `sudo -i`
++ create database: `gosu postgres createdb ecs -T template0 -l de_DE.utf8`
++ copy env: `cp /app/appliance/env.yml /app/env.yml`
++ update and start appliance: `reboot`
+
+### upgrade developer-vm
 
 on your local machine:
 
-+ insert your devserver name (eg. "testecs") into your /etc/hosts
-
 ```
+# insert your devserver name (eg. "testecs") into your /etc/hosts
 sudo -s 'printf "%s" "127.0.0.1 testecs" >> /etc/hosts'
-```
-
-+ connect to your developer vm with port 80 and 443:
-
-```
+# connect to your developer vm with port 80 and 443:
 sudo -E ssh -F ~/.ssh/config testecs -L 80:localhost:80 -L 443:localhost:443 -L 8050:localhost:8050
 ```
 
 inside the developer vm:
 
-+ install appliance
-
 ```
-# clone appliance code
+# install appliance, clone appliance code
 git clone ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs-appliance.git /app/appliance
 # install saltstack
 curl -o /tmp/bootstrap_salt.sh -L https://bootstrap.saltstack.com
@@ -79,7 +79,7 @@ if you also want the builder (for building the appliance image) installed:
 sudo salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance": {"enabled": true}}'
 ```
 
-### upgrade your xenial desktop
+### upgrade a xenial desktop
 
 This is the same procedure as for the developer vm,
 but be aware that compared to a typical desktop the appliance
