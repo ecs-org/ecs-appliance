@@ -161,5 +161,6 @@ if test ! -e /data/ecs-ca/crl.pem; then
     echo "Warning: ecs-ca is missing files (ca, crl), copy snakeoil client ca + crl to ecs-ca"
     cp /etc/appliance/snakeoil/ssl-ca-snakeoil.cert.pem /data/ecs-ca/ca.cert.pem
     cp /etc/appliance/snakeoil/ssl-crl-snakeoil.pem /data/ecs-ca/crl.pem
+    chown 1000:1000 /data/ecs-ca/ca.cert.pem /data/ecs-ca/crl.pem
 fi
 systemctl reload-or-restart nginx
