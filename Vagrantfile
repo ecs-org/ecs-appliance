@@ -62,6 +62,8 @@ Vagrant.configure(2) do |config|
         salt.minion_config = "salt/minion"
         salt.run_highstate = true
         salt.log_level = "info"
+        # https://github.com/mitchellh/vagrant/issues/3754
+        salt.verbose = true
         #salt.install_type = "git"
         #salt.install_args = "v2015.5.1"
         #salt.bootstrap_options = "-F -c /tmp/ -P"

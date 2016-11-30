@@ -1,5 +1,12 @@
 #!/bin/bash
+. /usr/local/etc/env.include
 . /usr/local/etc/appliance.include
+
+ENV_YML=/run/active-env.yml userdata_to_env ecs,appliance
+if test $? -ne 0; then
+    echo "Could not activate userdata environment"
+    exit 1
+fi
 
 if test ! -e /app/appliance; then mkdir -p /app/appliance; chown app:app /app/appliance; fi
 cd /app/appliance
