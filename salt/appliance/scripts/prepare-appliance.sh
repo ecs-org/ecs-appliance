@@ -157,4 +157,9 @@ else
 fi
 cat /etc/appliance/template.identity |
     sed "s/##ALLOWED_HOSTS##/$APPLIANCE_DOMAIN/g;s/##VERIFY_CLIENT##/$client_certs/g" > /etc/appliance/server.identity
+if test ! -e /data/ecs-ca/crl.pem; then
+    echo "Warning: ecs-ca is missing files (ca, crl), copy snakeoil client ca + crl to ecs-ca"
+    cp /etc/appliance/snakeoil/ssl-ca-snakeoil.cert.pem /data/ecs-ca/ca.cert.pem
+    cp /etc/appliance/snakeoil/ssl-crl-snakeoil.pem /data/ecs-ca/crl.pem
+fi
 systemctl reload-or-restart nginx
