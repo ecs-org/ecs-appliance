@@ -3,4 +3,4 @@ Description=Reload Nginx on ECS-CA change (eg. empty ecs-ca or revoke certificat
 
 [Service]
 Type=oneshot
-ExecStart=/bin/systemctl restart-or-reload nginx
+ExecStart=/bin/systemctl reload-or-restart nginx
