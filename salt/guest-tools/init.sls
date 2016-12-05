@@ -11,4 +11,10 @@ virtualbox-guest-dkms:
   pkg:
     - installed
 
+{% elif grains['virtual'] == 'VMware' %}
+
+open-vm-tools:
+  pkg:
+    - installed
+
 {% endif %}
