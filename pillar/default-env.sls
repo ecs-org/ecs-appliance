@@ -31,7 +31,6 @@ appliance:
   #   # default see appliance.include
   #   branch: master
   #   source: git_url
-  #   ssh_command: ssh -i /app/.ssh/git-source.id
   # extra:  # write out extra files on appliance configure
   #   files:
   #     - path: /path/of/filename
@@ -96,7 +95,6 @@ ecs:
   # git: # default see appliance.include
   #   branch: stable
   #   source: git_url
-  #   ssh_command: ssh -i /app/.ssh/git-source.id
   # database: # default: ecs , used internal for appliance service
   migrate:
     auto: true
