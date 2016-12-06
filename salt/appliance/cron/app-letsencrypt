@@ -2,4 +2,5 @@
 
 deploy_cert_as_root.sh:
 
-+# FIXME restart mocca & pdfas container (has certs in it) if exists, just restart and make docker-compose be ok with it
++ do not call if domains.txt = empty
++ FIXME restart mocca & pdfas container (has certs in it) if exists, just restart and make docker-compose be ok with it

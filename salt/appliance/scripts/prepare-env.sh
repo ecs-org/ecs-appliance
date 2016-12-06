@@ -1,5 +1,7 @@
 #!/bin/bash
 . /usr/local/etc/env.include
+# XXX appliance.include sets git_source* for appliance and ecs if empty env,
+#  but this doesnt matter because we dont use it here
 . /usr/local/etc/appliance.include
 
 # ### environment setup, read userdata
