@@ -97,6 +97,15 @@ configures strange things, enables and take over services.
 + overwrites nginx, postfix, postgresql, stunnel configuration
 + listens on default route interface on ports 22,25,80,443,465
 
+### Build Disk Image of unconfigured Appliance
+
+appliance gets build using packer.
+
+`vagrant up` installs all packages needed for builder
+
+add on top of developer-vm or appliance update:
+`sudo salt-call state.highstate pillar='{"builder": "enabled": true}}'`
+
 
 ## Configure Appliance
 
@@ -135,18 +144,20 @@ if the appliance.service enters fail state, it creates a file named
 You have to remove this file using `rm /run/appliance_failed` before running
 the service again using `systemctl restart appliance.service`
 
+
+
 ## Other Usage
 
 + enter a running ecs container:
-  + `docker exec -it ecs_image[.startcommand]_1 /bin/bash`
-    + image = ecs, mocca, pdfas, memcached, redis
-    + ecs .startcommand = web, worker, beat, smtpd
+    + `docker exec -it ecs_image[.startcommand]_1 /bin/bash`
+        + image = ecs, mocca, pdfas, memcached, redis
+        + ecs .startcommand = web, worker, beat, smtpd
 
-  + enter a django shell_plus in a running (eg. ecs_ecs.web_1) container:
-    + `docker exec -it ecs_ecs.web_1 /start run ./manage.py shell_plus`
+    + enter a django shell_plus in a running (eg. ecs_ecs.web_1) container:
+        + `docker exec -it ecs_ecs.web_1 /start run ./manage.py shell_plus`
 
 + run a new django shell with correct environment but independent of other container
-  +  `docker-compose -f /etc/appliance/ecs/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
+    +  `docker-compose -f /etc/appliance/ecs/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
 
 + follow the appliance log file (backend nginx, uwsgi, beat, worker, smtpd,redis, memcached, pdfas, mocca):
     + `journalctl -u appliance -f`
@@ -159,37 +170,37 @@ the service again using `systemctl restart appliance.service`
 + quick update appliance code:
     + `cd /app/appliance; gosu app git pull; salt-call state.highstate pillar='{"appliance": "enabled": true}}'`
 + read details of a container in yaml:
-  + `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
+    + `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
 + look at all appliance http status pages: `gosu app git grep "\(ecs\|appliance\)_\(exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort`
 + line and word count appliance:
-  + `wc $(find . -regex ".*\.\(sls\|yml\|sh\|json\|conf\|template\|include\|service\|identity\)")`
+    + `wc $(find . -regex ".*\.\(sls\|yml\|sh\|json\|conf\|template\|include\|service\|identity\)")`
 
 
-### Sourcecode
+### Architecture
 
 + Sourcecode from ecs is at /app/ecs on vm
 + Sourcecode from appliance is at /app/appliance on vm
 + files of appliance:
 
-    Path | Description
-    --- | ---
-    /pillar/                        | salt environment
-    /pillar/top.sls                 | defines the root of the environment tree
-    /pillar/default-env.sls         | fallback env yaml and example localhost ecs config
-    /salt/*.sls                     | states (to be executed)
-    /salt/top.sls                   | defines the root of the state tree
-    /salt/common/init.sls           | common install
-    /salt/common/env.template.yml   | template used to generate a new env.yml
-    /salt/common/generate-new-env.sh    | command line utility for env generation
-    /salt/appliance/init.sls            | ecs appliance install
-    /salt/appliance/scripts/prepare-env.sh       | script started first to read environment
-    /salt/appliance/scripts/prepare-appliance.sh | script started next to setup services
-    /salt/appliance/scripts/prepare-ecs.sh       | script started next to build container
-    /salt/appliance/scripts/update-appliance.sh  | user script to trigger appliance/ecs update
-    /salt/appliance/ecs/docker-compose.yml       | main container group definition
-    /salt/appliance/systemd/appliance.service    | systemd appliance service that ties all together
+Path | Description
+--- | ---
+/pillar/                        | salt environment
+/pillar/top.sls                 | defines the root of the environment tree
+/pillar/default-env.sls         | fallback env yaml and example localhost ecs config
+/salt/*.sls                     | states (to be executed)
+/salt/top.sls                   | defines the root of the state tree
+/salt/common/init.sls           | common install
+/salt/common/env.template.yml   | template used to generate a new env.yml
+/salt/common/generate-new-env.sh    | command line utility for env generation
+/salt/appliance/init.sls            | ecs appliance install
+/salt/appliance/scripts/prepare-env.sh       | script started first to read environment
+/salt/appliance/scripts/prepare-appliance.sh | script started next to setup services
+/salt/appliance/scripts/prepare-ecs.sh       | script started next to build container
+/salt/appliance/scripts/update-appliance.sh  | user script to trigger appliance/ecs update
+/salt/appliance/ecs/docker-compose.yml       | main container group definition
+/salt/appliance/systemd/appliance.service    | systemd appliance service that ties all together
 
-### Systemd Startup Order
+#### Systemd Startup Order
 
 on start:
 
@@ -203,7 +214,7 @@ on start:
 on error:
     + appliance-failed
 
-### Environment & Flags
+#### Environment & Flags
 
 Path | Description
 --- | ---
@@ -211,45 +222,36 @@ Path | Description
 /run/active-env.yml | current activated configuration
 /run/appliance-failed | flag to be cleared after a failed appliance start
 
-#### Buildtime Environment Usage
+`salt-call state.highstate` (the install part) does not need an environment,
+    but has a default one and will use any /active environment for sentry logging.
 
-* salt-call state.highstate (the install part) does not need an environment,
-    but has a default one and will use any /active environment for sentry logging
+Runtime Environment Usage:
 
-#### VM Runtime Environment Usage
-* prepare-appliance tries to get a environment yaml from all local and network sources
-  * writes the filtered result ("ecs,appliance") to /run/active-env.yml
-  * Storage Setup (`salt-call state.sls storage.sls`) expects /run/active-env.yml
-* prepare-ecs and the appliance.service both parse /run/active-env.yml
+* prepare-env
+    * get a environment yaml from all local and network sources
+    * writes the result to /run/active-env.yml
+* update-appliance, prepare-appliance,
+    Storage Setup (`salt-call state.sls storage.sls`),
+    prepare-ecs,  appliance.service parse /run/active-env.yml
 * appliance.service calls docker-compose up with active-env
   * docker compose passes the following to the ecs/ecs* container
-      * service_urls.env,
-      * ECS_SETTINGS, ECS_VAULT_SIGN, ECS_VAULT_ENCRYPT
+      * service_urls.env, database_url.env
+      * ECS_SETTINGS
   * docker compose passes APPLIANCE_DOMAIN as HOSTNAME to mocca and pdfas
 
 
-## Builder
-
-appliance gets build using packer.
-
-`vagrant up` installs all packages needed for builder
-
-add on top of developer-vm or appliance update:
-`sudo salt-call state.highstate pillar='{"builder": "enabled": true}}'`
-
-
-### Partitioning
+#### Partitioning
 
 + default xenial cloud image partition layout:
-    + dos-mbr
-    + p1 Boot ext4 label cloudimg-rootfs (10G)
-    + used space ~ 900MB naked , ~ 1700MB with ecs appliance (currently, will grow)
+  + dos-mbr
+  + p1 Boot ext4 label cloudimg-rootfs (10G)
+  + used space ~ 900MB naked , ~ 1700MB with ecs appliance (currently, will grow)
 
 + developer setup:
-    + vagrantfile has grow-root baked into it, p1 will take all space, appliance will not create additional partitions
-    + storage setup will create the directories but do not expect a mountpoint
+  + vagrantfile has grow-root baked into it, p1 will take all space, appliance will not create additional partitions
+  + storage setup will create the directories but do not expect a mountpoint
 
 + production setup:
-    + storage.setup will (if told in env.yml):
-        + add p2 (all usable space) as pv-lvm
-        + add a vg and volumes ecs-data (60%) ecs-volatile (30%), rest is for snapshots
+  + storage.setup will (if told in env.yml):
+      + add p2 (all usable space) as pv-lvm
+      + add a vg and volumes ecs-data (60%) ecs-volatile (30%), rest is for snapshots
