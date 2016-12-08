@@ -39,7 +39,7 @@ include:
         DATABASE_URL=postgres://app:invalid@{{ salt['pillar.get']('docker:ip') }}:5432/ecs
     - replace: false
 
-{% for n in ['prepare-env.service', 'udpate-appliance.service',
+{% for n in ['prepare-env.service', 'update-appliance.service',
   'prepare-appliance.service', 'prepare-ecs.service', 'appliance.service',
   'appliance-cleanup.service', 'appliance-failed@.service'] %}
 install_{{ n }}:
