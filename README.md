@@ -3,7 +3,7 @@
 the ecs appliance is a selfservice production setup virtual machine builder and executor.
 it can be stacked on top of the developer vm, but is independend of it.
 
-## installing
+## Install Appliance
 
 
 ### to empty xenial vm via ssh
@@ -94,11 +94,11 @@ configures strange things, enables and take over services.
 + docker and docker container
     + stops all container on relocate
     + expects docker0 to be the default docker bridge with default ip values
-+ [partly]overwrites nginx, postfix, postgresql, stunnel configuration
++ overwrites nginx, postfix, postgresql, stunnel configuration
 + listens on default route interface on ports 22,25,80,443,465
 
 
-## configure appliance
+## Configure Appliance
 
 ### development server
 + login in devserver
@@ -118,79 +118,90 @@ configures strange things, enables and take over services.
 + create a empty ecs database: `sudo -u postgres createdb ecs -T template0  -l de_DE.utf8`
 
 ## start appliance
-+ start appliance: `sudo systemctl start appliance`
++ start appliance: `systemctl start appliance`
 + open your browser and go to: http://testecs or http://localhost
-+ stop appliance: `sudo systemctl stop appliance`
++ stop appliance: `systemctl stop appliance`
 
-## update appliance
 
-Update Appliance (this includes also update ecs): `sudo update-appliance.sh`
+## Update Appliance
 
-## recover from failed state
+Update Appliance (appliance and ecs): `systemctl restart appliance`
+
+### Recover from failed state
 
 if the appliance.service enters fail state, it creates a file named
 "/run/appliance_failed".
 
 You have to remove this file using `rm /run/appliance_failed` before running
-the service again using `sudo update-appliance.sh` or `sudo systemctl start appliance.service`
+the service again using `systemctl restart appliance.service`
 
-## other usage
+## Other Usage
 
-+ quick update appliance:
-    + `cd ~/appliance; git pull; sudo salt-call state.highstate pillar='{"appliance": "enabled": true}}'`
 + enter a running ecs container:
-  + `sudo docker exec -it ecs_image[.startcommand]_1 /bin/bash`
-  + image = ecs, mocca, pdfas, memcached, redis
-  + ecs .startcommand = web, worker, beat, smtpd
-+ enter a django shell_plus in a running (eg. ecs_ecs.web_1) container:
-  + `sudo docker exec -it ecs_ecs.web_1 /start run ./manage.py shell_plus`
-+ run a new django shell with correct environment but independent of other container
-  +  `sudo docker-compose -f /etc/appliance/ecs/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
-+ search for salt-call output: `journalctl $(which salt-call)`
-+ follow the appliance log file (backend nginx, uwsgi, beat, worker, smtpd,redis, memcached, pdfas, mocca):
-    + `sudo journalctl -u appliance -f`
-+ follow whole journal: `sudo journalctl -f`
-+ follow prepare-appliance: `sudo journalctl -u prepare-appliance -f`
-+ follow prepare-ecs: `sudo journalctl -u prepare-ecs -f`
-+ follow frontend nginx: `sudo journalctl -u nginx -f`
+  + `docker exec -it ecs_image[.startcommand]_1 /bin/bash`
+    + image = ecs, mocca, pdfas, memcached, redis
+    + ecs .startcommand = web, worker, beat, smtpd
 
+  + enter a django shell_plus in a running (eg. ecs_ecs.web_1) container:
+    + `docker exec -it ecs_ecs.web_1 /start run ./manage.py shell_plus`
+
++ run a new django shell with correct environment but independent of other container
+  +  `docker-compose -f /etc/appliance/ecs/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
+
++ follow the appliance log file (backend nginx, uwsgi, beat, worker, smtpd,redis, memcached, pdfas, mocca):
+    + `journalctl -u appliance -f`
++ follow whole journal: `journalctl -f`
++ follow prepare-appliance: `journalctl -u prepare-appliance -f`
++ follow prepare-ecs: `journalctl -u prepare-ecs -f`
++ follow frontend nginx: `journalctl -u nginx -f`
++ search for salt-call output: `journalctl $(which salt-call)`
+
++ quick update appliance code:
+    + `cd /app/appliance; gosu app git pull; salt-call state.highstate pillar='{"appliance": "enabled": true}}'`
 + read details of a container in yaml:
   + `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
-+ look at all appliance http status pages: `git grep "\(ecs\|appliance\)_\(exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort`
++ look at all appliance http status pages: `gosu app git grep "\(ecs\|appliance\)_\(exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort`
 + line and word count appliance:
   + `wc $(find . -regex ".*\.\(sls\|yml\|sh\|json\|conf\|template\|include\|service\|identity\)")`
 
 
-### files sourcecode
+### Sourcecode
 
-+ Sourcecode from appliance is at /app/appliance on vm
 + Sourcecode from ecs is at /app/ecs on vm
++ Sourcecode from appliance is at /app/appliance on vm
++ files of appliance:
 
-Path | Description
---- | ---
-/pillar/                        | salt environment
-/pillar/top.sls                 | defines the root of the environment tree
-/pillar/default-env.sls         | fallback env yaml and example localhost ecs config
-/salt/*.sls                     | states (to be executed)
-/salt/top.sls                   | defines the root of the state tree
-/salt/common/init.sls           | common install
-/salt/common/env.template.yml   | template used to generate a new env.yml
-/salt/common/generate-new-env.sh    | command line utility for env generation
-/salt/appliance/init.sls            | ecs appliance install
-/salt/appliance/scripts/prepare-env.sh       | script started first to read environment
-/salt/appliance/scripts/prepare-appliance.sh | script started next to setup services
-/salt/appliance/scripts/prepare-ecs.sh       | script started next to build container
-/salt/appliance/scripts/update-appliance.sh  | user script to trigger appliance/ecs update
-/salt/appliance/ecs/docker-compose.yml       | main container group definition
-/salt/appliance/systemd/appliance.service    | systemd appliance service that ties all together
+    Path | Description
+    --- | ---
+    /pillar/                        | salt environment
+    /pillar/top.sls                 | defines the root of the environment tree
+    /pillar/default-env.sls         | fallback env yaml and example localhost ecs config
+    /salt/*.sls                     | states (to be executed)
+    /salt/top.sls                   | defines the root of the state tree
+    /salt/common/init.sls           | common install
+    /salt/common/env.template.yml   | template used to generate a new env.yml
+    /salt/common/generate-new-env.sh    | command line utility for env generation
+    /salt/appliance/init.sls            | ecs appliance install
+    /salt/appliance/scripts/prepare-env.sh       | script started first to read environment
+    /salt/appliance/scripts/prepare-appliance.sh | script started next to setup services
+    /salt/appliance/scripts/prepare-ecs.sh       | script started next to build container
+    /salt/appliance/scripts/update-appliance.sh  | user script to trigger appliance/ecs update
+    /salt/appliance/ecs/docker-compose.yml       | main container group definition
+    /salt/appliance/systemd/appliance.service    | systemd appliance service that ties all together
 
-### systemd startup order
+### Systemd Startup Order
 
-+ prepare-env
-+ prepare-appliance
-+ prepare-ecs
-+ appliance
+on start:
 
+    + prepare-env
+    + update-appliance
+    + prepare-appliance
+    + prepare-ecs
+    + appliance
+    + appliance-cleanup
+
+on error:
+    + appliance-failed
 
 ### Environment & Flags
 
