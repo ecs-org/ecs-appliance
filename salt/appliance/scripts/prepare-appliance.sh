@@ -2,11 +2,10 @@
 . /usr/local/etc/appliance.include
 set -o pipefail
 
-# set hostname and minion_id from env
+# set hostname from env if different
 if test "$APPLIANCE_DOMAIN" != "$(hostname -f)"; then
     echo "setting hostname to $APPLIANCE_DOMAIN"
     hostnamectl set-hostname $APPLIANCE_DOMAIN
-    printf "%s" "$APPLIANCE_DOMAIN" > /etc/salt/minion_id
 fi
 
 appliance_status "Appliance Startup" "Starting up"

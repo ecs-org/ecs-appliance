@@ -1,22 +1,21 @@
 [Unit]
-Description=ECS Preparation
+Description=Appliance Update
 ConditionPathExists=!/run/appliance-failed
 ConditionFileNotEmpty=/run/active-env.yml
-Requires=prepare-appliance.service
-Wants=docker.service
+Requires=prepare-env.service
 PartOf=appliance.service
-After=prepare-appliance.service docker.service
+After=network.target prepare-env.service
 ReloadPropagatedFrom=appliance.service
 
 [Service]
 Type=oneshot
 RemainAfterExit=on
-TimeoutStartSec=45min
+TimeoutStartSec=30min
 Environment=UNITNAME=%n
 Environment=ENV_YML=/run/active-env.yml
 ExecStart=/bin/bash -c '. /usr/local/etc/env.include; \
     userdata_to_env ecs,appliance; \
-    exec /usr/local/sbin/prepare-ecs.sh'
+    exec /usr/local/sbin/update-appliance.sh'
 
 [Install]
 WantedBy=multi-user.target

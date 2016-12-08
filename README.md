@@ -223,7 +223,7 @@ Path | Description
 /run/appliance-failed | flag to be cleared after a failed appliance start
 
 `salt-call state.highstate` (the install part) does not need an environment,
-    but has a default one and will use any /active environment for sentry logging.
+but has a default one and will use any /active environment for sentry logging.
 
 Runtime Environment Usage:
 

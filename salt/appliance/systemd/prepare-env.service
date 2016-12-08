@@ -2,7 +2,6 @@
 Description=Environment Preparation
 PartOf=appliance.service
 After=network.target
-Before=prepare-appliance.service prepare-ecs.service appliance.service
 ReloadPropagatedFrom=appliance.service
 
 [Service]
