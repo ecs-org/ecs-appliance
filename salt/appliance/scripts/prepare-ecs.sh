@@ -1,5 +1,5 @@
 #!/bin/bash
-. /usr/local/etc/appliance.include
+. /usr/local/share/appliance/appliance.include
 
 last_running=$(cat /etc/appliance/last_running_ecs 2> /dev/null || echo "invalid")
 need_migration=false

@@ -9,13 +9,9 @@ include:
   - .backup
 
 
-/usr/local/etc/appliance.include:
-  file.managed:
-    - source: salt://appliance/scripts/appliance.include
-
-{% for i in ['prepare-env.sh', 'prepare-appliance.sh',
+{% for i in ['appliance.include', 'prepare-env.sh', 'prepare-appliance.sh',
   'prepare-ecs.sh', 'update-appliance.sh'] %}
-/usr/local/sbin/{{ i }}:
+/usr/local/share/appliance/{{ i }}:
   file.managed:
     - source: salt://appliance/scripts/{{ i }}
     - mode: "0755"

@@ -1,5 +1,5 @@
 #!/bin/bash
-. /usr/local/etc/appliance.include
+. /usr/local/share/appliance/appliance.include
 set -o pipefail
 
 # set hostname from env if different

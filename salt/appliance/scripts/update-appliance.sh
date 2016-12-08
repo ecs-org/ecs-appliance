@@ -1,5 +1,5 @@
 #!/bin/bash
-. /usr/local/etc/appliance.include
+. /usr/local/share/appliance/appliance.include
 
 if test ! -e /app/appliance; then mkdir -p /app/appliance; chown app:app /app/appliance; fi
 cd /app/appliance

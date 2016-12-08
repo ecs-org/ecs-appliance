@@ -83,7 +83,7 @@ set_locale:
     - contents: |
         Defaults env_keep += "SSH_AUTH_SOCK"
 
-/usr/local/etc/env.include:
+/usr/local/share/appliance/env.include:
   file.managed:
     - source: salt://common/env.include
 
