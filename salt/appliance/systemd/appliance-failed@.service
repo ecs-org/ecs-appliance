@@ -12,4 +12,4 @@ ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_to_en
     extra=$((for i in prepare-env prepare-appliance prepare-ecs appliance; do \
         systemctl status -l -q --no-pager -n 20 ${i}.service; done) | \
         python3 -c "import sys, json; json.dump({\"status\": sys.stdin.readlines()}, sys.stdout)"); \
-    appliance_exit "Appliance Error" "Appliance (%I) failed to start, system in standby" critical $extra'
+    appliance_exit "Appliance Error" "Appliance (%I) failed to start, system in standby" critical "$extra"'
