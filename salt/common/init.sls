@@ -86,6 +86,7 @@ set_locale:
 /usr/local/share/appliance/env.include:
   file.managed:
     - source: salt://common/env.include
+    - makedirs: True
 
 /usr/local/sbin/generate-new-env.sh:
   file.managed:

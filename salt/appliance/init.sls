@@ -15,6 +15,7 @@ include:
   file.managed:
     - source: salt://appliance/scripts/{{ i }}
     - mode: "0755"
+    - makedirs: true
 {% endfor %}
 
 /etc/appliance/ecs:

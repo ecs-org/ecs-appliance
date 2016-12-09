@@ -2,10 +2,10 @@
 Description=Appliance Preparation
 ConditionPathExists=!/run/appliance-failed
 ConditionFileNotEmpty=/run/active-env.yml
-Requires=update-appliance.service
+Requires=prepare-env.service
 Wants=postgresql.service nginx.service
 PartOf=appliance.service
-After=network.target postgresql.service nginx.service update-appliance.service
+After=network.target postgresql.service nginx.service prepare-env.service
 ReloadPropagatedFrom=appliance.service
 
 [Service]

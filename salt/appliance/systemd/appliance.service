@@ -2,7 +2,7 @@
 Description=Appliance
 ConditionPathExists=!/run/appliance-failed
 ConditionFileNotEmpty=/run/active-env.yml
-Requires=prepare-env.service update-appliance.service prepare-appliance.service prepare-ecs.service
+Requires=prepare-env.service prepare-appliance.service prepare-ecs.service
 After=prepare-ecs.service
 Before=appliance-cleanup.service
 OnFailure=appliance-failed@%n.service

@@ -2,14 +2,11 @@
 Description=Appliance Update
 ConditionPathExists=!/run/appliance-failed
 ConditionFileNotEmpty=/run/active-env.yml
-Requires=prepare-env.service
-PartOf=appliance.service
-After=network.target prepare-env.service
-ReloadPropagatedFrom=appliance.service
+After=network.target
 
 [Service]
 Type=oneshot
-RemainAfterExit=on
+RemainAfterExit=off
 TimeoutStartSec=30min
 Environment=UNITNAME=%n
 Environment=ENV_YML=/run/active-env.yml

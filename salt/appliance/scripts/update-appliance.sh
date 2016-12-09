@@ -1,6 +1,8 @@
 #!/bin/bash
 . /usr/local/share/appliance/appliance.include
 
+need_update=$(update_available)
+
 if test ! -e /app/appliance; then mkdir -p /app/appliance; chown app:app /app/appliance; fi
 cd /app/appliance
 
@@ -44,4 +46,8 @@ if test "$last_running" != "$target"; then
     fi
     # save executed commit
     printf "%s" "$target" > /etc/appliance/last_running_appliance
+fi
+
+if $need_update; then
+    systemctl restart appliance
 fi
