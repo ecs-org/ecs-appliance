@@ -15,7 +15,7 @@ systemctl start nginx
 
 # ### storage setup
 need_storage_setup=false
-for d in /data/appliance /data/ecs-ca /data/ecs-pgdump \
+for d in /data/appliance /data/ecs-ca /data/ecs-gpg /data/ecs-pgdump \
     /data/ecs-storage-vault /data/postgresql \
     /volatile/docker /volatile/ecs-backup-test \
     /volatile/ecs-cache /volatile/redis; do
@@ -88,13 +88,19 @@ if test "$APPLIANCE_EXTRA_FILES_LEN" != ""; then
     done
 fi
 
+# ### storagevault keys setup
+echo "writing storage vault keys to ecs-gpg"
+# wipe directory clean of *.gpg files, but not eg. random_seed and do not remove directory
+find /data/ecs-gpg -mindepth 1 -name "*.gpg*" -delete
+echo "$ECS_VAULT_ENCRYPT" | gpg --homedir /data/ecs-gpg --batch --yes --import --
+echo "$ECS_VAULT_SIGN" | gpg --homedir /data/ecs-gpg --batch --yes --import --
+chown -R 1000:1000 /data/ecs-gpg
+
 # ### backup setup
 # create ready to use /root/.gpg for backup being done using duplicity
-if test -d /root/.gpg; then rm -r /root/.gpg; fi
 mkdir -p /root/.gpg
-printf "%s" "$APPLIANCE_BACKUP_ENCRYPT" > /root/.gpg/backup_encrypt.sec
-chmod -R 0600 /root/.gpg/
-gpg --homedir /root/.gpg --batch --yes --import /root/.gpg/backup_encrypt.sec
+find /root/.gpg -mindepth 1 -name "*.gpg*" -delete
+echo "$APPLIANCE_BACKUP_ENCRYPT" | gpg --homedir /root/.gpg --batch --yes --import --
 
 # ### ssl setup
 # re-generate dhparam.pem if not found or less than 2048 bit

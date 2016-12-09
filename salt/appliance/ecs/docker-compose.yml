@@ -11,11 +11,10 @@ services:
     volumes:
       - /data/ecs-storage-vault:/app/ecs-storage-vault
       - /data/ecs-ca:/app/ecs-ca
+      - /data/ecs-gpg:/app/ecs-gpg
       - /volatile/ecs-cache:/app/ecs-cache
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
-      - ECS_VAULT_ENCRYPT=${ECS_VAULT_ENCRYPT}
-      - ECS_VAULT_SIGN=${ECS_VAULT_SIGN}
     env_file:
       - service_urls.env
       - database_url.env
@@ -32,11 +31,10 @@ services:
     volumes:
       - /data/ecs-storage-vault:/app/ecs-storage-vault
       - /data/ecs-ca:/app/ecs-ca
+      - /data/ecs-gpg:/app/ecs-gpg
       - /volatile/ecs-cache:/app/ecs-cache
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
-      - ECS_VAULT_ENCRYPT=${ECS_VAULT_ENCRYPT}
-      - ECS_VAULT_SIGN=${ECS_VAULT_SIGN}
     env_file:
       - service_urls.env
       - database_url.env

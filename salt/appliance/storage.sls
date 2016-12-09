@@ -104,6 +104,7 @@ postfix_relocate_{{ source }}:
 {{ dir_setup ('/data', [
   ('appliance', 'app', ''),
   ('ecs-ca', 1000, '0700'),
+  ('ecs-gpg', 1000, '0700'),
   ('ecs-pgdump', 'app', ''),
   ('ecs-storage-vault', 1000, ''),
   ('postgresql', 'postgres', ''),
@@ -114,5 +115,6 @@ postfix_relocate_{{ source }}:
     'systemctl stop postgresql', 'systemctl start postgresql'),
   ('/data/appliance', '/etc/appliance', '', ''),
   ('/data/ecs-ca', '/app/ecs-ca', '', ''),
+  ('/data/ecs-gpg', '/app/ecs-gpg', '', ''),
   ('/data/ecs-storage-vault/', '/app/ecs-storage-vault', '', ''),
   ]) }}
