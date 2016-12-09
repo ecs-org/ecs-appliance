@@ -44,7 +44,7 @@ include:
 
 {% for n in ['prepare-env.service', 'update-appliance.service',
   'prepare-appliance.service', 'prepare-ecs.service', 'appliance.service',
-  'appliance-cleanup.service', 'appliance-failed@.service'] %}
+  'appliance-cleanup.service'] %}
 install_{{ n }}:
   file.managed:
     - name: /etc/systemd/system/{{ n }}
@@ -54,6 +54,10 @@ install_{{ n }}:
     - watch:
       - file: install_{{ n }}
 {% endfor %}
+
+/etc/systemd/system/appliance-failed@.service:
+  file.managed:
+    - source: salt://appliance/systemd/appliance-failed@.service
 
 /etc/systemd/system/watch_ecs_ca.service:
   file.managed:
