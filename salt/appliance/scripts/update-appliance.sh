@@ -9,7 +9,7 @@ cd /app/appliance
 # if APPLIANCE_GIT_SOURCE is different to current remote, delete source, re-clone
 current_source=$(gosu app git config --get remote.origin.url || echo "")
 if test "$APPLIANCE_GIT_SOURCE" != "$current_source"; then
-    sentry_entry "Appliance Update" "Warning: appliance has different upstream sources, will re-clone. Current: \"$current_source\", new: \"$APPLIANCE_GIT_SOURCE\""
+    sentry_entry "Appliance Update" "Warning: appliance has different upstream sources, will re-clone. Current: \"$current_source\", new: \"$APPLIANCE_GIT_SOURCE\"" warning
     cd /; rm -r /app/appliance; mkdir -p /app/appliance; chown app:app /app/appliance; cd /app/appliance
     gosu app git clone --branch $APPLIANCE_GIT_BRANCH $APPLIANCE_GIT_SOURCE /app/appliance
 fi

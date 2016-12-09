@@ -174,6 +174,7 @@ the service again using `systemctl restart appliance.service`
 + look at all appliance http status pages: `gosu app git grep "\(ecs\|appliance\)_\(exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort`
 + line and word count appliance:
     + `wc $(find . -regex ".*\.\(sls\|yml\|sh\|json\|conf\|template\|include\|service\|identity\)")`
++ python -c "import sys, shlex; sys.stdout.write(shlex.quote(sys.stdin.read()))"
 
 
 ### Architecture

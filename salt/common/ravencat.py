@@ -90,9 +90,11 @@ def main():
     parser.add_argument('--release', default='')
     parser.add_argument('--site', default='')
     parser.add_argument('--level', default='info', choices=logging_choices)
-    parser.add_argument('--tags', action=JsonAction,
+    parser.add_argument('--extra', default={}, action=JsonAction,
+        help='a json dictionary of extra data')
+    parser.add_argument('--tags', default={}, action=JsonAction,
         help='a json dictionary listening tag name and value')
-    parser.add_argument('--request', action=JsonAction, default={},
+    parser.add_argument('--request', default={}, action=JsonAction,
         help='a json dictionary of the request')
     parser.add_argument('--dsn', action=EnvDefault,
         envvar='SENTRY_DSN', required=True,
