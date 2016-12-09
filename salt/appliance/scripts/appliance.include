@@ -59,32 +59,35 @@ update_available(){
 }
 
 sentry_entry () {
-    # call with group message [level [extra]]
-    # default level is error
-    last_running_ecs=$(cat /etc/appliance/last_running_ecs 2> /dev/null || echo "invalid")
-    last_build_ecs=$(cat /etc/appliance/last_build_ecs 2> /dev/null || echo "invalid")
-    last_running_appliance=$(cat /etc/appliance/last_running_appliance 2> /dev/null || echo "invalid")
-    last_running_ecs_image=$(cat /etc/appliance/last_running_ecs_image 2> /dev/null || echo "invalid")
-    last_failed_ecs=$(cat /etc/appliance/last_failed_ecs 2> /dev/null || echo "invalid")
-    current_appliance=$(gosu app git -C /app/appliance rev-parse HEAD)
-    tags="{\"group\": \"$1\", \
+    # call with (group,message,[level,[extra]]) , default level is error
+    local group=$1
+    local msg=$2
+    local level=${3:-error}
+    local extra=${4:-{}}
+    local last_running_ecs=$(cat /etc/appliance/last_running_ecs 2> /dev/null || echo "invalid")
+    local last_build_ecs=$(cat /etc/appliance/last_build_ecs 2> /dev/null || echo "invalid")
+    local last_running_appliance=$(cat /etc/appliance/last_running_appliance 2> /dev/null || echo "invalid")
+    local last_running_ecs_image=$(cat /etc/appliance/last_running_ecs_image 2> /dev/null || echo "invalid")
+    local last_failed_ecs=$(cat /etc/appliance/last_failed_ecs 2> /dev/null || echo "invalid")
+    local current_appliance=$(gosu app git -C /app/appliance rev-parse HEAD)
+    local tags="{\"group\": \"$group\", \
         \"last_running_ecs\": \"$last_running_ecs\", \
         \"last_build_ecs\": \"$last_build_ecs\", \
         \"last_running_appliance\": \"$last_running_appliance\", \
         \"last_failed_ecs\": \"$last_failed_ecs\", \
         \"last_running_ecs_image\": \"$last_running_ecs_image\"}"
 
-    printf "Level: %s Group: %s Message: %s Extra: %s" "$3" "$1" "$2" "$4"
+    printf "Level: %s Group: %s Message: %s Extra: %s" "$level" "$group" "$msg" "$extra"
     if test -n "$APPLIANCE_SENTRY_DSN"; then
         SENTRY_DSN="$APPLIANCE_SENTRY_DSN" /usr/local/bin/ravencat.py \
             --culprit ${UNITNAME:-shellscript} \
             --logger appliance.status \
             --release "$current_appliance" \
             --site "$APPLIANCE_DOMAIN"  \
-            --level "${3:-error}" \
+            --level "$level" \
             --tags "$tags" \
-            --extra "$4" \
-            "$2"
+            --extra "$extra" \
+            "$msg"
     fi
 }
 
