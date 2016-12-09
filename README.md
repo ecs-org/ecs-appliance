@@ -134,7 +134,7 @@ add on top of developer-vm or appliance update:
 
 ## Update Appliance
 
-Update Appliance (appliance and ecs): `systemctl restart appliance`
+Update Appliance (appliance and ecs): `systemctl start update-appliance`
 
 ### Recover from failed state
 
@@ -203,9 +203,7 @@ Path | Description
 #### Systemd Startup Order
 
 on start:
-
     + prepare-env
-    + update-appliance
     + prepare-appliance
     + prepare-ecs
     + appliance
@@ -213,6 +211,9 @@ on start:
 
 on error:
     + appliance-failed
+
+on update:
+    + update-appliance
 
 #### Environment & Flags
 

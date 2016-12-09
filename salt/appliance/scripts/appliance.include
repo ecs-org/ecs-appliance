@@ -26,7 +26,7 @@ appliance_update_available(){
             fi
         fi
     fi
-    return $appliance_need_update
+    $appliance_need_update
 }
 
 ecs_update_available() {
@@ -51,7 +51,7 @@ ecs_update_available() {
             fi
         fi
     fi
-    return $ecs_need_update
+    $ecs_need_update
 }
 
 update_available(){
