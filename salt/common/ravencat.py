@@ -116,6 +116,7 @@ def main():
         transport=RequestsHTTPTransport,
         release=args.release,
         site=args.site,
+        context= {},
         )
 
     if not client.remote.is_active():
