@@ -1,0 +1,13 @@
+GPG_KEY='ECS_BACKUP'
+GPG_PW=''
+GPG_OPTS='--trust-model always'
+VERBOSITY=2
+MAX_AGE=4M
+MAX_FULLBKP_AGE=2M
+DUPL_PARAMS="$DUPL_PARAMS --full-if-older-than $MAX_FULLBKP_AGE "
+DUPL_PARAMS="$DUPL_PARAMS --exclude-other-filesystems "
+
+# TARGET='scheme://user[:password]@host[:port]/[/]path'
+TARGET='{{ target }}'
+# base directory to backup
+SOURCE='/data'

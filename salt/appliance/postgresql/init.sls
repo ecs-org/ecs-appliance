@@ -1,6 +1,8 @@
 include:
   - docker
 
+# https://sourceforge.net/projects/pgbarman/
+
 late_postgresql.service:
   file.managed:
     - name: /etc/systemd/system/late_postgresql.service

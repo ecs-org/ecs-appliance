@@ -1,9 +1,0 @@
-GPG_KEY='ECS_BACKUP'
-GPG_PW=''
-GPG_OPTS='--always-trust'
-VERBOSITY=3
-TARGET=''
-MAX_AGE=2M
-MAX_FULLBKP_AGE=1M
-DUPL_PARAMS="$DUPL_PARAMS --full-if-older-than $MAX_FULLBKP_AGE "
-DUPL_PARAMS="$DUPL_PARAMS --exclude-other-filesystems "

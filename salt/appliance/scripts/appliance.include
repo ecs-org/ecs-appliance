@@ -58,6 +58,11 @@ update_available(){
     return $(appliance_update_available || ecs_update_available)
 }
 
+text2json(){
+    python3 -c "import sys, json; \
+    d={\"status\": sys.stdin.read().split(\"\n\")}; json.dump(d, sys.stdout)"
+}
+
 sentry_entry () {
     # call with (group,message,[level,[extra]]) , default level is error
     local group=$1

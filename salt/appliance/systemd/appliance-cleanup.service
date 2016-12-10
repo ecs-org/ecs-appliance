@@ -12,7 +12,6 @@ ExecStart=/bin/bash -c "sleep 30; \
   docker-compose -f /etc/appliance/ecs/docker-compose.yml rm -v -f; \
   docker rmi --force $(docker images -q --filter 'dangling=true')"
 ExecReload=/bin/true
-RemainAfterExit=on
 
 [Install]
 WantedBy=multi-user.target

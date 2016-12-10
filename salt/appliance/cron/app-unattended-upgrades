@@ -1,3 +1,6 @@
 + run after backup complete
-+ local unattended all package update
-+ update-appliance.sh
+
+# unattended all package upgrade
+/usr/bin/unattended-upgrade
+
+systemctl start update-appliance

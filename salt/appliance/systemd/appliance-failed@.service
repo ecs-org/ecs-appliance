@@ -10,7 +10,5 @@ ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_to_en
     rm -f /etc/appliance/last_running_ecs; \
     touch /run/appliance-failed; \
     extra=$((for i in prepare-env prepare-appliance prepare-ecs appliance; do \
-        systemctl status -l -q --no-pager -n 20 ${i}.service; done) | \
-        python3 -c "import sys, json; \
-        d={\"status\": sys.stdin.read().split(\"\n\")}; json.dump(d, sys.stdout)"); \
+        systemctl status -l -q --no-pager -n 20 ${i}.service; done) | text2json); \
     appliance_exit "Appliance Error" "Appliance (%I) failed to start, system in standby" critical "$extra"'

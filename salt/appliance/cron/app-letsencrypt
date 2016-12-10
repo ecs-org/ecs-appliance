@@ -1,3 +1,7 @@
+
+once every week, can restart the appliance service if cert is updated (pdfas and mocca need updated cert),
+therefore make it in sync with other stuff weekly
+
 + local: update letsencrypt
 
 deploy_cert_as_root.sh:
