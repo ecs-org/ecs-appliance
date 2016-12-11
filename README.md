@@ -195,6 +195,7 @@ Path | Description
 
 Application:
 
+path | remark
 --- | ---
 /app/env.yml        | local (nocloud) environment configuration location
 /app/ecs            | ecs repository used for container creation
@@ -216,6 +217,7 @@ Application:
 
 Data & Volatile:
 
+path | remark
 --- | ---
 /data | important data
 /data/ecs-ca |
