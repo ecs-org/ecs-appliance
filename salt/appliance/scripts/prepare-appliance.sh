@@ -64,14 +64,14 @@ if ! $(gosu postgres psql ${ECS_DATABASE} -qtc "\dx" | grep -q pg_stat_statement
     # create pg_stat_statements extension
     gosu postgres psql ${ECS_DATABASE} -c "CREATE extension pg_stat_statements;"
 fi
-pgpass=$(cat /app/etc/compose/database_url.env 2> /dev/null | grep 'DATABASE_URL=' | \
+pgpass=$(cat /app/etc/ecs/database_url.env 2> /dev/null | grep 'DATABASE_URL=' | \
     sed -re 's/DATABASE_URL=postgres:\/\/[^:]+:([^@]+)@.+/\1/g')
 if test "$pgpass" = ""; then pgpass="invalid"; fi
 if test "$pgpass" = "invalid"; then
     # set app user postgresql password to a random string and write to service_urls.env
     pgpass=$(HOME=/root openssl rand -hex 8)
     gosu postgres psql -c "ALTER ROLE app WITH ENCRYPTED PASSWORD '"${pgpass}"';"
-    sed -ri "s/(postgres:\/\/app:)[^@]+(@[^\/]+\/).+/\1${pgpass}\2${ECS_DATABASE}/" /app/etc/compose/database_url.env
+    sed -ri "s/(postgres:\/\/app:)[^@]+(@[^\/]+\/).+/\1${pgpass}\2${ECS_DATABASE}/" /app/etc/ecs/database_url.env
     # DATABASE_URL=postgres://app:invalidpassword@1.2.3.4:5432/ecs
 fi
 

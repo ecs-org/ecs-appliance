@@ -65,7 +65,7 @@ cp -Ra /app/ecs-homepage/user-manual-de/ /app/ecs/static/help
 
 
 # ### rebuild images
-cd /app/etc/compose
+cd /app/etc/ecs
 printf "%s" "invalid" > /app/etc/tags/last_build_ecs
 
 appliance_status "Appliance Update" "Pulling base images"
