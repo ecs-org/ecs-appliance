@@ -9,7 +9,6 @@ include:
   - .backup
   - .legacy-removal
 
-
 {% for i in ['appliance.include', 'prepare-env.sh', 'prepare-appliance.sh',
   'prepare-ecs.sh', 'update-appliance.sh'] %}
 /usr/local/share/appliance/{{ i }}:
@@ -23,6 +22,7 @@ include:
   file.recurse:
     - source: salt://appliance/ecs
     - keep_symlinks: true
+    - makedirs: true
 
 /app/etc/compose/service_urls.env:
   file.managed:
