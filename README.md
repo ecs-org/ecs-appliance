@@ -195,22 +195,24 @@ Path | Description
 
 Path | Description
 --- | ---
-/app/env.yml        | local (nocloud) env configuration location to be read by prepare-env
-/app/etc            | runtime configuration
-/app/etc/tags       | runtime tags
- |
+/app/env.yml        | local (nocloud) environment configuration location
 /app/ecs            | ecs repository used for container creation
 /app/appliance      | ecs-appliance repository active on host
  |
-/app/ecs-ca         | symlink
-/app/ecs-gpg        | symlink
-/app/ecs-cache      | symlink
-/data/ecs-ca        | client certificate ca and crl directory
-/data/ecs-gpg       | storage-vault gpg keys directory
-/volatile/ecs-cache | temporary storage directory
+/app/etc            | runtime configuration
+ | symlink of /data/etc
+/app/etc/tags       | runtime tags
+ |
+/app/ecs-ca        | client certificate ca and crl directory
+ | (symlink of /data/ecs-ca)
+/app/ecs-gpg       | storage-vault gpg keys directory
+ | (symlink of /data/ecs-gpg)
+/app/ecs-cache | temporary storage directory
+ | (symlink of /volatile/ecs-cache)
  |
 /run/active-env.yml | current activated configuration
-/run/appliance-failed | flag to be cleared after a failed appliance start
+/run/appliance-failed | flag that needs to be cleared,
+ | before a restart of a failed appliance is possbile
 
 ### Startup Order
 
@@ -242,17 +244,19 @@ but will use /run/active-env.yml if available
 
 Runtime Environment Usage:
 
-* prepare-env
-    * get a environment yaml from all local and network sources
-    * writes the result to /run/active-env.yml
-* update-appliance, Storage Setup (`salt-call state.sls storage.sls`),
-    prepare-appliance, prepare-ecs, appliance.service parse /run/active-env.yml
-* update appliance will call `salt-call state.highstate` which will use /run/active-env.yml
-* appliance.service calls docker-compose up with active-env
-    * docker compose passes the following to the ecs/ecs* container
-        * service_urls.env, database_url.env
-        * ECS_SETTINGS
-    * docker compose passes APPLIANCE_DOMAIN as HOSTNAME to mocca and pdfas
++ prepare-env
+    + get a environment yaml from all local and network sources
+    + writes the result to /run/active-env.yml
++ update-appliance, prepare-appliance, prepare-ecs, appliance.service
+    + parse /run/active-env.yml
+    + include defaults from appliance.include (GIT_SOURCE*)
++ Storage Setup (`salt-call state.sls storage.sls`) parses /run/active-env.yml
++ update-appliance will call `salt-call state.highstate` which will use /run/active-env.yml
++ appliance.service calls docker-compose up with active env from /run/active-env.yml
+    + docker compose passes the following to the ecs/ecs* container
+        + service_urls.env, database_url.env
+        + ECS_SETTINGS
+    + docker compose passes APPLIANCE_DOMAIN as HOSTNAME to mocca and pdfas container
 
 ### Partitioning
 
@@ -266,4 +270,4 @@ Runtime Environment Usage:
   + storage setup will create the directories but do not expect a mountpoint
 
 + production setup:
-  + appliance will (if told in env.yml) setup storage to any desired partitioning
+  + appliance will (if told in env.yml) setup storage to desired partitioning
