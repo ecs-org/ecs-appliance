@@ -4,7 +4,7 @@ therefore make it in sync with other stuff weekly
 
 + local: update letsencrypt
 
-deploy_cert_as_root.sh:
+deploy-cert-as-root.sh:
 
 + do not call if domains.txt = empty
 + FIXME restart mocca & pdfas container (has certs in it) if exists, just restart and make docker-compose be ok with it

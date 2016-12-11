@@ -13,7 +13,7 @@ include:
     - contents: |
         BASEDIR="/etc/appliance/dehydrated"
         WELLKNOWN="/etc/appliance/dehydrated/acme-challenge"
-        HOOK="/etc/appliance/dehydrated-hook.sh"
+        HOOK="/usr/local/bin/dehydrated-hook.sh"
     - makedirs: true
 
 {% for i in ['acme-challenge', 'certs'] %}
@@ -25,12 +25,12 @@ include:
       - sls: common.user
 {% endfor %}
 
-/etc/appliance/dehydrated-hook.sh:
+/usr/local/bin/dehydrated-hook.sh:
   file.managed:
     - mode: "0755"
     - source: salt://appliance/ssl/dehydrated-hook.sh
 
-{% for i in ['deploy_cert_as_root.sh', 'unchanged_cert_as_root.sh'] %}
+{% for i in ['deploy-cert-as-root.sh', 'unchanged-cert-as-root.sh'] %}
 /usr/local/sbin/{{ i }}:
   file.managed:
     - mode: "0755"
@@ -42,5 +42,5 @@ include:
     - makedirs: True
     - mode: "0440"
     - contents: |
-        app ALL=(ALL) NOPASSWD: /usr/local/sbin/deploy_cert_as_root.sh
-        app ALL=(ALL) NOPASSWD: /usr/local/sbin/unchanged_cert_as_root.sh
+        app ALL=(ALL) NOPASSWD: /usr/local/sbin/deploy-cert-as-root.sh
+        app ALL=(ALL) NOPASSWD: /usr/local/sbin/unchanged-cert-as-root.sh

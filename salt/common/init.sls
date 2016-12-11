@@ -45,6 +45,7 @@ base_packages:
       - gosu
       - git
       - socat
+      - swaks
       - tmux
 
 system_timezone:
@@ -88,9 +89,10 @@ set_locale:
     - source: salt://common/env.include
     - makedirs: True
 
-/usr/local/sbin/generate-new-env.sh:
+{% for n in ['env-new.sh', 'env-build.sh', 'env-update.sh'] %}
+/usr/local/sbin/{{ n }}:
   file.managed:
-    - source: salt://common/generate-new-env.sh
+    - source: salt://common/{{ n }}
     - mode: "0755"
 
 # python3 packages needed for flatyaml and ravencat

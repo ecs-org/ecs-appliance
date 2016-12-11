@@ -7,6 +7,7 @@ include:
   - .stunnel
   - .postgresql
   - .backup
+  - .legacy-removal
 
 
 {% for i in ['appliance.include', 'prepare-env.sh', 'prepare-appliance.sh',
@@ -53,15 +54,15 @@ install_{{ n }}:
   file.managed:
     - source: salt://appliance/systemd/appliance-failed@.service
 
-/etc/systemd/system/watch_ecs_ca.service:
+/etc/systemd/system/watch-ecs-ca.service:
   file.managed:
-    - source: salt://appliance/systemd/watch_ecs_ca.service
+    - source: salt://appliance/systemd/watch-ecs-ca.service
 
-/etc/systemd/system/watch_ecs_ca.path:
+/etc/systemd/system/watch-ecs-ca.path:
   file.managed:
-    - source: salt://appliance/systemd/watch_ecs_ca.path
+    - source: salt://appliance/systemd/watch-ecs-ca.path
   cmd.wait:
-    - name: systemctl enable watch_ecs_ca.path
+    - name: systemctl enable watch-ecs-ca.path
     - watch:
-        - file: /etc/systemd/system/watch_ecs_ca.path
-        - file: /etc/systemd/system/watch_ecs_ca.service
+        - file: /etc/systemd/system/watch-ecs-ca.path
+        - file: /etc/systemd/system/watch-ecs-ca.service

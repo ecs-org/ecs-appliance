@@ -9,6 +9,7 @@ env_gen_pkgs:
       - enscript
       - ghostscript
       - pdftk
+      - swaks
 
 {{ salt['pillar.get']('targetdir') }}/env.yml:
   file.managed:

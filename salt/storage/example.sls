@@ -3,7 +3,7 @@
 
 {% if we are sure that we want to wipe the disk, and which disks %}
 
-  {% if we have only one disks available %}
+  {% if we have only one disk available %}
 
     {% load_yaml as custom_storage %}
   parted:

@@ -4,10 +4,9 @@ usage() {
     cat <<EOF
 Usage: $0 datafile
 
-take (compressed) binary data,
-encode base32 and generate one or more alphanumeric qrcode,
-and arrange these in a 2x2 matrix per page pdf
-output to \${datafile}.pdf
+input (compressed) binary data,
+encode base32 and generate one or more alphanumeric qrcodes,
+arrange them in a 2x2 matrix per page pdf and output to \${datafile}.pdf
 
 Limits:
  * Single QRCode:
@@ -17,7 +16,7 @@ Limits:
  * manually linked QRCode, Version 29, 4 Codes per A4 Page (25 A4 Pages Maximum)
    * Medium Error Correction: 100 x Version 29:
      * 1839 alphanumeric (base32 decode of (1839 -6 (padding) -3 (split header) -4 (safety)= 1826):
-       * 1141 * 100 ~<= 114.100 (8 Bit)
+       * 1141 * 100 ~<= 114.100 Bytes (8 Bit)
 
 QR-Code Standard:
  * Version 40: alphanumeric Limits: L 4296, M 3391, Q 2420, H 1852
@@ -56,7 +55,7 @@ unittest() {
         fi
     done
 
-    popd $tempdir
+    popd
     rm -r $tempdir
 }
 

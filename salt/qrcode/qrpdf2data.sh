@@ -8,9 +8,9 @@ example:
   $0 test.pdf test.zip
   $0 *.png env.yml.gz; gzip -d env.yml.gz
 
-take qrcode pictures or a pdf with qrcodes,
-decode the qrcodes and base32 decode the resulting output
-input order of pictures is not relevant for the output 
+input qrcode pictures or a pdf with qrcodes.
+decode the qrcodes and base32 decode the resulting output.
+input order of pictures is not relevant for the output.
 
 EOF
     exit 1

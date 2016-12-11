@@ -34,14 +34,14 @@ mount-{{ name }}:
 prefix_relocate_{{ source }}:
   cmd.run:
     - name: {{ pre }}
-    - onlyif: test -d {{ name }} -a ! -L {{ source }}
+    - onlyif: test -d {{ name }} -a -e {{ source }} -a ! -L {{ source }}
     {%- endif %}
 relocate_{{ source }}:
   file.rename:
     - name: {{ name }}
     - source: {{ source }}
     - force: true
-    - onlyif: test -d {{ name }} -a ! -L {{ source }}
+    - onlyif: test -d {{ name }} -a -e {{ source }} -a ! -L {{ source }}
     {%- if pre %}
     - require:
       - cmd: prefix_relocate_{{ source }}
