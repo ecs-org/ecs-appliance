@@ -94,6 +94,7 @@ set_locale:
   file.managed:
     - source: salt://common/{{ n }}
     - mode: "0755"
+{% endfor %}
 
 # python3 packages needed for flatyaml and ravencat
 # python2 packages needed for saltstack raven
