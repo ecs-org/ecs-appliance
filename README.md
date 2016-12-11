@@ -8,7 +8,7 @@ it can be stacked on top of the developer vm, but is independend of it.
 
 ### to empty xenial vm via ssh
 
-+ on work laptop:
+on your local machine:
 
 ```
 ssh root@target.vm.ip '/bin/bash -c "mkdir -p /app/.ssh"'
@@ -16,7 +16,7 @@ scp cloneecs_id_ed25519 root@target.vm.ip:/app/.ssh/id_ed25519
 scp target.domain.name.env.yml root@target.vm.ip:/app/env.yml
 ```
 
-+ on empty machine:
+on empty target vm:
 
 ```
 apt-get -y update
@@ -50,18 +50,9 @@ reboot
 + copy env: `cp /app/appliance/env.yml /app/env.yml`
 + update and start appliance: `reboot`
 
-### upgrade developer-vm
+### upgrade developer vm
 
-on your local machine:
-
-```
-# insert your devserver name (eg. "testecs") into your /etc/hosts
-sudo -s 'printf "%s" "127.0.0.1 testecs" >> /etc/hosts'
-# connect to your developer vm with port 80 and 443:
-sudo -E ssh -F ~/.ssh/config testecs -L 80:localhost:80 -L 443:localhost:443 -L 8050:localhost:8050
-```
-
-inside the developer vm:
+on developer vm:
 
 ```
 # install appliance, clone appliance code
@@ -115,7 +106,7 @@ appliance gets build using packer.
 
 ### for a production server
 
-on user laptop:
+on your local machine:
 + vagrant up
 + make a new env.yml: `env-new.sh domainname.domain /app/`
 + edit your settings in /app/env.yml
@@ -124,8 +115,9 @@ on user laptop:
 + save and keep env.yml.tar.gz.gpg
 + copy env.yml to appliance /app/env.yml
 
-on appliance:
-+ login in empty appliance, copy env to /app/env.yml
+on the target appliance vm:
++ copy env.yml from local machine to target vm at /app/env.yml
++ login into appliance
 + create a empty ecs database: `sudo -u postgres createdb ecs -T template0  -l de_DE.utf8`
 
 ## start appliance
