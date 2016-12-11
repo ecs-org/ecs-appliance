@@ -15,7 +15,7 @@ systemctl start nginx
 
 # ### storage setup
 need_storage_setup=false
-for d in /data/appliance /data/ecs-ca /data/ecs-gpg /data/ecs-pgdump \
+for d in /data/etc /data/ecs-ca /data/ecs-gpg /data/ecs-pgdump \
     /data/ecs-storage-vault /data/postgresql \
     /volatile/docker /volatile/ecs-backup-test \
     /volatile/ecs-cache /volatile/redis; do

@@ -113,7 +113,7 @@ postfix_relocate_{{ source }}:
 {{ relocate_setup([
   ('/data/postgresql', '/var/lib/postgresql',
     'systemctl stop postgresql', 'systemctl start postgresql'),
-  ('/data/appliance', '/app/etc', '', ''),
+  ('/data/etc', '/app/etc', '', ''),
   ('/data/ecs-ca', '/app/ecs-ca', '', ''),
   ('/data/ecs-gpg', '/app/ecs-gpg', '', ''),
   ('/data/ecs-storage-vault/', '/app/ecs-storage-vault', '', ''),

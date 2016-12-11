@@ -18,12 +18,14 @@ include:
     - makedirs: true
 {% endfor %}
 
-create_app_etc_compose:
+{% for n in ['compose', 'tags'] %}
+create_app_etc_{{ n }}:
   file.directory:
-    - name: /app/etc/compose
+    - name: /app/etc/{{ n }}
     - makedirs: true
     - user: app
     - group: app
+{% endif %}
 
 /app/etc/compose:
   file.recurse:
