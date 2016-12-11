@@ -193,22 +193,27 @@ Path | Description
 /salt/appliance/compose/docker-compose.yml   | main container group definition
 /salt/appliance/systemd/appliance.service    | systemd appliance service that ties all together
 
-#### Systemd Startup Order
+#### Startup Order
 
-on start:
-    + prepare-env
-    + prepare-appliance
-    + prepare-ecs
-    + appliance
-    + appliance-cleanup
+```
+[on start]
+|
+|-- prepare-env
+|-- prepare-appliance
+|-- prepare-ecs
+|-- appliance
+|-- appliance-cleanup
 
-on error:
-    + appliance-failed
+[on error]
+|
+|-- appliance-failed
 
-on update:
-    + update-appliance
+[on update]
+|
+|-- update-appliance
+```
 
-#### Runtime Files & Environment
+#### Runtime Files
 
 Runtime Files:
 
@@ -217,8 +222,21 @@ Path | Description
 /app/env.yml        | one possible local env configuration location to be read by prepare-env
 /app/etc            | runtime configuration
 /app/etc/tags       | runtime tags
+--- | ---
+/app/ecs            | ecs repository used for container creation
+/app/appliance      | ecs-appliance repository active on host
+--- | ---
+/app/ecs-ca         | symlink
+/app/ecs-gpg        | symlink
+/app/ecs-cache      | symlink
+/data/ecs-ca        | client certificate ca and crl directory
+/data/ecs-gpg       | storage-vault gpg keys directory
+/volatile/ecs-cache | temporary storage directory
+--- | ---
 /run/active-env.yml | current activated configuration
 /run/appliance-failed | flag to be cleared after a failed appliance start
+
+#### Environment
 
 Buildtime Environment Usage:
 
