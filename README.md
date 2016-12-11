@@ -140,6 +140,9 @@ the service again using `systemctl restart appliance.service`
 
 ## Maintenance
 
++ activate /run/active-env.yml in current shell of appliance vm:
+    + `. /usr/local/shared/appliance/env.include; ENV_YML=/run/active-env.yml userdata_to_env ecs,appliance`
+
 + enter a running ecs container:
     + `docker exec -it ecs_image[.startcommand]_1 /bin/bash`
         + image = ecs, mocca, pdfas, memcached, redis
@@ -152,11 +155,11 @@ the service again using `systemctl restart appliance.service`
     +  `docker-compose -f /app/etc/compose/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
 
 + follow whole journal: `journalctl -f`
-+ follow the appliance log file
-    + backend nginx, uwsgi, beat, worker, smtpd,redis, memcached, pdfas, mocca
++ follow appliance log:
+    + (this includes backend nginx, uwsgi, beat, worker, smtpd, redis, memcached, pdfas, mocca)
     + `journalctl -u appliance -f`
-+ follow prepare-appliance: `journalctl -u prepare-appliance -f`
 + follow frontend nginx: `journalctl -u nginx -f`
++ follow prepare-appliance: `journalctl -u prepare-appliance -f`
 + search for salt-call output: `journalctl $(which salt-call)`
 
 + quick update appliance code:
@@ -263,6 +266,4 @@ Runtime Environment Usage:
   + storage setup will create the directories but do not expect a mountpoint
 
 + production setup:
-  + storage.setup will (if told in env.yml):
-      + add p2 (all usable space) as pv-lvm
-      + add a vg and volumes ecs-data (60%) ecs-volatile (30%), rest is for snapshots
+  + appliance will (if told in env.yml) setup storage to any desired partitioning

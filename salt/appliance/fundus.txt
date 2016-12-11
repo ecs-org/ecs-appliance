@@ -1,4 +1,4 @@
-#
+# stuff from old ecs
     def backup_config(self):
         if not self.config.get('backup', default=False):
             warn('no backup configuration, skipping backup config')
