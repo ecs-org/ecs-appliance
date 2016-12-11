@@ -4,8 +4,8 @@ the ecs appliance is a selfservice production setup virtual machine builder and 
 it can be stacked on top of the developer vm, but is independent of it.
 
 Contents:
-+ [Install](#install-appliance)
-+ [Configure](#configure-appliance)
++ [Installation](#install-appliance)
++ [Configuration](#configure-appliance)
 + [Maintenance](#maintenance)
 + [Architecture](#architecture)
 
@@ -191,6 +191,35 @@ Path | Description
 /salt/appliance/ecs/docker-compose.yml       | main container group definition
 /salt/appliance/systemd/appliance.service    | systemd appliance service that ties all together
 
+### Execution Order
+
+```
+[on start]
+|
+|-- prepare-env
+|-- prepare-appliance
+|   |
+|   |-- optional: call salt-call state.sls storage
+|---|
+|
+|-- prepare-ecs
+|-- appliance
+:
+:   (post-start)
+|-- appliance-cleanup
+
+[on error]
+|
+|-- appliance-failed
+
+[on update]
+|
+|-- update-appliance
+|   |
+|   |-- salt-call state.highstate
+|   |-- systemctl restart appliance
+```
+
 ### Runtime Layout
 
 Application:
@@ -232,57 +261,27 @@ path | remark
 /volatile/ecs-backup-test | default target directory of unconfigured backup
 /volatile/redis | redis container database volume
 
-ECS Container Mapping:
+### Container Volume Mapping
 
-host | container
---- | ---
-/data/ecs-ca | /app/ecs-ca
-/data/ecs-gpg | /app/ecs-gpg
-/data/ecs-storage-vault | /app/ecs-storage-vault
-/volatile/ecs-cache | /app/ecs-cache
+hostpath | container | container-path
+--- | --- | ---
+/data/ecs-ca | ecs | /app/ecs-ca
+/data/ecs-gpg | ecs | /app/ecs-gpg
+/data/ecs-storage-vault | ecs | /app/ecs-storage-vault
+/volatile/ecs-cache | ecs | /app/ecs-cache
+/app/etc/server.cert.pem | pdfas/mocca | /app/import/server.cert.pem:ro
 
-
-### Execution Order
-
-```
-[on start]
-|
-|-- prepare-env
-|-- prepare-appliance
-|   |
-|   |-- optional: call salt-call state.sls storage
-|---|
-|
-|-- prepare-ecs
-|-- appliance
-:
-:   (post-start)
-|-- appliance-cleanup
-
-[on error]
-|
-|-- appliance-failed
-
-[on update]
-|
-|-- update-appliance
-|   |
-|   |-- salt-call state.highstate
-|   |-- systemctl restart appliance
-```
-
-
-### Environment
+### Environment Mapping
 
 Types of environments:
-+ saltstack get the environment as pillar either /run/active-env.yml or from a default
++ saltstack get the environment as pillar either from /run/active-env.yml or from a default
 + shell-scripts and executed programs from these shellscripts get a flattend yaml representation in the environment (see flatyaml.py) usually restricted to ecs,appliance tree of the yaml file
 
-Buildtime Environment Usage:
+Buildtime Environment:
 + the build time call of `salt-call state.highstate` does not need an environment,
 but will use /run/active-env.yml if available
 
-Runtime Environment Usage:
+Runtime Environment:
 + prepare-env
     + get a environment yaml from all local and network sources
     + writes the result to /run/active-env.yml
@@ -295,7 +294,8 @@ Runtime Environment Usage:
     + docker compose passes the following to the ecs/ecs* container
         + service_urls.env, database_url.env
         + ECS_SETTINGS
-    + docker compose passes APPLIANCE_DOMAIN as HOSTNAME to mocca and pdfas container
+    + docker compose passes the following to the mocca and pdfas container
+        + APPLIANCE_DOMAIN as HOSTNAME
 
 ### Partitioning
 
