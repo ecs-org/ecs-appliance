@@ -195,14 +195,12 @@ Path | Description
 
 Application:
 
-Path | Description
 --- | ---
 /app/env.yml        | local (nocloud) environment configuration location
 /app/ecs            | ecs repository used for container creation
 /app/appliance      | ecs-appliance repository active on host
  |
-/app/etc            | runtime configuration
- | symlink of /data/etc
+/app/etc            | runtime configuration (symlink of /data/etc)
 /app/etc/tags       | runtime tags
  |
 /app/ecs-ca        | client certificate ca and crl directory
@@ -214,13 +212,12 @@ Path | Description
  |
 /run/active-env.yml | current activated configuration
 /run/appliance-failed | flag that needs to be cleared,
- | before a restart of a failed appliance is possbile
+ | before a restart of a failed appliance is possible
 
 Data & Volatile:
 
-path
 --- | ---
-/data  | important data
+/data | important data
 /data/ecs-ca |
 /data/ecs-gpg |
 /data/ecs-storage-vault |
