@@ -25,7 +25,7 @@ create_app_etc_{{ n }}:
     - makedirs: true
     - user: app
     - group: app
-{% endif %}
+{% endfor %}
 
 /app/etc/compose:
   file.recurse:
