@@ -3,10 +3,11 @@
 the ecs appliance is a selfservice production setup virtual machine builder and executor.
 it can be stacked on top of the developer vm, but is independend of it.
 
-1. [Install](#Install Appliance)
-2. [Configure](#Configure Appliance)
-3. [Maintenance](#Maintenance)
-
+Jump To:
++ [Install](#install-appliance)
++ [Configure](#configure-appliance)
++ [Maintenance](#maintenance)
++ [Architecture](#architecture)
 
 ## Install Appliance
 
@@ -167,9 +168,9 @@ the service again using `systemctl restart appliance.service`
 + read details of a container in yaml:
     + `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
 
-### Architecture
+## Architecture
 
-#### Repository Layout
+### Repository Layout
 
 Path | Description
 --- | ---
@@ -190,7 +191,7 @@ Path | Description
 /salt/appliance/compose/docker-compose.yml   | main container group definition
 /salt/appliance/systemd/appliance.service    | systemd appliance service that ties all together
 
-#### Runtime Layout
+### Runtime Layout
 
 Path | Description
 --- | ---
@@ -211,7 +212,7 @@ Path | Description
 /run/active-env.yml | current activated configuration
 /run/appliance-failed | flag to be cleared after a failed appliance start
 
-#### Startup Order
+### Startup Order
 
 ```
 [on start]
@@ -232,7 +233,7 @@ Path | Description
 ```
 
 
-#### Environment
+### Environment
 
 Buildtime Environment Usage:
 
@@ -253,7 +254,7 @@ Runtime Environment Usage:
         * ECS_SETTINGS
     * docker compose passes APPLIANCE_DOMAIN as HOSTNAME to mocca and pdfas
 
-#### Partitioning
+### Partitioning
 
 + default xenial cloud image partition layout:
   + dos-mbr
