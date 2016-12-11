@@ -13,3 +13,15 @@ remove_{{ f }}:
   file.absent:
     - name: {{ f }}
 {% endfor %}
+
+{% set files_absent=[
+  '/usr/local/sbin/generate-new-env.sh',
+  '/usr/local/sbin/deploy_cert_as_root.sh',
+  '/usr/local/sbin/unchanged_cert_as_root.sh',
+  ]
+%}
+{% for f in files_absent %}
+remove_{{ f }}:
+  file.absent:
+    - name: {{ f }}
+{% endfor %}
