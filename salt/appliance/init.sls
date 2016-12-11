@@ -19,19 +19,19 @@ include:
     - makedirs: true
 {% endfor %}
 
-/etc/appliance/ecs:
+/app/etc/ecs:
   file.recurse:
     - source: salt://appliance/ecs
     - keep_symlinks: true
 
-/etc/appliance/ecs/service_urls.env:
+/app/etc/ecs/service_urls.env:
   file.managed:
     - contents: |
         REDIS_URL=redis://ecs_redis_1:6379/0
         MEMCACHED_URL=memcached://ecs_memcached_1:11211
         SMTP_URL=smtp://{{ salt['pillar.get']('docker:ip') }}:25
 
-/etc/appliance/ecs/database_url.env:
+/app/etc/ecs/database_url.env:
   file.managed:
     - contents: |
         DATABASE_URL=postgres://app:invalid@{{ salt['pillar.get']('docker:ip') }}:5432/ecs

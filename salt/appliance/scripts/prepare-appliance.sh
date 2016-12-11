@@ -64,14 +64,14 @@ if ! $(gosu postgres psql ${ECS_DATABASE} -qtc "\dx" | grep -q pg_stat_statement
     # create pg_stat_statements extension
     gosu postgres psql ${ECS_DATABASE} -c "CREATE extension pg_stat_statements;"
 fi
-pgpass=$(cat /etc/appliance/ecs/database_url.env 2> /dev/null | grep 'DATABASE_URL=' | \
+pgpass=$(cat /app/etc/ecs/database_url.env 2> /dev/null | grep 'DATABASE_URL=' | \
     sed -re 's/DATABASE_URL=postgres:\/\/[^:]+:([^@]+)@.+/\1/g')
 if test "$pgpass" = ""; then pgpass="invalid"; fi
 if test "$pgpass" = "invalid"; then
     # set app user postgresql password to a random string and write to service_urls.env
     pgpass=$(HOME=/root openssl rand -hex 8)
     gosu postgres psql -c "ALTER ROLE app WITH ENCRYPTED PASSWORD '"${pgpass}"';"
-    sed -ri "s/(postgres:\/\/app:)[^@]+(@[^\/]+\/).+/\1${pgpass}\2${ECS_DATABASE}/" /etc/appliance/ecs/database_url.env
+    sed -ri "s/(postgres:\/\/app:)[^@]+(@[^\/]+\/).+/\1${pgpass}\2${ECS_DATABASE}/" /app/etc/ecs/database_url.env
     # DATABASE_URL=postgres://app:invalidpassword@1.2.3.4:5432/ecs
 fi
 
@@ -104,23 +104,23 @@ echo "$APPLIANCE_BACKUP_ENCRYPT" | gpg --homedir /root/.gpg --batch --yes --impo
 
 # ### ssl setup
 # re-generate dhparam.pem if not found or less than 2048 bit
-recreate_dhparam=$(test ! -e /etc/appliance/dhparam.pem && echo "true" || echo "false")
+recreate_dhparam=$(test ! -e /app/etc/dhparam.pem && echo "true" || echo "false")
 if ! $recreate_dhparam; then
-    recreate_dhparam=$(test "$(stat -L -c %s /etc/appliance/dhparam.pem)" -lt 224 && echo "true" || echo "false")
+    recreate_dhparam=$(test "$(stat -L -c %s /app/etc/dhparam.pem)" -lt 224 && echo "true" || echo "false")
 fi
 if $recreate_dhparam; then
     echo "no or to small dh.param found, regenerating with 2048 bit (takes a few minutes)"
-    mkdir -p /etc/appliance
-    openssl dhparam 2048 -out /etc/appliance/dhparam.pem
+    mkdir -p /app/etc
+    openssl dhparam 2048 -out /app/etc/dhparam.pem
 fi
 # certificate setup
 use_snakeoil=true
-domains_file=/etc/appliance/dehydrated/domains.txt
+domains_file=/app/etc/dehydrated/domains.txt
 if test "${APPLIANCE_SSL_KEY}" != "" -a "${APPLIANCE_SSL_CERT}" != ""; then
     echo "Information: using ssl key,cert supplied from environment"
-    printf "%s" "${APPLIANCE_SSL_KEY}" > /etc/appliance/server.key.pem
-    printf "%s" "${APPLIANCE_SSL_CERT}" > /etc/appliance/server.cert.pem
-    cat /etc/appliance/server.cert.pem /etc/appliance/dhparam.pem > /etc/appliance/server.cert.dhparam.pem
+    printf "%s" "${APPLIANCE_SSL_KEY}" > /app/etc/server.key.pem
+    printf "%s" "${APPLIANCE_SSL_CERT}" > /app/etc/server.cert.pem
+    cat /app/etc/server.cert.pem /app/etc/dhparam.pem > /app/etc/server.cert.dhparam.pem
     use_snakeoil=false
 else
     if is_truestr "${APPLIANCE_SSL_LETSENCRYPT_ENABLED:-true}"; then
@@ -142,9 +142,9 @@ if is_falsestr "${APPLIANCE_SSL_LETSENCRYPT_ENABLED:-true}"; then
 fi
 if $use_snakeoil; then
     echo "Warning: couldnt setup server certificate, copy snakeoil.* to appliance/server*"
-    cp /etc/appliance/snakeoil/ssl-cert-snakeoil.pem /etc/appliance/server.cert.pem
-    cp /etc/appliance/snakeoil/ssl-cert-snakeoil.key /etc/appliance/server.key.pem
-    cat /etc/appliance/server.cert.pem /etc/appliance/dhparam.pem > /etc/appliance/server.cert.dhparam.pem
+    cp /app/etc/snakeoil/ssl-cert-snakeoil.pem /app/etc/server.cert.pem
+    cp /app/etc/snakeoil/ssl-cert-snakeoil.key /app/etc/server.key.pem
+    cat /app/etc/server.cert.pem /app/etc/dhparam.pem > /app/etc/server.cert.dhparam.pem
 fi
 
 # rewrite postfix main.cf with APPLIANCE_DOMAIN, restart postfix with new domain and keys
@@ -160,6 +160,6 @@ if is_truestr "${APPLIANCE_SSL_CLIENT_CERTS_MANDATORY:-false}"; then
 else
     client_certs="optional"
 fi
-cat /etc/appliance/template.identity |
-    sed "s/##ALLOWED_HOSTS##/$APPLIANCE_DOMAIN/g;s/##VERIFY_CLIENT##/$client_certs/g" > /etc/appliance/server.identity
+cat /app/etc/template.identity |
+    sed "s/##ALLOWED_HOSTS##/$APPLIANCE_DOMAIN/g;s/##VERIFY_CLIENT##/$client_certs/g" > /app/etc/server.identity
 systemctl reload-or-restart nginx

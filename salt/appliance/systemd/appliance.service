@@ -22,16 +22,16 @@ Environment=UNITNAME=%n
 # XXX manual include env because EnvironmentFile is missing multiline var support
 # EnvironmentFile=/run/active-env.env
 Environment=ENV_YML=/run/active-env.yml
-WorkingDirectory=/etc/appliance/ecs
+WorkingDirectory=/app/etc/ecs
 ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_to_env ecs,appliance; \
     exec /usr/local/bin/docker-compose up --abort-on-container-exit'
 ExecStartPost=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_to_env ecs,appliance; \
     sleep 30; \
-    (docker images -q ecs/ecs:latest || echo "invalid") > /etc/appliance/last_running_ecs_image; \
-    rm -f /etc/appliance/last_failed_ecs; \
+    (docker images -q ecs/ecs:latest || echo "invalid") > /app/etc/last_running_ecs_image; \
+    rm -f /app/etc/last_failed_ecs; \
     . /usr/local/share/appliance/appliance.include; appliance_status --disable'
 ExecStop=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_to_env ecs,appliance; \
-    /usr/local/bin/docker-compose -f /etc/appliance/ecs/docker-compose.yml stop'
+    /usr/local/bin/docker-compose -f /app/etc/ecs/docker-compose.yml stop'
 ExecStopPost=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_to_env ecs,appliance; \
     . /usr/local/share/appliance/appliance.include; appliance_status "Appliance Standby" "Appliance is stopped"'
 

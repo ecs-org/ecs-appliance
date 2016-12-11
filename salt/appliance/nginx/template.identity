@@ -1,11 +1,11 @@
 server_name ##ALLOWED_HOSTS##;
-ssl_certificate /etc/appliance/server.cert.pem;
-ssl_certificate_key /etc/appliance/server.key.pem;
+ssl_certificate /app/etc/server.cert.pem;
+ssl_certificate_key /app/etc/server.key.pem;
 # Diffie-Hellman parameter for DHE ciphersuites, recommended 2048 bits
-ssl_dhparam /etc/appliance/dhparam.pem;
+ssl_dhparam /app/etc/dhparam.pem;
 # client certificate setup
-ssl_client_certificate /etc/appliance/ca.cert.pem;
-ssl_crl /etc/appliance/crl.pem;
+ssl_client_certificate /app/etc/ca.cert.pem;
+ssl_crl /app/etc/crl.pem;
 ssl_verify_client ##VERIFY_CLIENT##;
 
 location /bkuonline {

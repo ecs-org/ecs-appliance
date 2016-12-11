@@ -37,7 +37,7 @@ if test "$last_running" != "$target"; then
     gosu app git checkout -f $APPLIANCE_GIT_BRANCH
     gosu app git reset --hard origin/$APPLIANCE_GIT_BRANCH
     # appliance code has updated, we need a rebuild of ecs container
-    touch /etc/appliance/rebuild_wanted_ecs
+    touch /app/etc/rebuild_wanted_ecs
     # update appliance
     salt-call state.highstate pillar='{"appliance": {"enabled": true}}' --retcode-passthrough --return appliance
     err=$?
@@ -45,7 +45,7 @@ if test "$last_running" != "$target"; then
         appliance_exit "Appliance Error" "salt-call state.highstate failed with error $err"
     fi
     # save executed commit
-    printf "%s" "$target" > /etc/appliance/last_running_appliance
+    printf "%s" "$target" > /app/etc/last_running_appliance
 fi
 
 if $need_update; then

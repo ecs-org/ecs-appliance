@@ -1,7 +1,7 @@
 include:
   - appliance.ssl
 
-/etc/appliance/stunnel.conf:
+/app/etc/stunnel.conf:
   file.managed:
     - source: salt://appliance/stunnel/stunnel.conf
     - template: jinja
@@ -30,8 +30,8 @@ stunnel:
     - require:
       - cmd: stunnel
       - sls: appliance.ssl
-      - file: /etc/appliance/stunnel.conf
+      - file: /app/etc/stunnel.conf
       - file: /etc/systemd/system/stunnel.service
     - watch:
-      - file: /etc/appliance/stunnel.conf
-      - file: /etc/appliance/server.cert.dhparam.pem
+      - file: /app/etc/stunnel.conf
+      - file: /app/etc/server.cert.dhparam.pem

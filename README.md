@@ -157,7 +157,7 @@ the service again using `systemctl restart appliance.service`
         + `docker exec -it ecs_ecs.web_1 /start run ./manage.py shell_plus`
 
 + run a new django shell with correct environment but independent of other container
-    +  `docker-compose -f /etc/appliance/ecs/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
+    +  `docker-compose -f /app/etc/ecs/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
 
 + follow the appliance log file (backend nginx, uwsgi, beat, worker, smtpd,redis, memcached, pdfas, mocca):
     + `journalctl -u appliance -f`

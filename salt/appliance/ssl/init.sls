@@ -11,13 +11,13 @@ include:
 /usr/local/etc/dehydrated/config:
   file.managed:
     - contents: |
-        BASEDIR="/etc/appliance/dehydrated"
-        WELLKNOWN="/etc/appliance/dehydrated/acme-challenge"
+        BASEDIR="/app/etc/dehydrated"
+        WELLKNOWN="/app/etc/dehydrated/acme-challenge"
         HOOK="/usr/local/bin/dehydrated-hook.sh"
     - makedirs: true
 
 {% for i in ['acme-challenge', 'certs'] %}
-/etc/appliance/dehydrated/{{ i }}:
+/app/etc/dehydrated/{{ i }}:
   file.directory:
     - makedirs: true
     - user: app

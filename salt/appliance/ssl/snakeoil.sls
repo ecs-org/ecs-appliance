@@ -12,7 +12,7 @@ generate_snakeoil:
     - require:
       - pkg: generate_snakeoil
 
-/etc/appliance/snakeoil/ssl-cert-snakeoil.key:
+/app/etc/snakeoil/ssl-cert-snakeoil.key:
   file.copy:
     - source: /etc/ssl/private/ssl-cert-snakeoil.key
     - mode: "0644"
@@ -20,14 +20,14 @@ generate_snakeoil:
     - require:
       - cmd: generate_snakeoil
 
-/etc/appliance/snakeoil/ssl-cert-snakeoil.pem:
+/app/etc/snakeoil/ssl-cert-snakeoil.pem:
   file.copy:
     - source: /etc/ssl/certs/ssl-cert-snakeoil.pem
     - mode: "0644"
     - require:
       - cmd: generate_snakeoil
 
-/etc/appliance/snakeoil/ssl-snakeoil.conf:
+/app/etc/snakeoil/ssl-snakeoil.conf:
   file.managed:
     - contents: |
         [ ca ]
@@ -65,40 +65,40 @@ generate_snakeoil:
         emailAddress           = optional
 
 
-/etc/appliance/snakeoil/index.txt:
+/app/etc/snakeoil/index.txt:
   file:
     - touch
 
-/etc/appliance/snakeoil/crlnumber:
+/app/etc/snakeoil/crlnumber:
   file.managed:
     - contents: |
         01
     - replace: false
 
-/etc/appliance/snakeoil/ssl-ca-snakeoil.key:
+/app/etc/snakeoil/ssl-ca-snakeoil.key:
   cmd.run:
-    - cwd: /etc/appliance/snakeoil
+    - cwd: /app/etc/snakeoil
     - name: openssl genrsa -out ssl-ca-snakeoil.key 2048
-    - unless: test -f /etc/appliance/snakeoil/ssl-ca-snakeoil.key
+    - unless: test -f /app/etc/snakeoil/ssl-ca-snakeoil.key
 
-/etc/appliance/snakeoil/ssl-ca-snakeoil.cert.pem:
+/app/etc/snakeoil/ssl-ca-snakeoil.cert.pem:
   cmd.run:
-    - cwd: /etc/appliance/snakeoil
+    - cwd: /app/etc/snakeoil
     - name: openssl req -new -batch -x509 -config ssl-snakeoil.conf -key ssl-ca-snakeoil.key -out ssl-ca-snakeoil.cert.pem -subj "/CN=snakeoil/O=oilfactory"
-    - unless: test -f /etc/appliance/snakeoil/ssl-ca-snakeoil.cert.pem
+    - unless: test -f /app/etc/snakeoil/ssl-ca-snakeoil.cert.pem
 
-/etc/appliance/snakeoil/ssl-crl-snakeoil.pem:
+/app/etc/snakeoil/ssl-crl-snakeoil.pem:
   cmd.run:
-    - cwd: /etc/appliance/snakeoil
+    - cwd: /app/etc/snakeoil
     - name: openssl ca -gencrl -config ssl-snakeoil.conf -out ssl-crl-snakeoil.pem
-    - unless: test -f /etc/appliance/snakeoil/ssl-crl-snakeoil.pem
+    - unless: test -f /app/etc/snakeoil/ssl-crl-snakeoil.pem
 
 # symlink to /app/ecs-ca which will get relocated to /data/ecs-ca
-/etc/appliance/ca.cert.pem:
+/app/etc/ca.cert.pem:
   file.symlink:
     - target: /app/ecs-ca/ca.cert.pem
 
-/etc/appliance/crl.pem:
+/app/etc/crl.pem:
   file.symlink:
     - target: /app/ecs-ca/crl.pem
 
@@ -107,7 +107,7 @@ generate_snakeoil:
   file.copy:
     - replace: false
     - makedirs: true
-    - source: /etc/appliance/snakeoil/ssl-ca-snakeoil.cert.pem
+    - source: /app/etc/snakeoil/ssl-ca-snakeoil.cert.pem
     - group: 1000
     - user: 1000
 
@@ -115,21 +115,21 @@ generate_snakeoil:
   file.copy:
     - replace: false
     - makedirs: true
-    - source: /etc/appliance/snakeoil/ssl-crl-snakeoil.pem
+    - source: /app/etc/snakeoil/ssl-crl-snakeoil.pem
     - group: 1000
     - user: 1000
 
-/etc/appliance/server.key.pem:
+/app/etc/server.key.pem:
   file.copy:
     - replace: false
-    - source: /etc/appliance/snakeoil/ssl-cert-snakeoil.key
+    - source: /app/etc/snakeoil/ssl-cert-snakeoil.key
 
-/etc/appliance/server.cert.pem:
+/app/etc/server.cert.pem:
   file.copy:
     - replace: false
-    - source: /etc/appliance/snakeoil/ssl-cert-snakeoil.pem
+    - source: /app/etc/snakeoil/ssl-cert-snakeoil.pem
 
-/etc/appliance/server.cert.dhparam.pem:
+/app/etc/server.cert.dhparam.pem:
   file.copy:
     - replace: false
-    - source: /etc/appliance/snakeoil/ssl-cert-snakeoil.pem
+    - source: /app/etc/snakeoil/ssl-cert-snakeoil.pem

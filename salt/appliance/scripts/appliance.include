@@ -44,7 +44,7 @@ ecs_update_available() {
                 else
                     target=$(gosu app git -C /app/ecs rev-parse origin/$ECS_GIT_BRANCH)
                 fi
-                last_running=$(cat /etc/appliance/last_running_ecs 2> /dev/null || echo "invalid")
+                last_running=$(cat /app/etc/last_running_ecs 2> /dev/null || echo "invalid")
                 if test "$last_running" = "$target"; then
                     ecs_need_update=false
                 fi
@@ -69,11 +69,11 @@ sentry_entry () {
     local msg=$2
     local level=${3:-error}
     local extra=${4:-\{\}}
-    local last_running_ecs=$(cat /etc/appliance/last_running_ecs 2> /dev/null || echo "invalid")
-    local last_build_ecs=$(cat /etc/appliance/last_build_ecs 2> /dev/null || echo "invalid")
-    local last_running_appliance=$(cat /etc/appliance/last_running_appliance 2> /dev/null || echo "invalid")
-    local last_running_ecs_image=$(cat /etc/appliance/last_running_ecs_image 2> /dev/null || echo "invalid")
-    local last_failed_ecs=$(cat /etc/appliance/last_failed_ecs 2> /dev/null || echo "invalid")
+    local last_running_ecs=$(cat /app/etc/last_running_ecs 2> /dev/null || echo "invalid")
+    local last_build_ecs=$(cat /app/etc/last_build_ecs 2> /dev/null || echo "invalid")
+    local last_running_appliance=$(cat /app/etc/last_running_appliance 2> /dev/null || echo "invalid")
+    local last_running_ecs_image=$(cat /app/etc/last_running_ecs_image 2> /dev/null || echo "invalid")
+    local last_failed_ecs=$(cat /app/etc/last_failed_ecs 2> /dev/null || echo "invalid")
     local current_appliance=$(gosu app git -C /app/appliance rev-parse HEAD)
     local tags="{\"group\": \"$group\", \
         \"last_running_ecs\": \"$last_running_ecs\", \
@@ -99,7 +99,7 @@ sentry_entry () {
 appliance_status () {
     # call(Title, Text)
     # or call("--disable")
-    local templatefile=/etc/appliance/app-template.html
+    local templatefile=/app/etc/app-template.html
     local resultfile=/var/www/html/503.html
     local title text
     if test "$1" = "--disable"; then

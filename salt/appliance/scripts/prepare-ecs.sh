@@ -1,7 +1,7 @@
 #!/bin/bash
 . /usr/local/share/appliance/appliance.include
 
-last_running=$(cat /etc/appliance/last_running_ecs 2> /dev/null || echo "invalid")
+last_running=$(cat /app/etc/last_running_ecs 2> /dev/null || echo "invalid")
 need_migration=false
 target="invalid"
 if test ! -e /app/ecs; then mkdir -p /app/ecs; chown app:app /app/ecs; fi
@@ -45,20 +45,20 @@ fi
 
 
 # ### rebuild images
-cd /etc/appliance/ecs
-printf "%s" "invalid" > /etc/appliance/last_build_ecs
+cd /app/etc/ecs
+printf "%s" "invalid" > /app/etc/last_build_ecs
 
 appliance_status "Appliance Update" "Pulling base images"
 for n in redis:3 memcached tomcat:8-jre8 ubuntu:xenial; do
     docker pull $n
 done
 
-if test -e /etc/appliance/rebuild_wanted_ecs -o \
+if test -e /app/etc/rebuild_wanted_ecs -o \
     "$last_running" = "devserver" -o \
     "$target" != "$last_running"; then
 
-    if test -e /etc/appliance/rebuild_wanted_ecs; then
-        rm /etc/appliance/rebuild_wanted_ecs
+    if test -e /app/etc/rebuild_wanted_ecs; then
+        rm /app/etc/rebuild_wanted_ecs
     fi
     appliance_status "Appliance Update" "Building ECS $target (current= $last_running)"
     if ! docker-compose build mocca pdfas ecs.web; then
@@ -74,7 +74,7 @@ else
     appliance_status "Appliance Update" "ECS Last version = current version = $last_running, skipping build"
     exit 0
 fi
-printf "%s" "$target" > /etc/appliance/last_build_ecs
+printf "%s" "$target" > /app/etc/last_build_ecs
 
 
 # ### migrate database
@@ -88,13 +88,13 @@ if $need_migration; then
         appliance_failed "Appliance Error" "Could not pgdump database $ECS_DATABASE before starting migration"
     fi
     appliance_status "Appliance Update" "Migrating ecs database"
-    (docker images -q ecs/ecs:latest || echo "invalid") > /etc/appliance/last_running_ecs_image
-    printf "%s" "$target" > /etc/appliance/last_running_ecs
+    (docker images -q ecs/ecs:latest || echo "invalid") > /app/etc/last_running_ecs_image
+    printf "%s" "$target" > /app/etc/last_running_ecs
     docker-compose run --no-deps --rm --name ecs.migration ecs.web migrate
     err=$?
     if test $err -ne 0; then
         appliance_failed "Appliance Error" "Migration Error"
     fi
 else
-    printf "%s" "$target" > /etc/appliance/last_running_ecs
+    printf "%s" "$target" > /app/etc/last_running_ecs
 fi
