@@ -27,7 +27,7 @@ create_app_etc_compose:
 
 /app/etc/compose:
   file.recurse:
-    - source: salt://appliance/ecs
+    - source: salt://appliance/compose
     - keep_symlinks: true
 
 /app/etc/compose/service_urls.env:
