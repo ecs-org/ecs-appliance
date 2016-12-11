@@ -54,7 +54,7 @@ if test "$ECS_DOC_GIT_SOURCE" != "$current_source"; then
     install -g app -o app -d /app/ecs-homepage; cd /app/ecs-homepage
 fi
 if test ! -e /app/ecs-homepage/index.html; then
-    gosu app git clone --branch master ECS_DOC_GIT_SOURCE /app/ecs-homepage
+    gosu app git clone --branch master $ECS_DOC_GIT_SOURCE /app/ecs-homepage
 fi
 gosu app git fetch -a -p
 gosu app git checkout -f master
