@@ -114,7 +114,6 @@ generate_snakeoil:
 /app/ecs-ca/crl.pem:
   file.copy:
     - replace: false
-    - makedirs: true
     - source: /app/etc/snakeoil/ssl-crl-snakeoil.pem
     - group: 1000
     - user: 1000

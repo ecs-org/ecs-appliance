@@ -18,11 +18,17 @@ include:
     - makedirs: true
 {% endfor %}
 
+create_app_etc_compose:
+  file.directory:
+    - name: /app/etc/compose
+    - makedirs: true
+    - user: app
+    - group: app
+
 /app/etc/compose:
   file.recurse:
     - source: salt://appliance/ecs
     - keep_symlinks: true
-    - makedirs: true
 
 /app/etc/compose/service_urls.env:
   file.managed:
