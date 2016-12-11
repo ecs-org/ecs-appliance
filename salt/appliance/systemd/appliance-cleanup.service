@@ -9,7 +9,7 @@ ReloadPropagatedFrom=appliance.service
 Type=oneshot
 Environment=UNITNAME=%n
 ExecStart=/bin/bash -c "sleep 30; \
-  docker-compose -f /app/etc/ecs/docker-compose.yml rm -v -f; \
+  docker-compose -f /app/etc/compose/docker-compose.yml rm -v -f; \
   docker rmi --force $(docker images -q --filter 'dangling=true')"
 ExecReload=/bin/true
 

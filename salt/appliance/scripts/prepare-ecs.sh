@@ -45,7 +45,7 @@ fi
 
 
 # ### rebuild images
-cd /app/etc/ecs
+cd /app/etc/compose
 printf "%s" "invalid" > /app/etc/last_build_ecs
 
 appliance_status "Appliance Update" "Pulling base images"
