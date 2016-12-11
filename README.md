@@ -138,7 +138,7 @@ You have to remove this file using `rm /run/appliance_failed` before running
 the service again using `systemctl restart appliance.service`
 
 
-## Other Usage
+## Maintenance
 
 + enter a running ecs container:
     + `docker exec -it ecs_image[.startcommand]_1 /bin/bash`
@@ -163,16 +163,10 @@ the service again using `systemctl restart appliance.service`
     + `cd /app/appliance; gosu app git pull; salt-call state.highstate pillar='{"appliance": "enabled": true}}'`
 + read details of a container in yaml:
     + `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
-+ look at all appliance http status pages: `gosu app git grep "\(ecs\|appliance\)_\(failed\|exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort`
-+ line and word count appliance (without thirdparty and README):
-    + `wc $(find . ! -path "./.git/*" -a ! -path "./old/*" -a ! -name dehydrated -a ! -name README.md -a -type f| sort) | sort -n`
-    + old deployment had 6067 lines, new has 4563 lines
 
 ### Architecture
 
-+ Sourcecode from ecs is at /app/ecs on vm
-+ Sourcecode from appliance is at /app/appliance on vm
-+ files of appliance:
+#### Repository Layout
 
 Path | Description
 --- | ---
@@ -192,6 +186,27 @@ Path | Description
 /salt/appliance/scripts/update-appliance.sh  | user script to trigger appliance/ecs update
 /salt/appliance/compose/docker-compose.yml   | main container group definition
 /salt/appliance/systemd/appliance.service    | systemd appliance service that ties all together
+
+#### Runtime Layout
+
+Path | Description
+--- | ---
+/app/env.yml        | local (nocloud) env configuration location to be read by prepare-env
+/app/etc            | runtime configuration
+/app/etc/tags       | runtime tags
+ |
+/app/ecs            | ecs repository used for container creation
+/app/appliance      | ecs-appliance repository active on host
+ |
+/app/ecs-ca         | symlink
+/app/ecs-gpg        | symlink
+/app/ecs-cache      | symlink
+/data/ecs-ca        | client certificate ca and crl directory
+/data/ecs-gpg       | storage-vault gpg keys directory
+/volatile/ecs-cache | temporary storage directory
+ |
+/run/active-env.yml | current activated configuration
+/run/appliance-failed | flag to be cleared after a failed appliance start
 
 #### Startup Order
 
@@ -213,34 +228,12 @@ Path | Description
 |-- update-appliance
 ```
 
-#### Runtime Files
-
-Runtime Files:
-
-Path | Description
---- | ---
-/app/env.yml        | local (nocloud) env configuration location to be read by prepare-env
-/app/etc            | runtime configuration
-/app/etc/tags       | runtime tags
- |
-/app/ecs            | ecs repository used for container creation
-/app/appliance      | ecs-appliance repository active on host
- |
-/app/ecs-ca         | symlink
-/app/ecs-gpg        | symlink
-/app/ecs-cache      | symlink
-/data/ecs-ca        | client certificate ca and crl directory
-/data/ecs-gpg       | storage-vault gpg keys directory
-/volatile/ecs-cache | temporary storage directory
- | 
-/run/active-env.yml | current activated configuration
-/run/appliance-failed | flag to be cleared after a failed appliance start
 
 #### Environment
 
 Buildtime Environment Usage:
 
-the build time call of `salt-call state.highstate` does not need an environment,
++ the build time call of `salt-call state.highstate` does not need an environment,
 but will use /run/active-env.yml if available
 
 Runtime Environment Usage:
