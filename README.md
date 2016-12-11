@@ -3,6 +3,11 @@
 the ecs appliance is a selfservice production setup virtual machine builder and executor.
 it can be stacked on top of the developer vm, but is independend of it.
 
+1. [Install](#Install Appliance)
+2. [Configure](#Configure Appliance)
+3. [Maintenance](#Maintenance)
+
+
 ## Install Appliance
 
 
@@ -120,14 +125,10 @@ on the target appliance vm:
 + login into appliance
 + create a empty ecs database: `sudo -u postgres createdb ecs -T template0  -l de_DE.utf8`
 
-## start appliance
-+ start appliance: `systemctl start appliance`
-+ open your browser and go to: http://testecs or http://localhost
-+ stop appliance: `systemctl stop appliance`
-
-## Update Appliance
-
-Update Appliance (appliance and ecs): `systemctl start update-appliance`
+## Start, Stop & Update Appliance
++ Start appliance: `systemctl start appliance`
++ Stop appliance: `systemctl stop appliance`
++ Update Appliance (appliance and ecs): `systemctl start update-appliance`
 
 ### Recover from failed state
 
@@ -136,7 +137,6 @@ if the appliance.service enters fail state, it creates a file named
 
 You have to remove this file using `rm /run/appliance_failed` before running
 the service again using `systemctl restart appliance.service`
-
 
 ## Maintenance
 
@@ -253,16 +253,15 @@ Runtime Environment Usage:
         * ECS_SETTINGS
     * docker compose passes APPLIANCE_DOMAIN as HOSTNAME to mocca and pdfas
 
-
 #### Partitioning
 
 + default xenial cloud image partition layout:
   + dos-mbr
   + p1 Boot ext4 label cloudimg-rootfs (10G)
-  + used space ~ 900MB naked , ~ 1700MB with ecs appliance (currently, will grow)
 
 + developer setup:
-  + vagrantfile has grow-root baked into it, p1 will take all space, appliance will not create additional partitions
+  + Vagrantfile has grow-root baked into it, therefore p1 will take all space
+  + appliance will not create additional partitions
   + storage setup will create the directories but do not expect a mountpoint
 
 + production setup:
