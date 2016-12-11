@@ -1,9 +1,9 @@
 # ECS-Appliance
 
 the ecs appliance is a selfservice production setup virtual machine builder and executor.
-it can be stacked on top of the developer vm, but is independend of it.
+it can be stacked on top of the developer vm, but is independent of it.
 
-Jump To:
+Contents:
 + [Install](#install-appliance)
 + [Configure](#configure-appliance)
 + [Maintenance](#maintenance)
@@ -188,7 +188,7 @@ Path | Description
 /salt/appliance/scripts/prepare-appliance.sh | script started next to setup services
 /salt/appliance/scripts/prepare-ecs.sh       | script started next to build container
 /salt/appliance/scripts/update-appliance.sh  | user script to trigger appliance/ecs update
-/salt/appliance/compose/docker-compose.yml   | main container group definition
+/salt/appliance/ecs/docker-compose.yml       | main container group definition
 /salt/appliance/systemd/appliance.service    | systemd appliance service that ties all together
 
 ### Runtime Layout
@@ -219,14 +219,14 @@ Data & Volatile:
 
 path | remark
 --- | ---
-/data | important data
-/data/ecs-ca |
-/data/ecs-gpg |
-/data/ecs-storage-vault |
-/data/etc        |
+/data | data to keep
+/data/ecs-ca | symlink target of /app/ecs-ca
+/data/ecs-gpg | symlink target of /app/ecs-gpg
+/data/ecs-storage-vault | symlink target of /app/ecs-storage-vault
+/data/etc        | symlink target of /app/etc
 /data/ecs-pgdump | database migration dump and backup dump diretory
 /data/postgresql | referenced from moved /var/lib/postgresql
-/volatile  | data that can get lost
+/volatile  | data that can get deleted
 /volatile/docker | referenced from moved /var/lib/docker
 /volatile/ecs-cache | Shared Cache Directory
 /volatile/ecs-backup-test | default target directory of unconfigured backup
@@ -242,15 +242,21 @@ host | container
 /volatile/ecs-cache | /app/ecs-cache
 
 
-### Startup Order
+### Execution Order
 
 ```
 [on start]
 |
 |-- prepare-env
 |-- prepare-appliance
+|   |
+|   |-- optional: call salt-call state.sls storage
+|---|
+|
 |-- prepare-ecs
 |-- appliance
+:
+:   (post-start)
 |-- appliance-cleanup
 
 [on error]
@@ -260,18 +266,23 @@ host | container
 [on update]
 |
 |-- update-appliance
+|   |
+|   |-- salt-call state.highstate
+|   |-- systemctl restart appliance
 ```
 
 
 ### Environment
 
-Buildtime Environment Usage:
+Types of environments:
++ saltstack get the environment as pillar either /run/active-env.yml or from a default
++ shell-scripts and executed programs from these shellscripts get a flattend yaml representation in the environment (see flatyaml.py) usually restricted to ecs,appliance tree of the yaml file
 
+Buildtime Environment Usage:
 + the build time call of `salt-call state.highstate` does not need an environment,
 but will use /run/active-env.yml if available
 
 Runtime Environment Usage:
-
 + prepare-env
     + get a environment yaml from all local and network sources
     + writes the result to /run/active-env.yml
