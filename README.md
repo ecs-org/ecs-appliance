@@ -193,6 +193,8 @@ Path | Description
 
 ### Runtime Layout
 
+Application:
+
 Path | Description
 --- | ---
 /app/env.yml        | local (nocloud) environment configuration location
@@ -213,6 +215,33 @@ Path | Description
 /run/active-env.yml | current activated configuration
 /run/appliance-failed | flag that needs to be cleared,
  | before a restart of a failed appliance is possbile
+
+Data & Volatile:
+
+path
+--- | ---
+/data  | important data
+/data/ecs-ca |
+/data/ecs-gpg |
+/data/ecs-storage-vault |
+/data/etc        |
+/data/ecs-pgdump | database migration dump and backup dump diretory
+/data/postgresql | referenced from moved /var/lib/postgresql
+/volatile  | data that can get lost
+/volatile/docker | referenced from moved /var/lib/docker
+/volatile/ecs-cache | Shared Cache Directory
+/volatile/ecs-backup-test | default target directory of unconfigured backup
+/volatile/redis | redis container database volume
+
+ECS Container Mapping:
+
+host | container
+--- | ---
+/data/ecs-ca | /app/ecs-ca
+/data/ecs-gpg | /app/ecs-gpg
+/data/ecs-storage-vault | /app/ecs-storage-vault
+/volatile/ecs-cache | /app/ecs-cache
+
 
 ### Startup Order
 
