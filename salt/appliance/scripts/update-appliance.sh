@@ -45,7 +45,7 @@ if test "$last_running" != "$target"; then
         appliance_exit "Appliance Error" "salt-call state.highstate failed with error $err"
     fi
     # save executed commit
-    printf "%s" "$target" > /app/etc/last_running_appliance
+    printf "%s" "$target" > /app/etc/tags/last_running_appliance
 fi
 
 if $need_update; then

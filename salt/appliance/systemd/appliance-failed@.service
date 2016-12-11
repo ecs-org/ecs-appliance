@@ -6,8 +6,8 @@ After=network.target
 Type=simple
 ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_to_env ecs,appliance; \
     . /usr/local/share/appliance/appliance.include; \
-    (cat /app/etc/last_running_ecs || echo "invalid") > /app/etc/last_failed_ecs; \
-    rm -f /app/etc/last_running_ecs; \
+    (cat /app/etc/tags/last_running_ecs || echo "invalid") > /app/etc/tags/last_failed_ecs; \
+    rm -f /app/etc/tags/last_running_ecs; \
     touch /run/appliance-failed; \
     extra=$((for i in prepare-env prepare-appliance prepare-ecs appliance; do \
         systemctl status -l -q --no-pager -n 20 ${i}.service; done) | text2json); \

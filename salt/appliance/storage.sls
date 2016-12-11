@@ -102,7 +102,7 @@ postfix_relocate_{{ source }}:
 {% endif %}
 
 {{ dir_setup ('/data', [
-  ('appliance', 'app', ''),
+  ('etc', 'app', ''),
   ('ecs-ca', 1000, '0700'),
   ('ecs-gpg', 1000, '0700'),
   ('ecs-pgdump', 'app', ''),

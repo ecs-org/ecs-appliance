@@ -27,8 +27,8 @@ ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_to_en
     exec /usr/local/bin/docker-compose up --abort-on-container-exit'
 ExecStartPost=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_to_env ecs,appliance; \
     sleep 30; \
-    (docker images -q ecs/ecs:latest || echo "invalid") > /app/etc/last_running_ecs_image; \
-    rm -f /app/etc/last_failed_ecs; \
+    (docker images -q ecs/ecs:latest || echo "invalid") > /app/etc/tags/last_running_ecs_image; \
+    rm -f /app/etc/tags/last_failed_ecs; \
     . /usr/local/share/appliance/appliance.include; appliance_status --disable'
 ExecStop=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_to_env ecs,appliance; \
     /usr/local/bin/docker-compose -f /app/etc/compose/docker-compose.yml stop'

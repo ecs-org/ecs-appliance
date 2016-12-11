@@ -15,9 +15,9 @@ targetdir=$(readlink -f "$2")
 shift 2
 appuser=$USER
 
-sudo salt-call state.sls common.env_gen \
+sudo salt-call state.sls common.env-gen \
     pillar="{\"domain\": \"$domain\", \
-    \"template\": \"salt://common/env.template.yml\", \
+    \"template\": \"salt://common/env-template.yml\", \
     \"targetdir\": \"$targetdir\", \"appuser\": \"$appuser\"}" "$@"
 
 exit 0

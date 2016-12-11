@@ -27,4 +27,3 @@ genisoimage -volid cidata -joliet -rock -input-charset utf-8 -output env-cidata.
 rm meta-data
 tar cz env.yml env.yml.pdf env-cidata.iso | \
     gpg --encrypt > "${APPLIANCE_DOMAIN}.ecs.env.$(date +%Y-%m-%d_%H.%M).tar.gz.gpg"
-for a in

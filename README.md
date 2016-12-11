@@ -131,7 +131,6 @@ add on top of developer-vm or appliance update:
 + open your browser and go to: http://testecs or http://localhost
 + stop appliance: `systemctl stop appliance`
 
-
 ## Update Appliance
 
 Update Appliance (appliance and ecs): `systemctl start update-appliance`
@@ -171,9 +170,9 @@ the service again using `systemctl restart appliance.service`
     + `cd /app/appliance; gosu app git pull; salt-call state.highstate pillar='{"appliance": "enabled": true}}'`
 + read details of a container in yaml:
     + `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
-+ look at all appliance http status pages: `gosu app git grep "\(ecs\|appliance\)_\(exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort`
++ look at all appliance http status pages: `gosu app git grep "\(ecs\|appliance\)_\(failed\|exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort`
 + line and word count appliance:
-    + `wc $(find . -regex ".*\.\(sls\|yml\|sh\|json\|conf\|template\|include\|service\|identity\)")`
+    + `wc $(find . -regex ".*\.\(*.py\|sls\|yml\|sh\|json\|conf\|*.cf\|template\|include\|service\|identity\)")`
 + python -c "import sys, shlex; sys.stdout.write(shlex.quote(sys.stdin.read()))"
 
 
@@ -185,20 +184,21 @@ the service again using `systemctl restart appliance.service`
 
 Path | Description
 --- | ---
-/pillar/                        | salt environment
+/pillar/*.sls                   | salt environment
 /pillar/top.sls                 | defines the root of the environment tree
 /pillar/default-env.sls         | fallback env yaml and example localhost ecs config
-/salt/*.sls                     | states (to be executed)
+/salt/*.sls                     | salt states (to be executed)
 /salt/top.sls                   | defines the root of the state tree
 /salt/common/init.sls           | common install
-/salt/common/env.template.yml   | template used to generate a new env.yml
-/salt/common/generate-new-env.sh    | command line utility for env generation
-/salt/appliance/init.sls            | ecs appliance install
+/salt/common/env-template.yml   | template used to generate a new env.yml
+/salt/common/env-new.sh         | cli for env generation
+/salt/common/env-build.sh       | cli for building pdf,iso,tar.gz.gpg
+/salt/appliance/init.sls        | ecs appliance install
 /salt/appliance/scripts/prepare-env.sh       | script started first to read environment
 /salt/appliance/scripts/prepare-appliance.sh | script started next to setup services
 /salt/appliance/scripts/prepare-ecs.sh       | script started next to build container
 /salt/appliance/scripts/update-appliance.sh  | user script to trigger appliance/ecs update
-/salt/appliance/ecs/docker-compose.yml       | main container group definition
+/salt/appliance/compose/docker-compose.yml   | main container group definition
 /salt/appliance/systemd/appliance.service    | systemd appliance service that ties all together
 
 #### Systemd Startup Order
@@ -216,30 +216,36 @@ on error:
 on update:
     + update-appliance
 
-#### Environment & Flags
+#### Runtime Files & Environment
+
+Runtime Files:
 
 Path | Description
 --- | ---
 /app/env.yml        | one possible local env configuration location to be read by prepare-env
+/app/etc            | runtime configuration
+/app/etc/tags       | runtime tags
 /run/active-env.yml | current activated configuration
 /run/appliance-failed | flag to be cleared after a failed appliance start
 
-`salt-call state.highstate` (the install part) does not need an environment,
-but has a default one and will use any /active environment for sentry logging.
+Buildtime Environment Usage:
+
+the build time call of `salt-call state.highstate` does not need an environment,
+but will use /run/active-env.yml if available
 
 Runtime Environment Usage:
 
 * prepare-env
     * get a environment yaml from all local and network sources
     * writes the result to /run/active-env.yml
-* update-appliance, prepare-appliance,
-    Storage Setup (`salt-call state.sls storage.sls`),
-    prepare-ecs,  appliance.service parse /run/active-env.yml
+* update-appliance, Storage Setup (`salt-call state.sls storage.sls`),
+    prepare-appliance, prepare-ecs, appliance.service parse /run/active-env.yml
+* update appliance will call `salt-call state.highstate` which will use /run/active-env.yml
 * appliance.service calls docker-compose up with active-env
-  * docker compose passes the following to the ecs/ecs* container
-      * service_urls.env, database_url.env
-      * ECS_SETTINGS
-  * docker compose passes APPLIANCE_DOMAIN as HOSTNAME to mocca and pdfas
+    * docker compose passes the following to the ecs/ecs* container
+        * service_urls.env, database_url.env
+        * ECS_SETTINGS
+    * docker compose passes APPLIANCE_DOMAIN as HOSTNAME to mocca and pdfas
 
 
 #### Partitioning
