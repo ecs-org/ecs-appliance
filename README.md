@@ -101,28 +101,30 @@ configures strange things, enables and take over services.
 
 appliance gets build using packer.
 
-`vagrant up` installs all packages needed for builder
-
-add on top of developer-vm or appliance update:
-`sudo salt-call state.highstate pillar='{"builder": "enabled": true}}'`
++ `vagrant up` installs all packages needed for builder
+    + to add builder on top of developer-vm or appliance:
+        + `sudo salt-call state.highstate pillar='{"builder": "enabled": true}}'`
 
 
 ## Configure Appliance
 
-### development server
+### for a development server
 + login in devserver
 + make a development env.yml: `cp /app/appliance/salt/pillar/default-env.sls /app/env.yml`
 + edit your settings in /app/env.yml and change your domainname
 
-### production prepare
+### for a production server
+
+on user laptop:
 + vagrant up
-+ make a new env.yml: `generate-new-env.sh domainname.domain /app/`
++ make a new env.yml: `env-new.sh domainname.domain /app/`
 + edit your settings in /app/env.yml
-+ build env into different formats: `build-env.sh /app/env.yml`
++ build env into different formats: `env-build.sh /app/env.yml`
 + print out /app/env.yml.pdf
 + save and keep env.yml.tar.gz.gpg
++ copy env.yml to appliance /app/env.yml
 
-#### on appliance
+on appliance:
 + login in empty appliance, copy env to /app/env.yml
 + create a empty ecs database: `sudo -u postgres createdb ecs -T template0  -l de_DE.utf8`
 
@@ -144,7 +146,6 @@ You have to remove this file using `rm /run/appliance_failed` before running
 the service again using `systemctl restart appliance.service`
 
 
-
 ## Other Usage
 
 + enter a running ecs container:
@@ -152,17 +153,17 @@ the service again using `systemctl restart appliance.service`
         + image = ecs, mocca, pdfas, memcached, redis
         + ecs .startcommand = web, worker, beat, smtpd
 
-    + enter a django shell_plus in a running (eg. ecs_ecs.web_1) container:
+    + enter a django shell_plus as app user in a running (eg. ecs_ecs.web_1) container:
         + `docker exec -it ecs_ecs.web_1 /start run ./manage.py shell_plus`
 
 + run a new django shell with correct environment but independent of other container
     +  `docker-compose -f /app/etc/compose/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
 
-+ follow the appliance log file (backend nginx, uwsgi, beat, worker, smtpd,redis, memcached, pdfas, mocca):
-    + `journalctl -u appliance -f`
 + follow whole journal: `journalctl -f`
++ follow the appliance log file
+    + backend nginx, uwsgi, beat, worker, smtpd,redis, memcached, pdfas, mocca
+    + `journalctl -u appliance -f`
 + follow prepare-appliance: `journalctl -u prepare-appliance -f`
-+ follow prepare-ecs: `journalctl -u prepare-ecs -f`
 + follow frontend nginx: `journalctl -u nginx -f`
 + search for salt-call output: `journalctl $(which salt-call)`
 
@@ -171,10 +172,9 @@ the service again using `systemctl restart appliance.service`
 + read details of a container in yaml:
     + `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
 + look at all appliance http status pages: `gosu app git grep "\(ecs\|appliance\)_\(failed\|exit\|status\)"  | grep '"' | sed -re 's/[^"]+"(.*)/\1/g' | sort`
-+ line and word count appliance:
-    + `wc $(find . -regex ".*\.\(*.py\|sls\|yml\|sh\|json\|conf\|*.cf\|template\|include\|service\|identity\)")`
-+ python -c "import sys, shlex; sys.stdout.write(shlex.quote(sys.stdin.read()))"
-
++ line and word count appliance (without thirdparty and README):
+    + `wc $(find . ! -path "./.git/*" -a ! -path "./old/*" -a ! -name dehydrated -a ! -name README.md -a -type f| sort) | sort -n`
+    + old deployment had 6067 lines, new has 4563 lines
 
 ### Architecture
 
