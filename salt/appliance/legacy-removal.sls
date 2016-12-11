@@ -8,8 +8,8 @@
 {% for f in service_remove %}
 remove_{{ f }}:
   cmd.run:
-    - name: systemctl stop {{ f }}
+    - name: systemctl stop {{ f }} || true
     - onlyif: test -e {{ f }}
-  file:
-    - absent
+  file.absent:
+    - name: {{ f }}
 {% endfor %}
