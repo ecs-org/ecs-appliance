@@ -44,6 +44,8 @@ install_{{ n }}:
   file.managed:
     - name: /etc/systemd/system/{{ n }}
     - source: salt://appliance/systemd/{{ n }}
+    - watch_in:
+      - cmd: systemd_reload
   cmd.wait:
     - name: systemctl enable {{ n }}
     - watch:
@@ -53,6 +55,8 @@ install_{{ n }}:
 /etc/systemd/system/appliance-failed@.service:
   file.managed:
     - source: salt://appliance/systemd/appliance-failed@.service
+    - watch_in:
+      - cmd: systemd_reload
 
 /etc/systemd/system/watch-ecs-ca.service:
   file.managed:
@@ -61,8 +65,15 @@ install_{{ n }}:
 /etc/systemd/system/watch-ecs-ca.path:
   file.managed:
     - source: salt://appliance/systemd/watch-ecs-ca.path
+    - watch_in:
+      - cmd: systemd_reload
   cmd.wait:
     - name: systemctl enable watch-ecs-ca.path
     - watch:
-        - file: /etc/systemd/system/watch-ecs-ca.path
-        - file: /etc/systemd/system/watch-ecs-ca.service
+      - file: /etc/systemd/system/watch-ecs-ca.path
+      - file: /etc/systemd/system/watch-ecs-ca.service
+
+systemd_reload:
+  cmd.wait:
+    - name: systemctl daemon-reload
+    - order: last
