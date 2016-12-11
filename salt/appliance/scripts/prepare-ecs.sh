@@ -4,8 +4,9 @@
 last_running=$(cat /app/etc/tags/last_running_ecs 2> /dev/null || echo "invalid")
 need_migration=false
 target="invalid"
-if test ! -e /app/ecs; then mkdir -p /app/ecs; chown app:app /app/ecs; fi
+if test ! -e /app/ecs; then install -g app -o app -d /app/ecs; fi
 cd /app/ecs
+
 
 # ### update source
 if test -e /app/bin/devupdate.sh; then
@@ -18,7 +19,7 @@ else
     current_source=$(gosu app git config --get remote.origin.url || echo "")
     if test "$ECS_GIT_SOURCE" != "$current_source"; then
         sentry_entry "Appliance Update" "Warning: ecs has different upstream sources, will re-clone. Current: \"$current_source\", new: \"$ECS_GIT_SOURCE\"" warning
-        cd /; rm -r /app/ecs; mkdir -p /app/ecs; chown app:app /app/ecs; cd /app/ecs
+        cd /; rm -r /app/ecs; install -g app -o app -d /app/ecs; cd /app/ecs
     fi
     # clone source if currently not existing
     if test ! -e /app/ecs/ecs/settings.py; then
@@ -42,6 +43,25 @@ else
     gosu app git checkout -f $ECS_GIT_BRANCH
     gosu app git reset --hard $target
 fi
+
+
+# ### add ecs-homepage repository to /app/ecs-homepage
+if test ! -e /app/ecs-homepage; then install -g app -o app -d /app/ecs-homepage; fi
+cd /app/ecs-homepage
+current_source=$(gosu app git config --get remote.origin.url || echo "")
+if test "$ECS_DOC_GIT_SOURCE" != "$current_source"; then
+    cd /; rm -r /app/ecs-homepage
+    install -g app -o app -d /app/ecs-homepage; cd /app/ecs-homepage
+fi
+if test ! -e /app/ecs-homepage/index.html; then
+    gosu app git clone --branch master ECS_DOC_GIT_SOURCE /app/ecs-homepage
+fi
+gosu app git fetch -a -p
+gosu app git checkout -f master
+gosu app git reset --hard $(gosu app git rev-parse origin/master)
+# ### copy /app/ecs-homepage/user-manual-de to /app/ecs/static/help
+if test -e /app/ecs/static/help; then rm -r /app/ecs/static/help; fi
+cp -Ra /app/ecs-homepage/user-manual-de/ /app/ecs/static/help
 
 
 # ### rebuild images

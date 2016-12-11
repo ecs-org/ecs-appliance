@@ -3,6 +3,7 @@
 ECS_DATABASE="${ECS_DATABASE:-ecs}"
 ECS_GIT_BRANCH="${ECS_GIT_BRANCH:-master}"
 ECS_GIT_SOURCE="${ECS_GIT_SOURCE:-ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs.git}"
+ECS_DOC_GIT_SOURCE="${ECS_DOC_GIT_SOURCE:-ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs-homepage.git}"
 APPLIANCE_GIT_BRANCH=${APPLIANCE_GIT_BRANCH:-master}
 APPLIANCE_GIT_SOURCE=${APPLIANCE_GIT_SOURCE:-ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs-appliance.git}
 
