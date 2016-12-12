@@ -1,5 +1,6 @@
 include:
   - appliance.ssl
+  - systemd.reload
 
 /app/etc/stunnel.conf:
   file.managed:
@@ -14,6 +15,8 @@ include:
 /etc/systemd/system/stunnel.service:
   file.managed:
     - source: salt://appliance/stunnel/stunnel.service
+    - watch_in:
+      - cmd: systemd_reload
     - require:
       - pkg: stunnel
 

@@ -4,4 +4,4 @@ Description=
 [Timer]
 
 [Install]
-WantedBy=
+WantedBy=timers.target

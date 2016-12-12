@@ -1,9 +1,12 @@
 include:
   - docker
+  - systemd.reload
 
 /etc/systemd/system/cadvisor.service:
   file.managed:
     - source: salt://cadvisor/cadvisor.service
+    - watch_in:
+      - cmd: systemd_reload
 
 cadvisor:
   service.running:

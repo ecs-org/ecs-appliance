@@ -1,5 +1,6 @@
 include:
   - docker
+  - systemd.reload
 
 # https://sourceforge.net/projects/pgbarman/
 
@@ -7,6 +8,8 @@ late_postgresql.service:
   file.managed:
     - name: /etc/systemd/system/late_postgresql.service
     - source: salt://appliance/postgresql/late_postgresql.service
+    - watch_in:
+      - cmd: systemd_reload
   cmd.wait:
     - name: systemctl enable late_postgresql.service
     - watch:

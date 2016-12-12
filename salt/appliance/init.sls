@@ -1,6 +1,7 @@
 include:
   - docker
   - cadvisor
+  - systemd.reload
   - .ssl
   - .nginx
   - .postfix
@@ -80,8 +81,3 @@ install_{{ n }}:
     - watch:
       - file: /etc/systemd/system/watch-ecs-ca.path
       - file: /etc/systemd/system/watch-ecs-ca.service
-
-systemd_reload:
-  cmd.wait:
-    - name: systemctl daemon-reload
-    - order: last

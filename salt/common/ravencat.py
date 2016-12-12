@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 import re
 import sys
@@ -41,10 +40,12 @@ class JsonAction(argparse.Action):
             raise
         setattr(namespace, self.dest, values)
 
+def exist_dir(x):
+    if not os.path.isdir(x):
+        raise argparse.ArgumentTypeError("{0} does not exist".format(x))
+    return x
+
 def exist_file(x):
-    """
-    'Type' for argparse - checks that file exists but does not open.
-    """
     if not os.path.exists(x):
         raise argparse.ArgumentTypeError("{0} does not exist".format(x))
     return x
@@ -75,6 +76,31 @@ def send_message(client, message, options):
 
     return (success, eventid)
 
+def send_mbox(client, args):
+    try:
+        mbox = mailbox.mbox(args.mbox_message)
+        margs = args.__dict__
+
+        for message in mbox:
+            margs['culprit'] = message['From']
+            margs['date'] = email.utils.parsedate_to_datetime(message['Date'])
+            margs['logger'] = 'mailbox.mbox'
+
+            for k in message.walk():
+                if k.get_content_type() == 'text/plain':
+                    margs['extra'] = {'content': k.get_payload().splitlines()}
+                    break
+
+            success, eventid = send_message(client, message['subject'], margs)
+            if success:
+                # TODO: delete message from mbox
+                pass
+    finally:
+        if mbox:
+            mbox.close()
+
+def parse_maildir():
+    pass
 
 def main():
     logging_choices= ('critical', 'error', 'warning', 'info', 'debug')
@@ -101,7 +127,9 @@ def main():
         help='specify a sentry dsn, will use env SENTRY_DSN if unset')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--mbox-message', type=exist_file, metavar='FILE',
-        help='mbox filename to parse,split and send all')
+        help='mbox filename to parse and send all')
+    group.add_argument('--maildir-message', type=exist_dir, metavar='DIR',
+        help='maildir directory to parse and send all')
     group.add_argument('--message', type=argparse.FileType(mode='r', encoding='utf-8'),
         dest='message_file',
         metavar='FILE',
@@ -128,27 +156,9 @@ def main():
         sys.exit(1)
 
     if args.mbox_message:
-        try:
-            mbox = mailbox.mbox(args.mbox_message)
-            margs = args.__dict__
-
-            for message in mbox:
-                margs['culprit'] = message['From']
-                margs['date'] = email.utils.parsedate_to_datetime(message['Date'])
-                margs['logger'] = 'mailbox.mbox'
-
-                for k in message.walk():
-                    if k.get_content_type() == 'text/plain':
-                        margs['extra'] = {'content': k.get_payload().splitlines()}
-                        break
-
-                success, eventid = send_message(client, message['subject'], margs)
-                if success:
-                    # TODO: delete message from mbox
-                    pass
-        finally:
-            if mbox:
-                mbox.close()
+        send_mbox(client, args)
+    elif args.maildir_message:
+        send_maildir(client, args)
     else:
         if args.message_file:
             args.message= args.message_file.read()

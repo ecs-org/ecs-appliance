@@ -1,5 +1,6 @@
 include:
   - python
+  - systemd.reload
 
 # enable cgroup memory and swap accounting, needs kernel restart
 docker-grub-settings:
@@ -49,6 +50,8 @@ docker-service:
   file.managed:
     - name: /etc/systemd/system/docker.service
     - source: salt://docker/docker.service
+    - watch_in:
+      - cmd: systemd_reload
     - require:
       - pkg: docker
 
