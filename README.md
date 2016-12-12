@@ -168,7 +168,7 @@ the service again using `systemctl restart appliance.service`
 + read details of a container in yaml:
     + `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
 
-## Architecture
+## Development
 
 ### Repository Layout
 
@@ -204,6 +204,8 @@ Path | Description
 |
 |-- prepare-ecs
 |-- appliance
+|   |
+|   |-- docker-compose up
 :
 :   (post-start)
 |-- appliance-cleanup
