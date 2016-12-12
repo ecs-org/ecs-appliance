@@ -7,7 +7,7 @@ Contents:
 + [Installation](#install-appliance)
 + [Configuration](#configure-appliance)
 + [Maintenance](#maintenance)
-+ [Architecture](#architecture)
++ [Development](#development)
 
 ## Install Appliance
 
