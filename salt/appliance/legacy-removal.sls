@@ -6,11 +6,20 @@
   'update-appliance.service',
   ]
 %}
-{% set files_remove=[
+{% set paths_remove=[
   '/usr/local/sbin/generate-new-env.sh',
   '/usr/local/sbin/deploy_cert_as_root.sh',
   '/usr/local/sbin/unchanged_cert_as_root.sh',
   '/usr/local/share/appliance/update-appliance.sh',
+  '/usr/local/etc/appliance.include',
+  '/usr/local/etc/env.include',
+  '/usr/local/sbin/prepare-appliance.sh',
+  '/usr/local/sbin/prepare-env.sh',
+  '/usr/local/sbin/update-appliance.sh',
+  '/usr/local/sbin/prepare-ecs.sh',
+  '/usr/local/sbin/update-ecs.sh',
+  '/etc/appliance',
+  '/data/appliance',
   ]
 %}
 
@@ -23,8 +32,8 @@ service_remove_{{ f }}:
     - name: /etc/systemd/system/{{ f }}
 {% endfor %}
 
-{% for f in files_remove %}
-file_remove_{{ f }}:
+{% for f in paths_remove %}
+path_remove_{{ f }}:
   file.absent:
     - name: {{ f }}
 {% endfor %}
