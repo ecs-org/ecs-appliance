@@ -19,7 +19,7 @@ include:
     - makedirs: true
 {% endfor %}
 
-{% for n in ['compose', 'tags'] %}
+{% for n in ['ecs', 'tags'] %}
 create_app_etc_{{ n }}:
   file.directory:
     - name: /app/etc/{{ n }}
