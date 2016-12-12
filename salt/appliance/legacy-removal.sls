@@ -1,9 +1,9 @@
 # everything that should be absent but is not because of legacy leftover
 
 {% set services_remove=[
-  '/etc/systemd/system/watch_ecs_ca.path',
-  '/etc/systemd/system/watch_ecs_ca.service',
-  '/etc/systemd/system/update-appliance.service',
+  'watch_ecs_ca.path',
+  'watch_ecs_ca.service',
+  'update-appliance.service',
   ]
 %}
 {% set files_remove=[
@@ -17,10 +17,10 @@
 {% for f in services_remove %}
 service_remove_{{ f }}:
   cmd.run:
-    - name: systemctl stop {{ f }} || true
-    - onlyif: test -e {{ f }}
+    - name: systemctl disable {{ f }} || true
+    - onlyif: test -e /etc/systemd/system/{{ f }}
   file.absent:
-    - name: {{ f }}
+    - name: /etc/systemd/system/{{ f }}
 {% endfor %}
 
 {% for f in files_remove %}
