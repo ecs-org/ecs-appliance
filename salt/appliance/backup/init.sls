@@ -15,7 +15,7 @@ backup:
     - template: jinja
     - makedirs: true
     - defaults:
-        main_ip: {{ salt['network.get_route'](salt['network.default_route']('inet')[0].gateway).source }}
+        target: {{ salt['pillar.get']('appliance:backup:url') }}
 
 /root/.duply/appliance-backup/exclude:
   file.managed:
@@ -37,3 +37,18 @@ backup:
     - source: salt://appliance/backup/appliance-backup.service
     - watch_in:
       - cmd: systemd_reload
+
+enable-appliance-backup-service:
+  service.running:
+    - name: appliance-backup
+    - enable: true
+    - require:
+      - pkg: backup
+      - file: /etc/systemd/system/appliance-backup.service
+      - file: /etc/systemd/system/appliance-backup.timer
+      - file: /usr/local/share/appliance/appliance-backup.sh
+      - file: /root/.duply/appliance-backup/conf
+      - file: /root/.duply/appliance-backup/exclude
+    - watch:
+      - file: /etc/systemd/system/appliance-backup.service
+      - file: /etc/systemd/system/appliance-backup.timer

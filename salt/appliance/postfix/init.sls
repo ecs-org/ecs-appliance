@@ -9,6 +9,7 @@ include:
     - defaults:
         additional_ip: {{ salt['pillar.get']('docker:ip') }}
         additional_net: {{ salt['pillar.get']('docker:net') }}
+        domain: {{ salt['pillar.get']('appliance:domain') }}
 
 postfix:
   pkg.installed:

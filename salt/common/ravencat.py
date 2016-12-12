@@ -99,7 +99,7 @@ def send_mbox(client, args):
         if mbox:
             mbox.close()
 
-def parse_maildir():
+def send_maildir():
     pass
 
 def main():

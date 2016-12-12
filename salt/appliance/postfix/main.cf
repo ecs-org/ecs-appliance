@@ -1,6 +1,6 @@
-myhostname = localhost
-mydomain = localhost
-mydestination = $myhostname, localhost.$mydomain, localhost
+myhostname = {{ domain }}
+mydomain = {{ domain }}
+mydestination = $myhostname, localhost
 mynetworks = 127.0.0.0/8 {{ additional_net }}
 relayhost =
 smtpd_banner = $myhostname ESMTP $mail_name
