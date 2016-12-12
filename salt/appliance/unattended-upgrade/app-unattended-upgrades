@@ -3,4 +3,4 @@
 # unattended all package upgrade
 /usr/bin/unattended-upgrade
 
-systemctl start update-appliance
+systemctl start appliance-update

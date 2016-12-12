@@ -11,7 +11,7 @@ include:
   - .legacy-removal
 
 {% for i in ['appliance.include', 'prepare-env.sh', 'prepare-appliance.sh',
-  'prepare-ecs.sh', 'update-appliance.sh'] %}
+  'prepare-ecs.sh', 'appliance-update.sh'] %}
 /usr/local/share/appliance/{{ i }}:
   file.managed:
     - source: salt://appliance/scripts/{{ i }}
@@ -46,9 +46,10 @@ create_app_etc_{{ n }}:
         DATABASE_URL=postgres://app:invalid@{{ salt['pillar.get']('docker:ip') }}:5432/ecs
     - replace: false
 
-{% for n in ['prepare-env.service', 'update-appliance.service',
-  'prepare-appliance.service', 'prepare-ecs.service', 'appliance.service',
-  'appliance-cleanup.service'] %}
+{% for n in ['prepare-env.service', 'prepare-appliance.service',
+  'prepare-ecs.service', 'appliance.service',
+  'appliance-cleanup.service', 'appliance-update.service',
+  ] %}
 install_{{ n }}:
   file.managed:
     - name: /etc/systemd/system/{{ n }}
@@ -70,6 +71,8 @@ install_{{ n }}:
 /etc/systemd/system/watch-ecs-ca.service:
   file.managed:
     - source: salt://appliance/systemd/watch-ecs-ca.service
+    - watch_in:
+      - cmd: systemd_reload
 
 /etc/systemd/system/watch-ecs-ca.path:
   file.managed:

@@ -129,7 +129,7 @@ on the target appliance vm:
 ## Start, Stop & Update Appliance
 + Start appliance: `systemctl start appliance`
 + Stop appliance: `systemctl stop appliance`
-+ Update Appliance (appliance and ecs): `systemctl start update-appliance`
++ Update Appliance (appliance and ecs): `systemctl start appliance-update`
 
 ### Recover from failed state
 
@@ -187,7 +187,7 @@ Path | Description
 /salt/appliance/scripts/prepare-env.sh       | script started first to read environment
 /salt/appliance/scripts/prepare-appliance.sh | script started next to setup services
 /salt/appliance/scripts/prepare-ecs.sh       | script started next to build container
-/salt/appliance/scripts/update-appliance.sh  | user script to trigger appliance/ecs update
+/salt/appliance/scripts/appliance-update.sh  | script triggerd from appliance-update.service
 /salt/appliance/ecs/docker-compose.yml       | main container group definition
 /salt/appliance/systemd/appliance.service    | systemd appliance service that ties all together
 
@@ -216,7 +216,7 @@ Path | Description
 
 [on update]
 |
-|-- update-appliance
+|-- appliance-update
 |   |
 |   |-- salt-call state.highstate
 |   |-- systemctl restart appliance
@@ -287,11 +287,11 @@ Runtime Environment:
 + prepare-env
     + get a environment yaml from all local and network sources
     + writes the result to /run/active-env.yml
-+ update-appliance, prepare-appliance, prepare-ecs, appliance.service
++ appliance-update, prepare-appliance, prepare-ecs, appliance.service
     + parse /run/active-env.yml
     + include defaults from appliance.include (GIT_SOURCE*)
 + Storage Setup (`salt-call state.sls storage.sls`) parses /run/active-env.yml
-+ update-appliance will call `salt-call state.highstate` which will use /run/active-env.yml
++ appliance-update will call `salt-call state.highstate` which will use /run/active-env.yml
 + appliance.service calls docker-compose up with active env from /run/active-env.yml
     + docker compose passes the following to the ecs/ecs* container
         + service_urls.env, database_url.env
