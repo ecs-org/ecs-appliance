@@ -40,7 +40,7 @@ backup:
 
 enable-appliance-backup-service:
   service.running:
-    - name: appliance-backup
+    - name: appliance-backup.timer
     - enable: true
     - require:
       - pkg: backup
