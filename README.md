@@ -145,7 +145,7 @@ the service again using `systemctl restart appliance.service`
     + `. /usr/local/share/appliance/env.include; ENV_YML=/run/active-env.yml userdata_to_env ecs,appliance`
 
 + manual run letsencrypt client: `gosu app dehydrated --help`
-+ 
++
 + enter a running ecs container:
     + image = ecs, mocca, pdfas, memcached, redis
     + ecs .startcommand = web, worker, beat, smtpd
@@ -172,6 +172,14 @@ the service again using `systemctl restart appliance.service`
     + `cd /app/appliance; gosu app git pull; salt-call state.highstate pillar='{"appliance": "enabled": true}}'`
 + read details of a container in yaml:
     + `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
+
+### Reporting
+
+if ECS_SETTINGS:SENTRY_DSN and APPLIANCE_SENTRY_DSN is defined,
+the appliance will report the following items to sentry:
++ python exceptions in web, worker, beat, smtpd
++ salt-call error states and expections
++ systemd service exceptions where appliance_failed, appliance_exit or sentry_entry is called
 
 ## Development
 

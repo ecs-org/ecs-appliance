@@ -1,13 +1,13 @@
 # everything that should be absent but is not because of legacy
 # everything that should have different user/group/permissions but is not because of legacy
 
-{% set services_remove=[
+{% set services_remove= [
   'watch_ecs_ca.path',
   'watch_ecs_ca.service',
   'update-appliance.service',
   ]
 %}
-{% set paths_remove=[
+{% set paths_remove= [
   '/usr/local/sbin/generate-new-env.sh',
   '/usr/local/sbin/deploy_cert_as_root.sh',
   '/usr/local/sbin/unchanged_cert_as_root.sh',
@@ -23,7 +23,7 @@
   '/data/appliance',
   ]
 %}
-{% set path_user_group_dmode_fmode % [
+{% set path_user_group_dmode_fmode= [
   ('/app/etc/dehydrated/', 'app', 'app', '0755', '0664'),
   ]
 %}
