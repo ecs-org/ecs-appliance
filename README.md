@@ -145,9 +145,12 @@ the service again using `systemctl restart appliance.service`
     + `. /usr/local/shared/appliance/env.include; ENV_YML=/run/active-env.yml userdata_to_env ecs,appliance`
 
 + enter a running ecs container:
-    + `docker exec -it ecs_image[.startcommand]_1 /bin/bash`
-        + image = ecs, mocca, pdfas, memcached, redis
-        + ecs .startcommand = web, worker, beat, smtpd
+    + image = ecs, mocca, pdfas, memcached, redis
+    + ecs .startcommand = web, worker, beat, smtpd
+    + as root `docker exec -it ecs_image[.startcommand]_1 /bin/bash`
+        + eg. `docker exec -it ecs_ecs.worker_1 /bin/bash`
+    + as app user with activated environment
+        + eg. `docker exec -it ecs_ecs_worker_1 /start run /bin/bash`
 
     + enter a django shell_plus as app user in a running (eg. ecs_ecs.web_1) container:
         + `docker exec -it ecs_ecs.web_1 /start run ./manage.py shell_plus`
@@ -245,8 +248,10 @@ path | remark
 /run/active-env.yml | current activated configuration
 /run/appliance-failed | flag that needs to be cleared,
  | before a restart of a failed appliance is possible
+/usr/local/share/appliance | scripts from the appliance salt source
+/usr/local/[s]bin | user callable programs
 
-Data & Volatile:
+Data:
 
 path | remark
 --- | ---
@@ -258,6 +263,11 @@ path | remark
 /data/ecs-pgdump | database migration dump and backup dump diretory
 /data/postgresql | referenced from moved /var/lib/postgresql
 /volatile  | data that can get deleted
+
+Volatile:
+
+path | remark
+--- | ---
 /volatile/docker | referenced from moved /var/lib/docker
 /volatile/ecs-cache | Shared Cache Directory
 /volatile/ecs-backup-test | default target directory of unconfigured backup
