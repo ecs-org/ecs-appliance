@@ -74,7 +74,7 @@ services:
       - redis
       - memcached
     network_mode: "bridge"
-    command: beat
+    command: run /app/env/bin/celery -A ecs beat -l info
 
   memcached:
     image: memcached
