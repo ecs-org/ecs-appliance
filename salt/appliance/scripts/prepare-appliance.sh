@@ -102,7 +102,7 @@ mkdir -p /root/.gpg
 find /root/.gpg -mindepth 1 -name "*.gpg*" -delete
 echo "$APPLIANCE_BACKUP_ENCRYPT" | gpg --homedir /root/.gpg --batch --yes --import --
 # change backup target url according to env
-sed -ri "s/^TARGET=.*/TARGET=$APPLIANCE_BACKUP_URL/" /root/.duply/appliance-backup/conf
+sed -ri "s#^TARGET=.*#TARGET=$APPLIANCE_BACKUP_URL#" /root/.duply/appliance-backup/conf
 
 # ### ssl setup
 # re-generate dhparam.pem if not found or less than 2048 bit

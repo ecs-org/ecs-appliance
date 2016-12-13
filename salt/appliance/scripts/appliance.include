@@ -116,6 +116,7 @@ appliance_status () {
         echo "INFO: appliance status: $1 : $2"
         title=$(echo "$1" | tr / \\/)
         text=$(echo "$2" | tr / \\/)
+        # XXX will fail if $text includes "/" characters
         cat $templatefile |
             sed -r "s/\{\{ ?title ?\}\}/$title/g;s/\{\{ ?text ?\}\}/$text/g" > $resultfile
         if test "$(id -u)" = "0"; then
