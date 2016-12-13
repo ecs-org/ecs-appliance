@@ -21,7 +21,8 @@ gosu app /bin/bash -c "set -o pipefail; \
 /usr/bin/pg_dump --encoding='utf-8' --format=custom -Z0 -d ecs | \
     /bin/gzip --rsyncable > ${dbdump}.new"
 if test "$?" -ne 0; then
-    sentry_entry "Appliance Backup" "backup error: could not create database dump"
+    sentry_entry "Appliance Backup" "backup error: could not create database dump" "error" \
+        "$(service_status appliance-backup.service)"
     exit 1
 fi
 mv ${dbdump}.new ${dbdump}
@@ -30,16 +31,16 @@ mv ${dbdump}.new ${dbdump}
 /usr/bin/duply /root/.duply/appliance cleanup --force
 if test "$?" -ne "0"; then
     sentry_entry "Appliance Backup" "duply cleanup error" "warning" \
-    "$(systemctl status -l -q --no-pager -n 20 appliance-backup.service | text2json)"
+        "$(service_status appliance-backup.service)"
 fi
 /usr/bin/duply /root/.duply/appliance backup
 if test "$?" -ne "0"; then
     sentry_entry "Appliance Backup" "duply backup error" "error" \
-    "$(systemctl status -l -q --no-pager -n 20 appliance-backup.service | text2json)"
+        "$(service_status appliance-backup.service)"
     exit 1
 fi
 /usr/bin/duply /root/.duply/appliance purge-full --force
 if test "$?" -ne "0"; then
     sentry_entry "Appliance Backup" "duply purge-full error" "warning" \
-    "$(systemctl status -l -q --no-pager -n 20 appliance-backup.service | text2json)"
+        "$(service_status appliance-backup.service)"
 fi

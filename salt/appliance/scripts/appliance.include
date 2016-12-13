@@ -64,6 +64,10 @@ text2json(){
     d={\"status\": sys.stdin.read().split(\"\n\")}; json.dump(d, sys.stdout)"
 }
 
+service_status(){
+    systemctl status -l -q --no-pager -n 15 $@ | text2json
+}
+
 sentry_entry () {
     # call with (group,message,[level,[extra]]) , default level is error
     local group=$1
