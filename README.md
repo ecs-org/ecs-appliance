@@ -143,29 +143,38 @@ the service again using `systemctl restart appliance.service`
 
 + activate /run/active-env.yml in current shell of appliance vm:
     + `. /usr/local/share/appliance/env.include; ENV_YML=/run/active-env.yml userdata_to_env ecs,appliance`
+    + also run `. /usr/local/share/appliance/appliance.include` if you want to use sentry_entry
 
-+ manual run letsencrypt client: `gosu app dehydrated --help`
-+
-+ enter a running ecs container:
++ manual run letsencrypt client (do not call as root): `gosu app dehydrated --help`
+
++ enter a running ecs container
     + image = ecs, mocca, pdfas, memcached, redis
     + ecs .startcommand = web, worker, beat, smtpd
-    + as root `docker exec -it ecs_image[.startcommand]_1 /bin/bash`
-        + eg. `docker exec -it ecs_ecs.worker_1 /bin/bash`
-    + as app user with activated environment
-        + eg. `docker exec -it ecs_ecs_worker_1 /start run /bin/bash`
 
-    + enter a django shell_plus as app user in a running (eg. ecs_ecs.web_1) container:
+
+    for most ecs commands it is not important to which
+    instance (web,worker) you connect to, so ecs_ecs.web_1 is used in Examples
+
+    + as root `docker exec -it ecs_image[.startcommand]_1 /bin/bash`
+        + eg. `docker exec -it ecs_ecs.web_1 /bin/bash`
+    + shell as app user with activated environment
+        + `docker exec -it ecs_ecs.web_1 /start run /bin/bash`
+    + manualy create a celery task:
+        + `docker exec -it ecs_ecs.web_1 /start run celery --serializer=pickle -A ecs call ecs.integration.tasks.clearsessions`
+    + celery events console
+        + `docker exec -it ecs_ecs.web_1 /start run /bin/bash -c "TERM=screen celery -A ecs events"`
+    + enter a django shell_plus as app user in a running container
         + `docker exec -it ecs_ecs.web_1 /start run ./manage.py shell_plus`
 
 + run a new django shell with correct environment but independent of other container
     +  `docker-compose -f /app/etc/ecs/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
 
 + follow whole journal: `journalctl -f`
++ only follow service, eg. prepare-appliance: `journalctl -u prepare-appliance -f`
 + follow appliance log:
-    + (this includes backend nginx, uwsgi, beat, worker, smtpd, redis, memcached, pdfas, mocca)
+    + this includes backend nginx, uwsgi, beat, worker, smtpd, redis, memcached, pdfas, mocca
     + `journalctl -u appliance -f`
 + follow frontend nginx: `journalctl -u nginx -f`
-+ follow prepare-appliance: `journalctl -u prepare-appliance -f`
 + search for salt-call output: `journalctl $(which salt-call)`
 
 + quick update appliance code:
@@ -177,8 +186,9 @@ the service again using `systemctl restart appliance.service`
 
 if ECS_SETTINGS:SENTRY_DSN and APPLIANCE_SENTRY_DSN is defined,
 the appliance will report the following items to sentry:
+
 + python exceptions in web, worker, beat, smtpd
-+ salt-call error states and expections
++ salt-call exceptions and state return with error states
 + systemd service exceptions where appliance_failed, appliance_exit or sentry_entry is called
 
 ## Development
