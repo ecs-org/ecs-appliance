@@ -143,7 +143,7 @@ the service again using `systemctl restart appliance.service`
 
 + activate /run/active-env.yml in current shell of appliance vm:
     + `. /usr/local/share/appliance/env.include; ENV_YML=/run/active-env.yml userdata_to_env ecs,appliance`
-    + also run `. /usr/local/share/appliance/appliance.include` if you want to use sentry_entry
+    + `. /usr/local/share/appliance/appliance.include` *GIT_SOURCE defaults and other functions
 
 + manual run letsencrypt client (do not call as root): `gosu app dehydrated --help`
 
@@ -188,7 +188,7 @@ if ECS_SETTINGS:SENTRY_DSN and APPLIANCE_SENTRY_DSN is defined,
 the appliance will report the following items to sentry:
 
 + python exceptions in web, worker, beat, smtpd
-+ salt-call exceptions and state return with error states
++ salt-call exceptions and state returns with error states
 + systemd service exceptions where appliance_failed, appliance_exit or sentry_entry is called
 
 ## Development
