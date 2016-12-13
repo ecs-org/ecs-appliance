@@ -45,6 +45,19 @@ if $need_storage_setup; then
     fi
 fi
 
+# ### write out extra files from env
+if test "$APPLIANCE_EXTRA_FILES_LEN" != ""; then
+    for i in $(seq 0 $(( $APPLIANCE_EXTRA_FILES_LEN -1 )) ); do
+        fieldname="APPLIANCE_EXTRA_FILES_${i}_PATH"; fname="${!fieldname}"
+        fieldname="APPLIANCE_EXTRA_FILES_${i}_OWNER"; fowner="${!fieldname}"
+        fieldname="APPLIANCE_EXTRA_FILES_${i}_PERMISSIONS"; fperm="${!fieldname}"
+        fieldname="APPLIANCE_EXTRA_FILES_${i}_CONTENT"; fcontent="${!fieldname}"
+        echo "$fcontent" > $fname
+        if test "$fowner" != ""; then chown $fowner $fname; fi
+        if test "$fperm" != ""; then chmod $fperm $fname; fi
+    done
+fi
+
 # ### database setup
 gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw "$ECS_DATABASE"
 if test $? -ne 0; then
@@ -73,19 +86,6 @@ if test "$pgpass" = "invalid"; then
     gosu postgres psql -c "ALTER ROLE app WITH ENCRYPTED PASSWORD '"${pgpass}"';"
     sed -ri "s/(postgres:\/\/app:)[^@]+(@[^\/]+\/).+/\1${pgpass}\2${ECS_DATABASE}/" /app/etc/ecs/database_url.env
     # DATABASE_URL=postgres://app:invalidpassword@1.2.3.4:5432/ecs
-fi
-
-# ### extra files
-if test "$APPLIANCE_EXTRA_FILES_LEN" != ""; then
-    for i in $(seq 0 $(( $APPLIANCE_EXTRA_FILES_LEN -1 )) ); do
-        fieldname="APPLIANCE_EXTRA_FILES_${i}_PATH"; fname="${!fieldname}"
-        fieldname="APPLIANCE_EXTRA_FILES_${i}_OWNER"; fowner="${!fieldname}"
-        fieldname="APPLIANCE_EXTRA_FILES_${i}_PERMISSIONS"; fperm="${!fieldname}"
-        fieldname="APPLIANCE_EXTRA_FILES_${i}_CONTENT"; fcontent="${!fieldname}"
-        echo "$fcontent" > $fname
-        if test "$fowner" != ""; then chown $fowner $fname; fi
-        if test "$fperm" != ""; then chmod $fperm $fname; fi
-    done
 fi
 
 # ### storagevault keys setup

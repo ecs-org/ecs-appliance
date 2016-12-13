@@ -73,12 +73,12 @@ for n in redis:3 memcached tomcat:8-jre8 ubuntu:xenial; do
     docker pull $n
 done
 
-if test -e /app/etc/rebuild_wanted_ecs -o \
+if test -e /app/etc/flags/rebuild_wanted_ecs -o \
     "$last_running" = "devserver" -o \
     "$target" != "$last_running"; then
 
-    if test -e /app/etc/rebuild_wanted_ecs; then
-        rm /app/etc/rebuild_wanted_ecs
+    if test -e /app/etc/flags/rebuild_wanted_ecs; then
+        rm /app/etc/flags/rebuild_wanted_ecs
     fi
     appliance_status "Appliance Update" "Building ECS $target (current= $last_running)"
     if ! docker-compose build mocca pdfas ecs.web; then

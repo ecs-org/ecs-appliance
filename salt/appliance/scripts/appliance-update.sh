@@ -37,7 +37,7 @@ if test "$last_running" != "$target"; then
     gosu app git checkout -f $APPLIANCE_GIT_BRANCH
     gosu app git reset --hard origin/$APPLIANCE_GIT_BRANCH
     # appliance code has updated, we need a rebuild of ecs container
-    touch /app/etc/rebuild_wanted_ecs
+    touch /app/etc/flags/rebuild_wanted_ecs
     # update appliance
     salt-call state.highstate pillar='{"appliance": {"enabled": true}}' --retcode-passthrough --return appliance
     err=$?

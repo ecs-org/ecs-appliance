@@ -21,6 +21,7 @@
   '/usr/local/sbin/update-ecs.sh',
   '/etc/appliance',
   '/data/appliance',
+  '/app/etc/rebuild_wanted_ecs'
   ]
 %}
 {% set path_user_group_dmode_fmode= [
