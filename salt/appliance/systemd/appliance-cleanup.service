@@ -10,7 +10,9 @@ Type=oneshot
 Environment=UNITNAME=%n
 ExecStart=/bin/bash -c "sleep 30; \
   docker-compose -f /app/etc/ecs/docker-compose.yml rm -v -f; \
-  docker rmi --force $(docker images -q --filter 'dangling=true')"
+  docker volume ls -q -f dangling=true | xargs -r docker volume rm; \
+  docker images -q -f dangling=true | xargs -r docker rmi --force"
+
 ExecReload=/bin/true
 
 [Install]
