@@ -129,7 +129,7 @@ else
         echo "Information: generate certificates using letsencrypt (dehydrated client)"
         # we need a SAN (subject alternative name) for java ssl :(
         printf "%s" "$APPLIANCE_DOMAIN $APPLIANCE_DOMAIN" > $domains_file
-        dehydrated -c
+        gosu app dehydrated -c
         if test "$?" -eq 0; then
             use_snakeoil=false
             echo "Information: letsencrypt was successful, using letsencrypt certificate"

@@ -8,7 +8,7 @@ include:
   - .stunnel
   - .postgresql
   - .backup
-  - .legacy-removal
+  - .legacy
 
 {% for i in ['appliance.include', 'prepare-env.sh', 'prepare-appliance.sh',
   'prepare-ecs.sh', 'appliance-update.sh'] %}

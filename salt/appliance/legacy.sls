@@ -1,4 +1,5 @@
-# everything that should be absent but is not because of legacy leftover
+# everything that should be absent but is not because of legacy
+# everything that should have different user/group/permissions but is not because of legacy
 
 {% set services_remove=[
   'watch_ecs_ca.path',
@@ -22,6 +23,10 @@
   '/data/appliance',
   ]
 %}
+{% set path_user_group_dmode_fmode % [
+  ('/app/etc/dehydrated/', 'app', 'app', '0755', '0664'),
+  ]
+%}
 
 {% for f in services_remove %}
 service_remove_{{ f }}:
@@ -36,4 +41,18 @@ service_remove_{{ f }}:
 path_remove_{{ f }}:
   file.absent:
     - name: {{ f }}
+{% endfor %}
+
+{% for path,user,group,dmode,fmode in path_user_group_dmode_fmode %}
+path_owner_set_{{ path }}:
+  file.directory:
+    - name: {{ path }}
+    - user: {{ user }}
+    - group: {{ group }}
+    - dir_mode: {{ dmode }}
+    - file_mode: {{ fmode }}
+    - recurse:
+      - user
+      - group
+      - mode
 {% endfor %}

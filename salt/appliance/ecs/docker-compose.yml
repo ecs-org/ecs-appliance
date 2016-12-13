@@ -24,7 +24,7 @@ services:
       - redis
       - memcached
     network_mode: "bridge"
-    command: web
+    command: simple
 
   ecs.worker:
     image: ecs/ecs
@@ -38,6 +38,8 @@ services:
     env_file:
       - service_urls.env
       - database_url.env
+    depends_on:
+      - ecs.web
     links:
       - redis
       - memcached
@@ -59,18 +61,20 @@ services:
     network_mode: "bridge"
     command: smtpd
 
-# ecs.beat:
-#    image: ecs/ecs
-#    environment:
-#      - ECS_SETTINGS=${ECS_SETTINGS}
-#    env_file:
-#      - service_urls.env
-#      - database_url.env
-#    links:
-#      - redis
-#      - memcached
-#    network_mode: "bridge"
-#    command: beat
+  ecs.beat:
+    image: ecs/ecs
+    environment:
+      - ECS_SETTINGS=${ECS_SETTINGS}
+    env_file:
+      - service_urls.env
+      - database_url.env
+    depends_on:
+      - ecs.worker
+    links:
+      - redis
+      - memcached
+    network_mode: "bridge"
+    command: beat
 
   memcached:
     image: memcached

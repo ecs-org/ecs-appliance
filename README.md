@@ -142,8 +142,10 @@ the service again using `systemctl restart appliance.service`
 ## Maintenance
 
 + activate /run/active-env.yml in current shell of appliance vm:
-    + `. /usr/local/shared/appliance/env.include; ENV_YML=/run/active-env.yml userdata_to_env ecs,appliance`
+    + `. /usr/local/share/appliance/env.include; ENV_YML=/run/active-env.yml userdata_to_env ecs,appliance`
 
++ manual run letsencrypt client: `gosu app dehydrated --help`
++ 
 + enter a running ecs container:
     + image = ecs, mocca, pdfas, memcached, redis
     + ecs .startcommand = web, worker, beat, smtpd
