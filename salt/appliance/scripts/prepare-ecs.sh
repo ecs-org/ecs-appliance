@@ -117,7 +117,7 @@ if $need_migration; then
     fi
 else
     printf "%s" "$target" > /app/etc/tags/last_running_ecs
-    appliance_status "Appliance Update" "Bootstrap"
+    appliance_status "Appliance Update" "Running ecs bootstrap"
     docker-compose run --no-deps --rm --name ecs.bootstrap ecs.web run ./manage.py bootstrap
     err=$?
     if test $err -ne 0; then
