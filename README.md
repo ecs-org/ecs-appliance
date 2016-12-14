@@ -216,7 +216,8 @@ the appliance will report the following items to sentry:
 
 + python exceptions in web, worker, beat, smtpd
 + salt-call exceptions and state returns with error states
-+ systemd service exceptions where appliance_failed, appliance_exit or sentry_entry is called
++ systemd service exceptions where appliance-failed is triggered,
+    or appliance_failed, appliance_exit, sentry_entry is called
 
 ## Development
 
