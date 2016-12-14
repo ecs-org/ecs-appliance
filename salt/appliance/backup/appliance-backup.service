@@ -1,7 +1,7 @@
 [Unit]
 Description=Appliance Backup
 ConditionFileNotEmpty=/run/active-env.yml
-ConditionFileNotEmpty=/root/.gpg/secring.gpg
+ConditionFileNotEmpty=/root/.gnupg/secring.gpg
 After=network.target
 
 [Service]

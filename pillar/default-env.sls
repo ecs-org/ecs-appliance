@@ -57,7 +57,7 @@ appliance:
       data: true
 
   backup:
-    url: ssh://app@localhost/volatile/ecs-backup-test/
+    url: file:///volatile/ecs-backup-test/
     encrypt: |
         -----BEGIN PGP PRIVATE KEY BLOCK-----
         Version: GnuPG v1

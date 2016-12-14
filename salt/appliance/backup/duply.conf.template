@@ -8,6 +8,6 @@ DUPL_PARAMS="$DUPL_PARAMS --full-if-older-than $MAX_FULLBKP_AGE "
 DUPL_PARAMS="$DUPL_PARAMS --exclude-other-filesystems "
 
 # TARGET='scheme://user[:password]@host[:port]/[/]path'
-TARGET='{{ target }}'
+TARGET={{ target }}
 # base directory to backup
 SOURCE='/data'

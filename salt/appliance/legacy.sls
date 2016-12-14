@@ -21,7 +21,8 @@
   '/usr/local/sbin/update-ecs.sh',
   '/etc/appliance',
   '/data/appliance',
-  '/app/etc/rebuild_wanted_ecs'
+  '/app/etc/rebuild_wanted_ecs',
+  '/root/.gpg',
   ]
 %}
 {% set path_user_group_dmode_fmode= [

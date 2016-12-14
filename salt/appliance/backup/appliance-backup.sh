@@ -28,18 +28,18 @@ fi
 mv ${dbdump}.new ${dbdump}
 
 # duplicity to thirdparty of /data/ecs-storage-vault, /data/ecs-pgdump
-/usr/bin/duply /root/.duply/appliance cleanup --force
+/usr/bin/duply appliance-backup cleanup --force
 if test "$?" -ne "0"; then
     sentry_entry "Appliance Backup" "duply cleanup error" "warning" \
         "$(service_status appliance-backup.service)"
 fi
-/usr/bin/duply /root/.duply/appliance backup
+/usr/bin/duply appliance-backup backup
 if test "$?" -ne "0"; then
     sentry_entry "Appliance Backup" "duply backup error" "error" \
         "$(service_status appliance-backup.service)"
     exit 1
 fi
-/usr/bin/duply /root/.duply/appliance purge-full --force
+/usr/bin/duply appliance-backup purge-full --force
 if test "$?" -ne "0"; then
     sentry_entry "Appliance Backup" "duply purge-full error" "warning" \
         "$(service_status appliance-backup.service)"

@@ -97,10 +97,10 @@ echo "$ECS_VAULT_SIGN" | gpg --homedir /data/ecs-gpg --batch --yes --import --
 chown -R 1000:1000 /data/ecs-gpg
 
 # ### backup setup
-# create ready to use /root/.gpg for backup being done using duplicity
-mkdir -p /root/.gpg
-find /root/.gpg -mindepth 1 -name "*.gpg*" -delete
-echo "$APPLIANCE_BACKUP_ENCRYPT" | gpg --homedir /root/.gpg --batch --yes --import --
+# create ready to use /root/.gnupg for backup being done using duplicity
+mkdir -p /root/.gnupg
+find /root/.gnupg -mindepth 1 -name "*.gpg*" -delete
+echo "$APPLIANCE_BACKUP_ENCRYPT" | gpg --homedir /root/.gnupg --batch --yes --import --
 # change backup target url according to env
 sed -ri "s#^TARGET=.*#TARGET=$APPLIANCE_BACKUP_URL#" /root/.duply/appliance-backup/conf
 

@@ -163,7 +163,7 @@ All snippets expect root.
 
 + activate /run/active-env.yml in current shell of appliance vm:
     + `. /usr/local/share/appliance/env.include; ENV_YML=/run/active-env.yml userdata_to_env ecs,appliance`
-    + `. /usr/local/share/appliance/appliance.include` *GIT_SOURCE defaults and other functions
+    + to also set *GIT_SOURCE defaults: `. /usr/local/share/appliance/appliance.include` 
 
 + enter a running ecs container
     for most ecs commands it is not important to which
