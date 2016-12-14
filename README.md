@@ -12,25 +12,40 @@ Contents:
 ## Install Appliance
 
 
-### to empty xenial vm via ssh
+### to an empty xenial vm via ssh
 
-on your local machine:
-
++ copy the env.yml you want to execute to target vm as /app/env.yml
 ```
-ssh root@target.vm.ip '/bin/bash -c "mkdir -p /app/.ssh"'
-scp cloneecs_id_ed25519 root@target.vm.ip:/app/.ssh/id_ed25519
+ssh root@target.vm.ip '/bin/bash -c "mkdir -p /app/"'
 scp target.domain.name.env.yml root@target.vm.ip:/app/env.yml
 ```
 
-on empty target vm:
-
++ if cloning from a private repository,
+    copy the repository readonly ssh key to the target vm,
+    the saltstack part will correct permissions later
 ```
-apt-get -y update
-apt-get -y install git
+ssh root@target.vm.ip '/bin/bash -c "mkdir -p /app/.ssh"'
+scp cloneecs_id_ed25519 root@target.vm.ip:/app/.ssh/id_ed25519
+```
 
+on target vm:
+
++ clone from public repository
+```
+apt-get -y update; apt-get -y install git
+git clone https://github.com/ethikkom/ecs-appliance /app/apppliance
+```
+
++ clone from private repository
+```
+apt-get -y update; apt-get -y install git
 GIT_SSH_COMMAND="ssh -i /app/.ssh/id_ed25519 " git clone \
     ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs-appliance.git /app/appliance
+```
 
++ in both cases
+
+```
 cd /
 mkdir -p /etc/salt
 cp /app/appliance/salt/minion /etc/salt/minion
@@ -42,7 +57,6 @@ chmod 0600 /app/env.yml
 cp /app/env.yml /run/active-env.yml
 salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
 gosu postgres createdb ecs -T template0 -l de_DE.utf8
-# look at appliance service, if not starting
 reboot
 ```
 
@@ -61,8 +75,12 @@ reboot
 on developer vm:
 
 ```
-# install appliance, clone appliance code
+# clone from public repository
+git clone https://github.com/ethikkom/ecs-appliance /app/appliance
+
+# clone from private repository
 git clone ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs-appliance.git /app/appliance
+
 # install saltstack
 curl -o /tmp/bootstrap_salt.sh -L https://bootstrap.saltstack.com
 sudo bash -c "mkdir -p /etc/salt; cp /app/appliance/salt/minion /etc/salt/minion; \
@@ -76,11 +94,11 @@ if you also want the builder (for building the appliance image) installed:
 sudo salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance": {"enabled": true}}'
 ```
 
-### upgrade a xenial desktop
+### upgrade [empty] xenial desktop
 
 This is the same procedure as for the developer vm,
 but be aware that compared to a typical desktop the appliance
-configures strange things, enables and take over services.
+configures strange defaults, enables and take over services.
 
 + postgres data is relocated to /data/postgresql
 + docker data is relocated to /volatile/docker
@@ -89,7 +107,7 @@ configures strange things, enables and take over services.
     + set password of user app for tcp connect to postgresql
     + does not drop any data, unless told
 + docker and docker container
-    + stops all container on relocate
+    + stops all container on first installation
     + expects docker0 to be the default docker bridge with default ip values
 + overwrites nginx, postfix, postgresql, stunnel configuration
 + listens on default route interface on ports 22,25,80,443,465
@@ -141,19 +159,18 @@ the service again using `systemctl restart appliance.service`
 
 ## Maintenance
 
+All snippets expect root.
+
 + activate /run/active-env.yml in current shell of appliance vm:
     + `. /usr/local/share/appliance/env.include; ENV_YML=/run/active-env.yml userdata_to_env ecs,appliance`
     + `. /usr/local/share/appliance/appliance.include` *GIT_SOURCE defaults and other functions
 
-+ manual run letsencrypt client (do not call as root): `gosu app dehydrated --help`
-
 + enter a running ecs container
-    + image = ecs, mocca, pdfas, memcached, redis
-    + ecs .startcommand = web, worker, beat, smtpd
-
-
     for most ecs commands it is not important to which
     instance (web,worker) you connect to, so ecs_ecs.web_1 is used in Examples
+
+    + image = ecs, mocca, pdfas, memcached, redis
+    + ecs .startcommand = web, worker, beat, smtpd
 
     + as root `docker exec -it ecs_image[.startcommand]_1 /bin/bash`
         + eg. `docker exec -it ecs_ecs.web_1 /bin/bash`
@@ -169,18 +186,28 @@ the service again using `systemctl restart appliance.service`
 + run a new django shell with correct environment but independent of other container
     +  `docker-compose -f /app/etc/ecs/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
 
-+ follow whole journal: `journalctl -f`
-+ only follow service, eg. prepare-appliance: `journalctl -u prepare-appliance -f`
-+ follow appliance log:
-    + this includes backend nginx, uwsgi, beat, worker, smtpd, redis, memcached, pdfas, mocca
-    + `journalctl -u appliance -f`
-+ follow frontend nginx: `journalctl -u nginx -f`
-+ search for salt-call output: `journalctl $(which salt-call)`
-
++ manual run letsencrypt client (do not call as root): `gosu app dehydrated --help`
 + quick update appliance code:
     + `cd /app/appliance; gosu app git pull; salt-call state.highstate pillar='{"appliance": "enabled": true}}'`
 + read details of a container in yaml:
     + `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
+
+### Logging
+
+Container:
++ all container log to stdout and stderr
++ docker has the logs of every container available
+    + you can look at a log stream using eg. `docker logs ecs_ecs.web_1`
++ journald will get the container logs via the appliance.service which calls docker-compose
+    + this includes backend nginx, uwsgi, beat, worker, smtpd, redis, memcached, pdfas, mocca
+    + to follow use `journalctl -u appliance -f`
+
+Host:
++ (nearly) all logging is going through journald
++ follow whole journal: `journalctl -f`
++ only follow service, eg. prepare-appliance: `journalctl -u prepare-appliance -f`
++ follow frontend nginx: `journalctl -u nginx -f`
++ search for salt-call output: `journalctl $(which salt-call)`
 
 ### Reporting
 
@@ -257,6 +284,7 @@ path | remark
  |
 /app/etc            | runtime configuration (symlink of /data/etc)
 /app/etc/tags       | runtime tags
+/app/etc/flags      | runtime flags
  |
 /app/ecs-ca        | client certificate ca and crl directory
  | (symlink of /data/ecs-ca)
