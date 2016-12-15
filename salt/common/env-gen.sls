@@ -1,15 +1,8 @@
-include:
-  - qrcode
-
-env_gen_pkgs:
-  pkg.installed:
-    - pkgs:
-      - gnupg
-      - openssl
-      - enscript
-      - ghostscript
-      - pdftk
-      - swaks
+{% if salt['pillar.get']('extra_env') != "" %}
+{% set extra= salt['cmd.run_stdout']('cat '+ pillar.get('extra_env'))|load_yaml %}
+{% else %}
+{% set extra= {} %}
+{% endif %}
 
 {{ salt['pillar.get']('targetdir') }}/env.yml:
   file.managed:
@@ -19,7 +12,5 @@ env_gen_pkgs:
     - mode: "0600"
     - makedirs: true
     - defaults:
-        domain: {{ salt['pillar.get']('domain') }}
-    - require:
-      - sls: qrcode
-      - pkg: env_gen_pkgs
+      extra: {{ extra }}
+      domain: {{ salt['pillar.get']('domain') }}

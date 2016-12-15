@@ -1,20 +1,25 @@
-{% macro ssl_secret(len=39) -%}
+{%- macro ssl_secret(len=39) -%}
 {{ salt['cmd.run_stdout']('openssl rand -base64 39') }}
 {%- endmacro %}
-{% macro gpg_secret(ownername) -%}
+{%- macro gpg_secret(ownername) -%}
 {%- set batch = 'Key-Type: 1\nKey-Length: 2048\nExpire-Date: 0\n'+
     'Name-Real: '+ ownername+ '\n%secring -&1\n%pubring -&2\n%commit\n' -%}
 {%- set gpg_call = 'gpg --quiet --no-default-keyring --enable-special-filenames --batch --yes --armor --gen-key' -%}
 {{ salt['cmd.run_stdout'](gpg_call, stdin=batch) }}
 {%- endmacro %}
-
 # # exchange ip number and add this to your domain config
 # {{ domain }}.   IN  A     1.2.3.4
 # {{ domain }}.   IN  MX    10  {{ domain }}
 # {{ domain }}.   IN  TXT   "v=spf1 mx ptr -all"
 
 ssh_authorized_keys:
+{%- if extra.ssh_authorized_keys|d(false) %}
+  {%- for key in extra.ssh_authorized_keys %}
+  - {{ key }}
+  {%- endfor %}
+{%- else %}
   # - "ssh-rsa and some long glibberish somebody@somewhere"
+{%- endif %}
   # # you can put your ssh keys here, this is also used by cloud-init
 ssh_deprecated_keys:
   # - "ssh-rsa and some long glibberish somebody@somewhere"
@@ -36,14 +41,40 @@ appliance:
     # # if set ssl key for https host will be used, default empty
     # cert: filename-cert.pem
     # # if set ssl key for https host will be used, default empty
-
   # # set to your sentry url, must be the same as ecs_settings: SENTRY_DSN
+{%- if extra.appliance.sentry.dsn|d(false) %}
+  sentry:
+{{ extra.appliance.sentry|yaml(false)|indent(4,True) }}
+{%- else %}
   # sentry:
   #   dsn: 'https://url'
+{%- endif %}
+{%- if extra.appliance.git.source|d(false) %}
+  git:
+{{ extra.appliance.git|yaml(false)|indent(4,True) }}
+{%- else %}
   # git:
   #   # default see appliance.include
   #   branch: master
   #   source: git_url
+{%- endif %}
+{%- if extra.appliance.extra.files|d(false) %}
+  extra:
+    files:
+  {%- for f_dict in extra.appliance.extra.files %}
+      - path: {{ f_dict.path }}
+        content: |
+    {%- for l in f_dict.content.split('\\n') %}
+            {{ l }}
+    {%- endfor %}
+    {%- if f_dict.owner|d(false) %}
+        owner: {{ f_dict.owner }}
+    {%- endif %}
+    {%- if f_dict.permissions|d(false) %}
+        permissions: {{ f_dict.permissions }}
+    {%- endif %}
+  {%- endfor %}
+{%- else %}
   # extra:  # write out extra files on appliance configure
   #   files:
   #     - path: /path/of/filename
@@ -51,6 +82,7 @@ appliance:
   #           # Your content here
   #       owner: user:group
   #       permissions: "0600"
+{%- endif %}
   # env:
   #   recipients: # list of user that get the gpg encrypted tar.gz archive of the new env
   #     - email: key_name@another.domain.name
@@ -71,9 +103,14 @@ appliance:
 {{ gpg_secret('ecs_backup')|indent(8,True) }}
 
 ecs:
+{%- if extra.ecs.git.source|d(false) %}
+  git:
+{{ extra.ecs.git|yaml(false)|indent(4,True) }}
+{%- else %}
   # git: # default see appliance.include
   #   branch: stable
   #   source: git_url
+{%- endif %}
   userswitcher:
     enabled: false
   settings: |
@@ -84,8 +121,11 @@ ecs:
       SECURE_PROXY_SSL = True
       ECS_REQUIRE_CLIENT_CERTS = True
       DEBUG = False
-
+{%- if extra.appliance.sentry.dsn|d(false) %}
+      SENTRY_DSN = '{{ extra.appliance.sentry.dsn }}'
+{%- else %}
       # SENTRY_DSN = 'https://url' # set to sentry url if available
+{%- endif %}
       ETHICS_COMMISSION_UUID = 'ecececececececececececececececec'
 
       SECRET_KEY = '{{ ssl_secret() }}'

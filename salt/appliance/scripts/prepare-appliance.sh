@@ -101,8 +101,9 @@ chown -R 1000:1000 /data/ecs-gpg
 mkdir -p /root/.gnupg
 find /root/.gnupg -mindepth 1 -name "*.gpg*" -delete
 echo "$APPLIANCE_BACKUP_ENCRYPT" | gpg --homedir /root/.gnupg --batch --yes --import --
+
 # change backup target url according to env
-sed -ri "s#^TARGET=.*#TARGET=$APPLIANCE_BACKUP_URL#" /root/.duply/appliance-backup/conf
+sed -ri "s#^TARGET=.*#TARGET=$APPLIANCE_BACKUP_URL#;s#^GPG_KEY=.*#GPG_KEY=" /root/.duply/appliance-backup/conf
 
 # ### ssl setup
 # re-generate dhparam.pem if not found or less than 2048 bit
