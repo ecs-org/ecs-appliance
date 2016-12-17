@@ -15,6 +15,7 @@ services:
       - /volatile/ecs-cache:/app/ecs-cache
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
+      - ECS_USERSWITCHER_ENABLED=${ECS_USERSWITCHER_ENABLED}
     env_file:
       - service_urls.env
       - database_url.env
