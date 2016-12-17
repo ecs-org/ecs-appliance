@@ -11,7 +11,7 @@ ReloadPropagatedFrom=appliance.service
 [Service]
 Type=oneshot
 RemainAfterExit=on
-TimeoutStartSec=45min
+TimeoutStartSec=60min
 Environment=UNITNAME=%n
 Environment=ENV_YML=/run/active-env.yml
 ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.include; \
