@@ -2,7 +2,7 @@
 Description=ECS Preparation
 ConditionPathExists=!/run/appliance-failed
 ConditionFileNotEmpty=/run/active-env.yml
-Requires=prepare-appliance.service
+Requires=prepare-appliance.service watch-ecs-ca.path
 Wants=docker.service
 PartOf=appliance.service
 After=prepare-appliance.service docker.service
