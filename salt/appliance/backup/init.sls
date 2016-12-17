@@ -44,7 +44,7 @@ enable-appliance-backup-service:
       - file: /etc/systemd/system/appliance-backup.service
       - file: /etc/systemd/system/appliance-backup.timer
       - file: /usr/local/share/appliance/appliance-backup.sh
-      - file: /root/.duply/appliance-backup/conf
+      - file: /root/.duply/appliance-backup/conf.template
       - file: /root/.duply/appliance-backup/exclude
     - watch:
       - file: /etc/systemd/system/appliance-backup.service
