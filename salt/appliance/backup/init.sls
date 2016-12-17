@@ -9,13 +9,10 @@ backup:
       - lftp
       - gnupg
 
-/root/.duply/appliance-backup/conf:
+/root/.duply/appliance-backup/conf.template:
   file.managed:
     - source: salt://appliance/backup/duply.conf.template
-    - template: jinja
     - makedirs: true
-    - defaults:
-        target: {{ salt['pillar.get']('appliance:backup:url') }}
 
 /root/.duply/appliance-backup/exclude:
   file.managed:
