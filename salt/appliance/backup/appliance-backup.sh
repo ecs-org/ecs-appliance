@@ -17,8 +17,8 @@ fi
 
 # pgdump to /data/ecs-pgdump
 dbdump=/data/ecs-pgdump/ecs.pgdump.gz
-gosu app /bin/bash -c "set -o pipefail; \
-/usr/bin/pg_dump --encoding='utf-8' --format=custom -Z0 -d ecs | \
+gosu app /bin/bash -c "set -o pipefail &&  \
+    /usr/bin/pg_dump --encoding='utf-8' --format=custom -Z0 -d ecs | \
     /bin/gzip --rsyncable > ${dbdump}.new"
 if test "$?" -ne 0; then
     sentry_entry "Appliance Backup" "backup error: could not create database dump" "error" \
