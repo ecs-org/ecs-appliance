@@ -51,3 +51,7 @@ postgresql:
     - append_if_not_found: true
     - require:
       - pkg: postgresql
+
+/etc/postgresql/9.5/main/ecs.conf.template:
+  file.managed:
+    - source: salt://appliance/postgresql/ecs.conf.template

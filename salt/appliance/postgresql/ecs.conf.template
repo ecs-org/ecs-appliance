@@ -1,0 +1,17 @@
+### ECS-CONFIG-BEGIN ###
+# abort connections after 10 minutes, to remove stale connections
+statement_timeout = 10min
+# tuning source: http://pgtune.leopard.in.ua/ postgresql 9.5, linux, web
+# https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
+min_wal_size = 1GB
+max_wal_size = 2GB
+checkpoint_completion_target = 0.7
+default_statistics_target = 100
+max_connections = $max_connections
+# shared_buffers: If you have a system with 1GB or more of RAM, a reasonable starting value for shared_buffers is 1/4 of the memory in your system.
+shared_buffers = $shared_buffers
+# work_mem: This size is applied to each and every sort done by each user, and complex queries can use multiple working memory sort buffers. Set it to 50MB, and have 30 users submitting queries, and you are soon using 1.5GB of real memory. Furthermore, if a query involves doing merge sorts of 8 tables, that requires 8 times work_mem.
+work_mem = $work_mem
+# Setting effective_cache_size to 1/2 of total memory would be a normal conservative setting, and 3/4 of memory is a more aggressive but still reasonable amount.
+effective_cache_size = $effective_cache_size
+### ECS-CONFIG-END ###
