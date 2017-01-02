@@ -2,20 +2,25 @@ monit:
   pkg.installed:
     - pkgs:
       - monit
-      - collectd
-
   service.running:
     - name: monit
     - enable: True
     - require:
       - pkg: monit
 
-only while ecs running, stop on stop
 
-+ monitor postgres, frontend nginx, uwsgi, cpu-load, memory, disk-i/o, disk-free
++ only while ecs running, stop on stop
+
+# shell
+mem_kb=$(cat /proc/meminfo  | grep -i memtotal | sed -r "s/[^:]+: *([0-9]+) .*/\1/g")
+mem_mb=$(( mem_kb / 1024))
+cores=$(nproc)
+
+# saltstack
+{% set mem_mb = salt['grains.get']('mem_total') %}
+{% set cores = salt['grains.get']('num_cpus') %}
 
 + depending nr of cores
-
 check system $HOST
     if loadavg (5min) > 3 then alert
     if loadavg (15min) > 1 then alert

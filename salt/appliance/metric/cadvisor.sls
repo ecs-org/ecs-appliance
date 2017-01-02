@@ -4,7 +4,7 @@ include:
 
 /etc/systemd/system/cadvisor.service:
   file.managed:
-    - source: salt://cadvisor/cadvisor.service
+    - source: salt://appliance/monitor/cadvisor.service
     - watch_in:
       - cmd: systemd_reload
 

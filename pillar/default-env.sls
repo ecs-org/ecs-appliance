@@ -27,6 +27,11 @@ appliance:
   # #   must be the same as ecs_settings: SENTRY_DSN
   # sentry:
   #   dsn: 'https://url'
+  # # metric:collection default false, if set will also start metric services
+  # # metric:server default false, if set will also start metric server
+  # metric:
+  #   collection: false
+  #   server: false
   # git:
   #   # default see appliance.include
   #   branch: master

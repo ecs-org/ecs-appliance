@@ -1,0 +1,27 @@
+[Unit]
+Description=Prometheus Memcached Exporter
+After=docker.service
+ConditionPathExists=/app/etc/flags/metric.collection
+ConditionPathExists=/app/etc/ecs/service_urls.env
+Requires=docker.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker kill %n.service
+ExecStartPre=-/usr/bin/docker rm %n.service
+ExecStartPre=/usr/bin/docker pull prom/memcached-exporter
+EnvironmentFile=/app/etc/ecs/service_urls.env
+ExecStart=/usr/bin/docker run \
+    --rm \
+    --name %n \
+    -p 127.0.0.1:9106:9106 \
+    --net bridge \
+    prom/memcached-exporter \
+    -memcached.address $MEMCACHED_URL
+
+Restart=always
+RestartSec=10s
+TimeoutStartSec=120
+TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target

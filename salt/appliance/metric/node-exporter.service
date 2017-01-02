@@ -1,23 +1,26 @@
 [Unit]
 Description=Prometheus Node Exporter
 After=docker.service
+ConditionPathExists=/app/etc/flags/metric.collection
 Requires=docker.service
 
 [Service]
 ExecStartPre=-/usr/bin/docker kill node-exporter.service
 ExecStartPre=-/usr/bin/docker rm node-exporter.service
 ExecStartPre=/usr/bin/docker pull prom/node-exporter
-ExecStart=/bin/bash -c "var_lib_docker=$(readlink -e /var/lib/docker); exec /usr/bin/docker run \
+ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
-    -p 127.0.0.1:5080:8080 \
-    --net bridge \
+    -p 127.0.0.1:9100:9100 \
+    --net host \
+    -v /proc:/host/proc:ro \
+    -v /sys:/host/sys:ro \
     -v /:/rootfs:ro \
-    -v /sys:/sys:ro \
-    -v /var/run:/var/run:ro \
-    -v $var_lib_docker:/var/lib/docker:ro \
-    google/cadvisor \
-    --housekeeping_interval=5s"
+    prom/node-exporter \
+    -collector.procfs /host/proc \
+    -collector.sysfs /host/sys \
+    -collector.filesystem.ignored-mount-points "^/(sys|proc|dev|host|etc)($|/)"
+
 Restart=always
 RestartSec=10s
 TimeoutStartSec=120

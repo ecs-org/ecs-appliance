@@ -1,6 +1,5 @@
 include:
   - docker
-  - cadvisor
   - systemd.reload
   - .ssl
   - .nginx
@@ -8,6 +7,7 @@ include:
   - .stunnel
   - .postgresql
   - .backup
+  - .metric
   - .legacy
 
 {% for i in ['appliance.include', 'prepare-env.sh', 'prepare-appliance.sh',

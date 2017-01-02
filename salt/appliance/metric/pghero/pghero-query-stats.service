@@ -1,0 +1,26 @@
+[Unit]
+Description=pghero:capture_query_stats
+After=docker.service
+Requires=docker.service postgres.service
+
+[Service]
+ExecStartPre=/bin/bash -c '\
+    if ! $(gosu postgres psql ecs -qtc "\dt" | grep -q pghero_query_stats); then \
+        gosu postgres psql ecs -c \
+            CREATE TABLE "pghero_query_stats" ("id" serial primary key, \
+            "database" text, "user" text, "query" text, "query_hash" bigint, \
+            "total_time" float, "calls" bigint, "captured_at" timestamp); \
+    fi; \
+    if ! $(gosu postgres psql ecs -qtc "\di" | grep -q pghero_query_stats); then \
+        gosu postgres psql ecs -c \
+            CREATE INDEX ON "pghero_query_stats" ("database", "captured_at"); \
+    fi
+ExecStart=/usr/bin/docker run \
+    --rm \
+    --name %n \
+    --net bridge \
+    --env-file /app/etc/ecs/database_url.env \
+    ankane/pghero \
+    bin/rake pghero:capture_query_stats
+TimeoutStartSec=10
+TimeoutStopSec=5
