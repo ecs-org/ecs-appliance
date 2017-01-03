@@ -150,7 +150,8 @@ is_falsestr () {
 }
 
 tune_postgresql () {
-    local mem_kb mem_mb cores pg_mb MAX_CONNECTIONS SHARED_BUFFERS WORK_MEM EFFECTIVE_CACHE_SIZE
+    local mem_kb mem_mb cores pg_mb
+    local MAX_CONNECTIONS SHARED_BUFFERS WORK_MEM EFFECTIVE_CACHE_SIZE
     local pgcfg=/etc/postgresql/9.5/main/postgresql.conf
     # tune postgresql to current vm memory and cores
     mem_kb=$(cat /proc/meminfo  | grep -i memtotal | sed -r "s/[^:]+: *([0-9]+) .*/\1/g")
