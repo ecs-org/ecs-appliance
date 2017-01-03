@@ -162,7 +162,7 @@ tune_postgresql () {
     # connections are 2+cores(uwsgi), 1xsmtpd, cores=celery_worker, pg_hero+ buffer(8)
     MAX_CONNECTIONS=$((2+ cores+ 1+ cores+ 1+ 8)) # 1 core=14, 8 core=28
     SHARED_BUFFERS=$((64 * (pg_mb / 256)))MB
-    WORK_MEM=$((64 * (pg_mb / 256) * 1024 / (max_connections*4)))KB
+    WORK_MEM=$((64 * (pg_mb / 256) * 1024 / (MAX_CONNECTIONS*4)))KB
     EFFECTIVE_CACHE_SIZE=$((192 * pg_mb/256))MB
 
     cp ${pgcfg} ${pgcfg}.org
