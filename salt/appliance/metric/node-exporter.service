@@ -22,8 +22,8 @@ ExecStart=/usr/bin/docker run \
     -collector.filesystem.ignored-mount-points "^/(sys|proc|dev|host|etc)($|/)"
 
 Restart=always
-RestartSec=10s
-TimeoutStartSec=120
+RestartSec=30
+TimeoutStartSec=5min
 TimeoutStopSec=15
 
 [Install]

@@ -19,8 +19,8 @@ ExecStart=/bin/bash -c "var_lib_docker=$(readlink -e /var/lib/docker); exec /usr
     google/cadvisor \
     --housekeeping_interval=15s"
 Restart=always
-RestartSec=10s
-TimeoutStartSec=120
+RestartSec=30
+TimeoutStartSec=5min
 TimeoutStopSec=15
 
 [Install]

@@ -1,6 +1,6 @@
 [Unit]
 Description=pghero:capture_query_stats
-After=docker.service
+After=docker.service pghero-container.service
 Requires=docker.service postgres.service
 
 [Service]
