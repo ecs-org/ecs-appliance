@@ -164,7 +164,7 @@ tune_postgresql () {
     if test "$pg_mb" -le 256; then pg_mb=256; fi
     MAX_CONNECTIONS=$((2+ cores+ 1+ cores+ 1+ 8)) # 1 core=14, 8 core=28
     SHARED_BUFFERS=$((pg_mb / 4))MB
-    WORK_MEM=$((pg_mb / 4 * 1024 / MAX_CONNECTIONS))KB
+    WORK_MEM=$((pg_mb / 4 * 1024 / MAX_CONNECTIONS))kB
     EFFECTIVE_CACHE_SIZE=$((192 * pg_mb/256))MB
 
     cp ${pgcfg} ${pgcfg}.org

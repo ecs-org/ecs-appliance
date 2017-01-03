@@ -1,7 +1,7 @@
 include:
-  - .pghero
-{#
   - .cadvisor
+{#
+  - .pghero
   - .node-exporter
   - .memcached-exporter
   - .postgres_exporter

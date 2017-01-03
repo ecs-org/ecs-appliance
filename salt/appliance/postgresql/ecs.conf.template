@@ -24,7 +24,7 @@ shared_buffers = ##SHARED_BUFFERS##
 #   complex queries can use multiple working memory sort buffers.
 #   Set to 50MB, have 30 queries, using 1.5GB of real memory,
 #   if a query involves doing merge sorts of 8 tables, that requires 8 times work_mem.
-#   work_mem = (pg_mb / 4 * 1024 / MAX_CONNECTIONS)) KB
+#   work_mem = (pg_mb / 4 * 1024 / MAX_CONNECTIONS)) kB
 work_mem = ##WORK_MEM##
 # Setting effective_cache_size to 1/2 of total memory would be a normal conservative setting, and 3/4 of memory is a more aggressive but still reasonable amount.
 effective_cache_size = ##EFFECTIVE_CACHE_SIZE##
