@@ -15,6 +15,7 @@ ExecStartPre=/bin/bash -c '\
         gosu postgres psql ecs -c \
             CREATE INDEX ON "pghero_query_stats" ("database", "captured_at"); \
     fi
+
 ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
@@ -22,5 +23,6 @@ ExecStart=/usr/bin/docker run \
     --env-file /app/etc/ecs/database_url.env \
     ankane/pghero \
     bin/rake pghero:capture_query_stats
+
 TimeoutStartSec=10
 TimeoutStopSec=5

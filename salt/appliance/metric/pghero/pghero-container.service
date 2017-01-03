@@ -13,7 +13,8 @@ ExecStart=/usr/bin/docker run \
     --net bridge \
     -p 127.0.0.1:5081:8080 \
     --env-file /app/etc/ecs/database_url.env \
-    ankane/pghero \
+    ankane/pghero
+
 Restart=always
 RestartSec=20
 TimeoutStartSec=5min
