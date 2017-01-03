@@ -4,6 +4,7 @@ MAINTAINER felix@erkinger.at
 # run script expects a fullchain server ssl cert at /app/import/server.cert.pem
 
 ENV HOSTNAME localhost
+ENV CATALINA_OPTS "-Xms512m -Xmx1536m"
 
 RUN mkdir -p /app/mocca /app/import
 RUN rm -rf $CATALINA_HOME/webapps/*

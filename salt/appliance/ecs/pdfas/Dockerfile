@@ -4,7 +4,7 @@ MAINTAINER felix@erkinger.at
 # run script expects a fullchain server ssl cert at /import/server.cert.pem
 
 ENV HOSTNAME localhost
-ENV CATALINA_OPTS "-Dpdf-as-web.conf=/app/pdf-as-web/pdf-as-web.properties"
+ENV CATALINA_OPTS "-Xms350m -Xmx1024m -Dpdf-as-web.conf=/app/pdf-as-web/pdf-as-web.properties"
 
 RUN mkdir -p /app/pdf-as-web /app/import
 RUN rm -rf $CATALINA_HOME/webapps/*

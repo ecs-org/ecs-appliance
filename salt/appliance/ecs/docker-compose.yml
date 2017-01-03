@@ -93,7 +93,8 @@ services:
       args:
         - http_proxy
     image: ecs/mocca
-    mem_limit: 1024m
+    # mem limit= -Xmx1536m + 120m
+    mem_limit: 1656m
     environment:
       - HOSTNAME=${APPLIANCE_DOMAIN}
     volumes:
@@ -108,7 +109,8 @@ services:
       args:
         - http_proxy
     image: ecs/pdfas
-    mem_limit: 1024m
+    # mem limit= -Xmx1024m + 120m
+    mem_limit: 1144m
     environment:
       - HOSTNAME=${APPLIANCE_DOMAIN}
     volumes:
