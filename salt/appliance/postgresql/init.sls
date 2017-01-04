@@ -25,10 +25,8 @@ postgresql:
       - cmd: late_postgresql.service
       - sls: docker
       - file: /etc/postgresql/9.5/main/pg_hba.conf
-      - file: /etc/postgresql/9.5/main/postgresql.conf
     - watch:
       - file: /etc/postgresql/9.5/main/pg_hba.conf
-      - file: /etc/postgresql/9.5/main/postgresql.conf
 
 /etc/postgresql/9.5/main/pg_hba.conf:
   file.replace:
@@ -39,6 +37,10 @@ postgresql:
     - append_if_not_found: true
     - require:
       - pkg: postgresql
+
+/etc/postgresql/9.5/main/ecs.conf.template:
+  file.managed:
+    - source: salt://appliance/postgresql/ecs.conf.template
 
 {% for p,r in [
   ("listen_addresses", "listen_addresses = 'localhost,"+ salt['pillar.get']('docker:ip')+ "'"),
@@ -55,9 +57,8 @@ postgresql:
     - append_if_not_found: true
     - require:
       - pkg: postgresql
+    - watch_in:
+      - service: postgresql
+    - require_in:
+      - service: postgresql
 {% endfor %}
-
-
-/etc/postgresql/9.5/main/ecs.conf.template:
-  file.managed:
-    - source: salt://appliance/postgresql/ecs.conf.template
