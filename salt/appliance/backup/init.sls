@@ -8,6 +8,7 @@ backup:
       - duplicity
       - lftp
       - gnupg
+      # https://sourceforge.net/projects/pgbarman/
 
 /root/.duply/appliance-backup/conf.template:
   file.managed:

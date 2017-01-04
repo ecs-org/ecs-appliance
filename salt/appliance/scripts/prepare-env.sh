@@ -20,6 +20,14 @@ if test $? -ne 0; then
     appliance_exit "Appliance Error" "Could not activate userdata environment"
 fi
 
+# reset known metric flags
+flag=/app/etc/flags/metric.collection
+if is_truestr "$APPLIANCE_METRIC_COLLECTION"; then
+    touch $flag
+else
+    if test -e $flag; then rm $flag; fi
+fi
+
 # check if standby is true
 if is_truestr "$APPLIANCE_STANDBY"; then
     appliance_exit "Appliance Standby" "Appliance is in standby" "debug"
