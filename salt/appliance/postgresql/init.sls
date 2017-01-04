@@ -2,8 +2,6 @@ include:
   - docker
   - systemd.reload
 
-# https://sourceforge.net/projects/pgbarman/
-
 late_postgresql.service:
   file.managed:
     - name: /etc/systemd/system/late_postgresql.service
@@ -42,15 +40,23 @@ postgresql:
     - require:
       - pkg: postgresql
 
-/etc/postgresql/9.5/main/postgresql.conf:
+{% for p,r in [
+  ("listen_addresses", "listen_addresses = 'localhost,"+ salt['pillar.get']('docker:ip')+ "'"),
+  ("shared_preload_libraries", "shared_preload_libraries = 'pg_stat_statements'"),
+  ("pg_stat_statements.track", "pg_stat_statements.track = all")
+  ] %}
+
+/etc/postgresql/9.5/main/postgresql.conf_{{ p }}:
   file.replace:
     - pattern: |
-        ^.*listen_addresses.*
+        ^.*{{ p }}.*
     - repl: |
-        listen_addresses = 'localhost,{{ salt['pillar.get']('docker:ip') }}'
+        {{ r }}
     - append_if_not_found: true
     - require:
       - pkg: postgresql
+{% endfor %}
+
 
 /etc/postgresql/9.5/main/ecs.conf.template:
   file.managed:
