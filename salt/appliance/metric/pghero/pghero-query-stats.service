@@ -15,7 +15,8 @@ ExecStartPre=/bin/bash -c '\
         gosu postgres psql ecs -c \
             CREATE INDEX ON "pghero_query_stats" ("database", "captured_at"); \
     fi'
-
+ExecStartPre=-/usr/bin/docker kill %n
+ExecStartPre=-/usr/bin/docker rm %n
 ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
