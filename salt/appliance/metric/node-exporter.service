@@ -11,12 +11,12 @@ ExecStartPre=/usr/bin/docker pull prom/node-exporter
 ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
-    -p 127.0.0.1:9100:9100 \
     --net host \
     -v /proc:/host/proc:ro \
     -v /sys:/host/sys:ro \
     -v /:/rootfs:ro \
     prom/node-exporter \
+    -web.listen-address 127.0.0.1:9100 \
     -collector.procfs /host/proc \
     -collector.sysfs /host/sys \
     -collector.filesystem.ignored-mount-points "^/(sys|proc|dev|host|etc)($|/)"
