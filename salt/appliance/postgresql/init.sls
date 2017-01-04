@@ -50,6 +50,7 @@ postgresql:
 
 /etc/postgresql/9.5/main/postgresql.conf_{{ p }}:
   file.replace:
+    - name: /etc/postgresql/9.5/main/postgresql.conf
     - pattern: |
         ^.*{{ p }}.*
     - repl: |
