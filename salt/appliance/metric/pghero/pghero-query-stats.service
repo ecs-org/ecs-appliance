@@ -14,7 +14,7 @@ ExecStartPre=/bin/bash -c '\
     if ! $(gosu postgres psql ecs -qtc "\di" | grep -q pghero_query_stats); then \
         gosu postgres psql ecs -c \
             CREATE INDEX ON "pghero_query_stats" ("database", "captured_at"); \
-    fi
+    fi'
 
 ExecStart=/usr/bin/docker run \
     --rm \

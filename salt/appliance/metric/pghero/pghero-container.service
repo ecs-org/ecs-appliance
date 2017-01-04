@@ -13,6 +13,8 @@ ExecStart=/usr/bin/docker run \
     --net bridge \
     -p 127.0.0.1:5081:8080 \
     --env-file /app/etc/ecs/database_url.env \
+    --env PUMA_WORKERS=1 \
+    --env MAX_THREADS=2 \
     ankane/pghero
 
 Restart=always
