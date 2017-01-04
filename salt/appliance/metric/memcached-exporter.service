@@ -6,8 +6,8 @@ ConditionPathExists=/app/etc/ecs/service_urls.env
 Requires=docker.service
 
 [Service]
-ExecStartPre=-/usr/bin/docker kill %n.service
-ExecStartPre=-/usr/bin/docker rm %n.service
+ExecStartPre=-/usr/bin/docker kill %n
+ExecStartPre=-/usr/bin/docker rm %n
 ExecStartPre=/usr/bin/docker pull prom/memcached-exporter
 EnvironmentFile=/app/etc/ecs/service_urls.env
 ExecStart=/usr/bin/docker run \
@@ -19,8 +19,8 @@ ExecStart=/usr/bin/docker run \
     -memcached.address $MEMCACHED_URL
 
 Restart=always
-RestartSec=10s
-TimeoutStartSec=120
+RestartSec=30
+TimeoutStartSec=5min
 TimeoutStopSec=15
 
 [Install]
