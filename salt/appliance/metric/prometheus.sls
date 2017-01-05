@@ -4,7 +4,7 @@ include:
 
 # monitor docker, postgres, uwsgi, memcached, (redis), (both nginx),
 # cpu-load, memory, disk-i/o, disk-free, container
-# uwsgi prometheus metric is exported from ecs.web container to localhost:1717 in docker-compose.yml
+# uwsgi prometheus metric is exported from ecs.web container to {{ salt['pillar.get']('docker:ip') }}:1717 in docker-compose.yml
 
 {% macro metric_install(name, start=false) %}
 /etc/systemd/system/{{ name }}.service:

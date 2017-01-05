@@ -21,7 +21,7 @@ services:
       - database_url.env
     ports:
       - "127.0.0.1:5000:5000"
-      - "127.0.0.1:1717:1717"
+      - "{{ salt['pillar.get']('docker:ip') }}:1717:1717"
     links:
       - redis
       - memcached

@@ -32,6 +32,7 @@ create_app_etc_{{ n }}:
   file.recurse:
     - source: salt://appliance/ecs
     - keep_symlinks: true
+    - template: jinja
 
 /app/etc/ecs/service_urls.env:
   file.managed:
