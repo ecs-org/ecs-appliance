@@ -15,15 +15,30 @@ rule_files:
 scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
   - job_name: 'prometheus'
-
     # Override the global default and scrape targets from this job every 5 seconds.
     # scrape_interval: 5s
     # metrics_path defaults to '/metrics', scheme defaults to 'http'.
     static_configs:
       - targets:
         - '{{ salt['pillar.get']('docker:ip') }}:9090'
-        - '{{ salt['pillar.get']('docker:ip') }}:5080'
+
+  - job_name: 'node-exporter-cadvisor'
+    static_configs:
+      - targets:
         - '{{ salt['pillar.get']('docker:ip') }}:9100'
+        - '{{ salt['pillar.get']('docker:ip') }}:5080'
+
+  - job_name: 'uwsgi'
+    static_configs:
+      - targets:
         - '{{ salt['pillar.get']('docker:ip') }}:1717'
+
+  - job_name: 'postgresql'
+    static_configs:
+      - targets:
         - '{{ salt['pillar.get']('docker:ip') }}:9187'
+
+  - job_name: 'memcached'
+    static_configs:
+      - targets:
         - '{{ salt['pillar.get']('docker:ip') }}:9150'
