@@ -17,8 +17,8 @@ systemctl start nginx
 need_storage_setup=false
 for d in /data/etc /data/ecs-ca /data/ecs-gpg /data/ecs-pgdump \
     /data/ecs-storage-vault /data/postgresql \
-    /volatile/docker /volatile/ecs-backup-test \
-    /volatile/ecs-cache /volatile/redis; do
+    /volatile/docker /volatile/ecs-backup-test /volatile/ecs-cache \
+    /volatile/redis /volatile/prometheus /volatile/alertmanager; do
     if test ! -d $d ; then
         echo "Warning: could not find directory $d"
         need_storage_setup=true

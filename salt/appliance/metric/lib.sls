@@ -1,3 +1,6 @@
+include:
+  - systemd.reload
+  - docker
 
 {% macro metric_install(name) %}
 /etc/systemd/system/{{ name }}.service:

@@ -1,6 +1,7 @@
 [Unit]
 Description=Prometheus Node Exporter
 After=docker.service
+ConditionPathExists=/volatile/prometheus
 ConditionPathExists=/app/etc/flags/metric.server
 Requires=docker.service
 
@@ -13,11 +14,12 @@ ExecStart=/usr/bin/docker run \
     --name %n \
     -p 127.0.0.1:9090:9090 \
     --net bridge \
-    -v /data/prometheus:/data \
+    -v /app/etc/prometheus.yml:/etc/prometheus.yml \
+    -v /app/prometheus:/data \
     prom/prometheus \
-    -config.file=/data/prometheus.yml \
+    -config.file=/etc/prometheus.yml \
     -storage.local.path=/data \
-    -alertmanager.url=http://alertmanager:9093
+    -alertmanager.url=http://localhost:9093
 
 Restart=always
 RestartSec=30

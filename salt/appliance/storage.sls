@@ -87,6 +87,8 @@ postfix_relocate_{{ source }}:
   ('ecs-backup-test', 'app', ''),
   ('ecs-cache', 1000, ''),
   ('redis', 1000, ''),
+  ('prometheus', 1000, ''),
+  ('alertmanager', 1000, ''),
   ], salt['pillar.get']("appliance:storage:ignore:volatile",false)) }}
 
 {{ relocate_setup([
@@ -94,6 +96,8 @@ postfix_relocate_{{ source }}:
     'systemctl stop cadvisor; docker kill $(docker ps -q); systemctl stop docker',
     'systemctl start docker; systemctl start cadvisor'),
   ('/volatile/ecs-cache', '/app/ecs-cache', '', ''),
+  ('/volatile/prometheus', '/app/prometheus', '', ''),
+  ('/volatile/alertmanager', '/app/alertmanager', '', ''),
   ]) }}
 
 # ### Data Setup
