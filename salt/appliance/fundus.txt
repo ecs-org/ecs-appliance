@@ -1,3 +1,12 @@
+# reset known metric flags
+flag=/app/etc/flags/metric.collection
+if is_truestr "$APPLIANCE_METRIC_COLLECTION"; then
+    touch $flag
+else
+    if test -e $flag; then rm $flag; fi
+fi
+
+
 # stuff from old ecs
     def mail_config(self):
         '''
