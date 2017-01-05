@@ -89,6 +89,7 @@ postfix_relocate_{{ source }}:
   ('redis', 1000, ''),
   ('prometheus', 1000, ''),
   ('alertmanager', 1000, ''),
+  ('grafana', 1000, ''),
   ], salt['pillar.get']("appliance:storage:ignore:volatile",false)) }}
 
 {{ relocate_setup([
@@ -98,6 +99,7 @@ postfix_relocate_{{ source }}:
   ('/volatile/ecs-cache', '/app/ecs-cache', '', ''),
   ('/volatile/prometheus', '/app/prometheus', '', ''),
   ('/volatile/alertmanager', '/app/alertmanager', '', ''),
+  ('/volatile/grafana', '/app/grafana', '', ''),
   ]) }}
 
 # ### Data Setup
