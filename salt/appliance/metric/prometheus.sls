@@ -41,11 +41,16 @@ service_{{ name }}:
 {{ metric_install('prometheus') }}
 {{ metric_install('grafana') }}
 
-  {% for i in 'prometheus.yml', 'alertmanager.yml', 'alert.rules' %}
+  {% for i in 'prometheus.yml', 'alertmanager.yml' %}
 /app/etc/{{ i }}:
   file.managed:
     - source: salt://appliance/metric/{{ i }}
     - template: jinja
   {% endfor %}
+
+/app/etc/alert.rules:
+  file.managed:
+    - source: salt://appliance/metric/alert.rules
+    - template: jinja
 
 {% endif %}
