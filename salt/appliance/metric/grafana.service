@@ -1,19 +1,24 @@
 [Unit]
 Description=Grafana Frontend
 After=docker.service
+ConditionPathExists=/volatile/grafana
 ConditionPathExists=/app/etc/flags/metric.gui
 Requires=docker.service
 
 [Service]
 ExecStartPre=-/usr/bin/docker kill %n.service
 ExecStartPre=-/usr/bin/docker rm %n.service
-ExecStartPre=/usr/bin/docker pull prom/prometheus
+ExecStartPre=/usr/bin/docker pull grafana/grafana
 ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
-    -p 127.0.0.1:9090:9090 \
+    -p 127.0.0.1:3000:3000 \
     --net bridge \
-    prom/prometheus \
+    -v /app/grafana:/var/lib/grafana \
+    --env GF_SECURITY_ADMIN_PASSWORD=foobar \
+    --env GF_USERS_ALLOW_SIGN_UP=false \
+    grafana/grafana
+
 Restart=always
 RestartSec=30
 TimeoutStartSec=5min

@@ -12,7 +12,7 @@ ExecStartPre=/usr/bin/docker pull prom/alertmanager
 ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
-    -p 127.0.0.1:9093:9093 \
+    -p {{ salt['pillar.get']('docker:ip') }}:9093:9093 \
     --net bridge \
     -v /app/etc/alertmanager.yml:/etc/alertmanager.yml \
     -v /app/alertmanager:/data \

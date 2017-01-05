@@ -13,7 +13,7 @@ ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
     --net bridge \
-    -p 127.0.0.1:9187:9187 \
+    -p {{ salt['pillar.get']('docker:ip') }}:9187:9187 \
     --env DATA_SOURCE_NAME=$DATABASE_URL \
     wrouesnel/postgres_exporter
 

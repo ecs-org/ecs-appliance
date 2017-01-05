@@ -1,0 +1,35 @@
+global:
+  scrape_interval:     15s
+
+  # Attach these labels to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+  external_labels:
+      monitor: 'ecs-hostname'
+
+# Load and evaluate rules in this file every 'evaluation_interval' seconds.
+rule_files:
+  - "alert.rules"
+  # - "second.rules"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+
+    # Override the global default and scrape targets from this job every 5 seconds.
+    # scrape_interval: 5s
+    # metrics_path defaults to '/metrics', scheme defaults to 'http'.
+    static_configs:
+      targets:
+        # prometheus
+        - '{{ salt['pillar.get']('docker:ip') }}:9090'
+        # cadvisor
+        - '{{ salt['pillar.get']('docker:ip') }}:5080'
+        # node-exporter
+        - '{{ salt['pillar.get']('docker:ip') }}:9100'
+        # uwsgi_exporter
+        - '{{ salt['pillar.get']('docker:ip') }}:1717'
+        # postgres_exporter
+        - '{{ salt['pillar.get']('docker:ip') }}:9187'
+        # memcached_exporter
+        - '{{ salt['pillar.get']('docker:ip') }}:9150'

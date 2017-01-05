@@ -1,0 +1,12 @@
+global:
+  smtp_from: prometheus@localhost
+  smtp_smarthost: {{ salt['pillar.get']('docker:ip') }}
+
+route:
+  receiver: 'default'
+
+receivers:
+  - name: 'default'
+    email_configs:
+      - send_resolved: true
+        to: root@localhost

@@ -13,7 +13,7 @@ EnvironmentFile=/app/etc/ecs/service_urls.env
 ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
-    -p 127.0.0.1:9150:9150 \
+    -p {{ salt['pillar.get']('docker:ip') }}:9150:9150 \
     --net bridge \
     prom/memcached_exporter \
     -memcached.address $MEMCACHED_URL

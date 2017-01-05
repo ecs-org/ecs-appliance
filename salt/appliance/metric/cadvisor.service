@@ -11,7 +11,7 @@ ExecStart=/bin/bash -c "var_lib_docker=$(readlink -e /var/lib/docker); exec /usr
     --rm \
     --name %n \
     --net bridge \
-    -p 127.0.0.1:5080:8080 \
+    -p {{ salt['pillar.get']('docker:ip') }}:5080:8080 \
     -v /:/rootfs:ro \
     -v /sys:/sys:ro \
     -v /var/run:/var/run:ro \
