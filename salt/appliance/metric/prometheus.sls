@@ -38,15 +38,15 @@ service_{{ name }}:
 
   {% for i in 'prometheus.yml', 'alertmanager.yml' %}
 /app/etc/{{ i }}:
-file.managed:
-  - source: salt://appliance/metric/{{ i }}
-  - template: jinja
+  file.managed:
+    - source: salt://appliance/metric/{{ i }}
+    - template: jinja
   {% endfor %}
 
 /app/etc/alert.rules:
-file.managed:
-  - source: salt://appliance/metric/alert.rules
-  - template: jinja
+  file.managed:
+    - source: salt://appliance/metric/alert.rules
+    - template: jinja
 
 {{ metric_install('cadvisor') }}
 {{ metric_install('node-exporter') }}
