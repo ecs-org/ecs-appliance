@@ -46,7 +46,6 @@ service_{{ name }}:
 /app/etc/alert.rules:
   file.managed:
     - source: salt://appliance/metric/alert.rules
-    - template: jinja
 
 {{ metric_install('cadvisor') }}
 {{ metric_install('node-exporter') }}
