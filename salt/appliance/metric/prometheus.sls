@@ -44,8 +44,8 @@ service_{{ name }}:
   {% for i in 'prometheus.yml', 'alertmanager.yml', 'alert.rules' %}
 /app/etc/{{ i }}:
   file.managed:
-    source: salt://appliance/metric/{{ i }}
-    template: jinja
+    - source: salt://appliance/metric/{{ i }}
+    - template: jinja
   {% endfor %}
 
 {% endif %}
