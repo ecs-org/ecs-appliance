@@ -21,15 +21,9 @@ scrape_configs:
     # metrics_path defaults to '/metrics', scheme defaults to 'http'.
     static_configs:
       targets:
-        # prometheus
         - '{{ salt['pillar.get']('docker:ip') }}:9090'
-        # cadvisor
         - '{{ salt['pillar.get']('docker:ip') }}:5080'
-        # node-exporter
         - '{{ salt['pillar.get']('docker:ip') }}:9100'
-        # uwsgi_exporter
         - '{{ salt['pillar.get']('docker:ip') }}:1717'
-        # postgres_exporter
         - '{{ salt['pillar.get']('docker:ip') }}:9187'
-        # memcached_exporter
         - '{{ salt['pillar.get']('docker:ip') }}:9150'
