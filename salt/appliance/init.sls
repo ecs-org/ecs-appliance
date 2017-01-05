@@ -45,6 +45,7 @@ create_app_etc_{{ n }}:
   file.managed:
     - contents: |
         DATABASE_URL=postgres://app:invalid@{{ salt['pillar.get']('docker:ip') }}:5432/ecs
+        DATA_SOURCE_NAME=postgres://app:invalid@{{ salt['pillar.get']('docker:ip') }}:5432/ecs
     - replace: false
 
 {% for n in ['prepare-env.service', 'prepare-appliance.service',

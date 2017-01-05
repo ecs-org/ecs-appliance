@@ -84,7 +84,7 @@ if test "$pgpass" = "invalid"; then
     # set app user postgresql password to a random string and write to service_urls.env
     pgpass=$(HOME=/root openssl rand -hex 8)
     gosu postgres psql -c "ALTER ROLE app WITH ENCRYPTED PASSWORD '"${pgpass}"';"
-    sed -ri "s/(postgres:\/\/app:)[^@]+(@[^\/]+\/).+/\1${pgpass}\2${ECS_DATABASE}/" /app/etc/ecs/database_url.env
+    sed -ri "s/(postgres:\/\/app:)[^@]+(@[^\/]+\/).+/\1${pgpass}\2${ECS_DATABASE}/g" /app/etc/ecs/database_url.env
     # DATABASE_URL=postgres://app:invalidpassword@1.2.3.4:5432/ecs
 fi
 tune_postgresql

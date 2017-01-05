@@ -16,7 +16,7 @@ ExecStart=/usr/bin/docker run \
     -p {{ salt['pillar.get']('docker:ip') }}:9150:9150 \
     --net bridge \
     prom/memcached-exporter \
-    -memcached.address $MEMCACHED_URL
+    -memcached.address ${MEMCACHED_URL}
 
 Restart=always
 RestartSec=30

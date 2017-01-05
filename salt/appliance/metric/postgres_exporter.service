@@ -2,19 +2,19 @@
 Description=postgresql metrics exporter for prometheus
 After=docker.service
 ConditionPathExists=/app/etc/flags/metric.collection
+ConditionPathExists=/app/etc/ecs/database_url.env
 Requires=docker.service postgresql.service
 
 [Service]
 ExecStartPre=-/usr/bin/docker kill %n
 ExecStartPre=-/usr/bin/docker rm %n
 ExecStartPre=/usr/bin/docker pull wrouesnel/postgres_exporter
-EnvironmentFile=/app/etc/ecs/database_url.env
 ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
     --net bridge \
     -p {{ salt['pillar.get']('docker:ip') }}:9187:9187 \
-    --env DATA_SOURCE_NAME=$DATABASE_URL \
+    --env-file /app/etc/ecs/database_url.env \
     wrouesnel/postgres_exporter
 
 Restart=always
