@@ -38,6 +38,11 @@ scrape_configs:
       - targets:
         - '{{ salt['pillar.get']('docker:ip') }}:9187'
 
+  - job_name: 'process-exporter'
+    static_configs:
+      - targets:
+        - '{{ salt['pillar.get']('docker:ip') }}:9256'
+
   - job_name: 'memcached'
     static_configs:
       - targets:

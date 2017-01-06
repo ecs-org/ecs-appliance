@@ -51,6 +51,7 @@ service_{{ name }}:
 {{ metric_install('node-exporter') }}
 {{ metric_install('postgres_exporter') }}
 {{ metric_install('memcached-exporter') }}
+{{ metric_install('process-exporter') }}
 {{ metric_install('alertmanager') }}
 {{ metric_install('prometheus') }}
 {{ metric_install('grafana') }}
