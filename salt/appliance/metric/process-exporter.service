@@ -16,7 +16,7 @@ ExecStart=/usr/bin/docker run \
     -p {{ salt['pillar.get']('docker:ip') }}:9256:9256 \
     -v /proc:/host/proc \
     --privileged \
-    process-exporter:master \
+    process-exporter:latest \
     -procfs /host/proc -procnames uwsgi,postgres,nginx,celery
 
 Restart=always
