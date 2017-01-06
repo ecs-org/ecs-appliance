@@ -5,18 +5,17 @@ Requires=docker.service
 ConditionPathExists=/app/etc/flags/metric.collection
 
 [Service]
-Environment=branch=master
 ExecStartPre=-/usr/bin/docker kill %n
 ExecStartPre=-/usr/bin/docker rm %n
-ExecStartPre=/bin/bash -c " \
+ExecStartPre=/bin/bash -c ' \
     srcdir=/usr/local/src/process-exporter; \
     if test ! -e $srcdir; then \
-        git clone  --branch $branch https://github.com/ncabatoff/process-exporter.git $srcdir; \
+        git clone  --branch master https://github.com/ncabatoff/process-exporter.git $srcdir; \
     fi; \
     cd $srcdir; \
-    git checkout -f $branch; \
+    git checkout -f master; \
     git reset --hard origin/branch; \
-    docker docker build -t process-exporter/latest"
+    docker docker build -t process-exporter/latest'
 
 ExecStart=/usr/bin/docker run \
     --rm \
