@@ -7,7 +7,7 @@ ConditionPathExists=/app/etc/flags/metric.collection
 [Service]
 ExecStartPre=-/usr/bin/docker kill %n
 ExecStartPre=-/usr/bin/docker rm %n
-ExecStartPre=/usr/bin/docker build -t process-exporter/latest https://github.com/ncabatoff/process-exporter.git
+ExecStartPre=/usr/bin/docker build -t process-exporter:latest https://github.com/ncabatoff/process-exporter.git
 
 ExecStart=/usr/bin/docker run \
     --rm \
@@ -16,7 +16,7 @@ ExecStart=/usr/bin/docker run \
     -p {{ salt['pillar.get']('docker:ip') }}:9256:9256 \
     -v /proc:/host/proc \
     --privileged \
-    process-exporter:latest \
+    process-exporter \
     -procfs /host/proc -procnames uwsgi,postgres,nginx,celery
 
 Restart=always
