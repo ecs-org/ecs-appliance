@@ -16,8 +16,8 @@ ExecStartPre=/bin/bash -c " \
     cd $srcdir; \
     git checkout -f $branch; \
     git reset --hard origin/branch; \
-    docker docker build -t process-exporter/latest \
-    "
+    docker docker build -t process-exporter/latest"
+
 ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
