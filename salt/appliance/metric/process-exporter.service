@@ -34,5 +34,3 @@ TimeoutStopSec=10
 
 [Install]
 WantedBy=multi-user.target
-
-https://github.com/fstab/grok_exporter
