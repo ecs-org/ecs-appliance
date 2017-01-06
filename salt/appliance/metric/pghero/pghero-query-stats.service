@@ -1,7 +1,8 @@
 [Unit]
 Description=pghero:capture_query_stats
 After=docker.service pghero-container.service
-Requires=docker.service postgres.service
+ConditionPathExists=/app/etc/ecs/database_url.env
+Requires=docker.service postgresql.service
 
 [Service]
 ExecStartPre=/bin/bash -c '\

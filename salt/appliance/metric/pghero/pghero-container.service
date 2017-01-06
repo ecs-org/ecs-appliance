@@ -1,6 +1,7 @@
 [Unit]
 Description=pghero for ecs in container
 After=docker.service
+ConditionPathExists=/app/etc/ecs/database_url.env
 Requires=docker.service postgresql.service
 
 [Service]
