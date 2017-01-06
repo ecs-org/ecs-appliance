@@ -7,15 +7,7 @@ ConditionPathExists=/app/etc/flags/metric.collection
 [Service]
 ExecStartPre=-/usr/bin/docker kill %n
 ExecStartPre=-/usr/bin/docker rm %n
-ExecStartPre=/bin/bash -c ' \
-    srcdir=/usr/local/src/process-exporter; \
-    if test ! -e $srcdir; then \
-        git clone  --branch master https://github.com/ncabatoff/process-exporter.git $srcdir; \
-    fi; \
-    cd $srcdir; \
-    git checkout -f master; \
-    git reset --hard origin/branch; \
-    docker docker build -t process-exporter/latest'
+ExecStartPre=/usr/bin/docker build -t process-exporter/latest https://github.com/ncabatoff/process-exporter.git
 
 ExecStart=/usr/bin/docker run \
     --rm \
@@ -23,7 +15,7 @@ ExecStart=/usr/bin/docker run \
     --net bridge \
     -p {{ salt['pillar.get']('docker:ip') }}:9256:9256 \
     -v /proc:/host/proc \
-    --priviliged \
+    --privileged \
     process-exporter:master \
     -procfs /host/proc -procnames uwsgi,postgres,nginx,celery
 
