@@ -55,7 +55,7 @@ scrape_configs:
   - job_name: 'redis'
     static_configs:
       - targets:
-        - '{{ salt['pillar.get']('docker:ip') }}:6379'
+        - '{{ salt['pillar.get']('docker:ip') }}:9121'
 
   - job_name: 'nginx'
     static_configs:

@@ -101,7 +101,7 @@ services:
     image: oliver006/redis_exporter
     network_mode: "bridge"
     ports:
-      - "{{ salt['pillar.get']('docker:ip') }}:6379:6379"
+      - "{{ salt['pillar.get']('docker:ip') }}:9121:9121"
     links:
       - redis
     command: -redis.addr redis://ecs_redis_1:6379
