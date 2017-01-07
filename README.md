@@ -183,17 +183,18 @@ All snippets expect root.
     + enter a django shell_plus as app user in a running container
         + `docker exec -it ecs_ecs.web_1 /start run ./manage.py shell_plus`
 
-+ run a new django shell with correct environment but independent of other container
-    +  `docker-compose -f /app/etc/ecs/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
-
 + manual run letsencrypt client (do not call as root): `gosu app dehydrated --help`
+
 + quick update appliance code:
-    + `cd /app/appliance; gosu app git pull; salt-call state.highstate pillar='{"appliance":{"enabled":true}}'`
+    + `cd /app/appliance; gosu app git pull; salt-call state.highstate pillar='{"appliance":{"enabled":true}}'; rm /var/www/html/503.html`
+
 + get cummulative cpu,mem,net,disk statistics of container:
     + `docker stats $(docker ps|grep -v "NAMES"|awk '{ print $NF }'|tr "\n" " ")`
 
 + read details of a container in yaml:
     + `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
+
++ untested: `docker-compose -f /app/etc/ecs/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
 
 ### Logging
 
