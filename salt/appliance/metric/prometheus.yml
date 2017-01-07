@@ -22,10 +22,14 @@ scrape_configs:
       - targets:
         - '{{ salt['pillar.get']('docker:ip') }}:9090'
 
-  - job_name: 'node-exporter-cadvisor'
+  - job_name: 'node-exporter'
     static_configs:
       - targets:
         - '{{ salt['pillar.get']('docker:ip') }}:9100'
+
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets:
         - '{{ salt['pillar.get']('docker:ip') }}:5080'
 
   - job_name: 'uwsgi'
@@ -47,3 +51,13 @@ scrape_configs:
     static_configs:
       - targets:
         - '{{ salt['pillar.get']('docker:ip') }}:9150'
+
+  - job_name: 'redis'
+    static_configs:
+      - targets:
+        - '{{ salt['pillar.get']('docker:ip') }}:6379'
+
+  - job_name: 'nginx'
+    static_configs:
+      - targets:
+        - '{{ salt['pillar.get']('docker:ip') }}:9145'

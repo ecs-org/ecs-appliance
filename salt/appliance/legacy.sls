@@ -5,6 +5,7 @@
   'watch_ecs_ca.path',
   'watch_ecs_ca.service',
   'update-appliance.service',
+  'memcached-exporter.service'
   ]
 %}
 {% set paths_remove= [

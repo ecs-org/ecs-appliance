@@ -82,11 +82,29 @@ services:
     image: memcached
     network_mode: "bridge"
 
+  memcached-exporter:
+    image: prom/memcached-exporter
+    network_mode: "bridge"
+    ports:
+      - "{{ salt['pillar.get']('docker:ip') }}:9150:9150"
+    links:
+      - memcached
+    command: -memcached.address ecs_memcached_1:11211
+
   redis:
     image: redis:3
     volumes:
       - /volatile/redis:/data
     network_mode: "bridge"
+
+  redis_exporter:
+    image: oliver006/redis_exporter
+    network_mode: "bridge"
+    ports:
+      - "{{ salt['pillar.get']('docker:ip') }}:6379:6379"
+    links:
+      - redis
+    command: -redis.addr redis://ecs_redis_1:6379
 
   mocca:
     build:
