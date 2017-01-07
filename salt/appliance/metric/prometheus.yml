@@ -33,6 +33,7 @@ scrape_configs:
         - '{{ salt['pillar.get']('docker:ip') }}:5080'
 
   - job_name: 'uwsgi'
+    # uwsgi prometheus metric is exported from ecs.web container
     static_configs:
       - targets:
         - '{{ salt['pillar.get']('docker:ip') }}:1717'
@@ -48,16 +49,19 @@ scrape_configs:
         - '{{ salt['pillar.get']('docker:ip') }}:9256'
 
   - job_name: 'memcached'
+    # memcached prometheus metric is exported from ecs_memcached-exporter_1 container
     static_configs:
       - targets:
         - '{{ salt['pillar.get']('docker:ip') }}:9150'
 
   - job_name: 'redis'
+    # redis prometheus metric is exported from ecs_redis_exporter_1 container
     static_configs:
       - targets:
         - '{{ salt['pillar.get']('docker:ip') }}:9121'
 
   - job_name: 'nginx'
+    # nginx prometheus metric is exported direct from nginx using lua
     static_configs:
       - targets:
         - '{{ salt['pillar.get']('docker:ip') }}:9145'

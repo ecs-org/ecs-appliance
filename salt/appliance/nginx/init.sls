@@ -3,16 +3,20 @@ include:
 
 nginx:
   pkg.installed:
-    - name: nginx
+    - pkgs:
+      - nginx
+      - nginx-extras
   service.running:
     - enable: true
     - require:
       - pkg: nginx
       - sls: appliance.ssl
       - file: /etc/nginx/nginx.conf
+      - file: /etc/nginx/prometheus.lua
       - file: /app/etc/server.identity
     - watch:
       - file: /etc/nginx/nginx.conf
+      - file: /etc/nginx/prometheus.lua
       - file: /app/etc/server.identity
 
 {% for a in ['app-template.html', 'snakeoil.identity', 'template.identity'] %}
@@ -25,6 +29,11 @@ nginx:
 /etc/nginx/nginx.conf:
   file.managed:
     - source: salt://appliance/nginx/nginx.conf
+    - template: jinja
+
+/etc/nginx/prometheus.lua:
+  file.managed:
+    - source: salt://appliance/nginx/prometheus.lua
 
 /app/etc/server.identity:
   file.copy:

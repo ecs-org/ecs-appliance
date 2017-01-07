@@ -2,10 +2,6 @@ include:
   - systemd.reload
   - docker
 
-# monitor docker, postgres, uwsgi, memcached, (redis), (both nginx),
-# cpu-load, memory, disk-i/o, disk-free, container
-# uwsgi prometheus metric is exported from ecs.web container to {{ salt['pillar.get']('docker:ip') }}:1717 in docker-compose.yml
-
 {% macro metric_install(name, start=false) %}
 /etc/systemd/system/{{ name }}.service:
   file.managed:
@@ -36,12 +32,15 @@ service_{{ name }}:
 
 {% else %}
 
-  {% for i in 'prometheus.yml', 'alertmanager.yml' %}
-/app/etc/{{ i }}:
+/app/etc/prometheus.yml:
   file.managed:
-    - source: salt://appliance/metric/{{ i }}
+    - source: salt://appliance/metric/prometheus.yml
     - template: jinja
-  {% endfor %}
+
+/app/etc/alertmanager.yml:
+  file.managed:
+    - source: salt://appliance/metric/alertmanager.yml
+    - template: jinja
 
 /app/etc/alert.rules:
   file.managed:
