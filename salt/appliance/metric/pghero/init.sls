@@ -10,6 +10,11 @@ include:
       - cmd: systemd_reload
 {% endfor %}
 
+/usr/local/bin/recreate-pghero_query_stats:
+  file.managed:
+    - source: salt://appliance/metric/pghero/recreate-pghero_query_stats
+    - mode: 0755
+
 pghero-container:
   service.running:
     - enable: true
