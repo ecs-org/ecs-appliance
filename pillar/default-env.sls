@@ -29,6 +29,8 @@ appliance:
   #   dsn: 'https://url'
   # # metric:collection default false, if set will also start metric services
   # # metric:server default false, if set will also start metric server
+  # # metric:gui default false, if set will also start metric gui
+  # # metric:pghero default false, if set will start pghero
   # metric:
   #   pghero: false
   #   collection: false

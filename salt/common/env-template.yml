@@ -49,6 +49,16 @@ appliance:
   # sentry:
   #   dsn: 'https://url'
 {%- endif %}
+{%- if extra.appliance.metric|d(false) %}
+  metric:
+{{ extra.appliance.metric|yaml(false)|indent(4,True) }}
+{%- else %}
+  # metric:
+  #   pghero: false
+  #   collection: false
+  #   server: false
+  #   gui: false
+{%- endif %}
 {%- if extra.appliance.git.source|d(false) %}
   git:
 {{ extra.appliance.git|yaml(false)|indent(4,True) }}
