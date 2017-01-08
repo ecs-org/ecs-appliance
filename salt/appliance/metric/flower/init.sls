@@ -20,10 +20,14 @@ pghero-container:
     - require:
       - sls: docker
       - file: /etc/systemd/system/pghero-container.service
+    - watch:
+      - file: /etc/systemd/system/pghero-container.service
 
 pghero-query-stats.timer:
   service.enabled:
     - require:
       - sls: docker
+      - file: /etc/systemd/system/pghero-query-stats.timer
+    - watch:
       - file: /etc/systemd/system/pghero-query-stats.timer
       - file: /etc/systemd/system/pghero-query-stats.service

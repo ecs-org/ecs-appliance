@@ -30,8 +30,10 @@ appliance:
   # # metric:collection default false, if set will also start metric services
   # # metric:server default false, if set will also start metric server
   # metric:
+  #   pghero: false
   #   collection: false
   #   server: false
+  #   gui: false
   # git:
   #   # default see appliance.include
   #   branch: master

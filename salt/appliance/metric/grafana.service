@@ -19,7 +19,7 @@ ExecStart=/usr/bin/docker run \
     --env GF_USERS_ALLOW_SIGN_UP=false \
     grafana/grafana
 
-Restart=always
+Restart=on-failure
 RestartSec=30
 TimeoutStartSec=5min
 TimeoutStopSec=15

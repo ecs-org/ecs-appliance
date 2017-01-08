@@ -20,7 +20,7 @@ ExecStart=/usr/bin/docker run \
 
 /bin/bash -c "set -o pipefail && journalctl -f | grok_exporter -config /app/etc/grok_exporter.yml"
 
-Restart=always
+Restart=on-failure
 RestartSec=10
 TimeoutStartSec=5min
 TimeoutStopSec=10

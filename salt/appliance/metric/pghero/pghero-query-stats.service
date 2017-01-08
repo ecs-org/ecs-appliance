@@ -2,6 +2,7 @@
 Description=pghero:capture_query_stats
 After=docker.service pghero-container.service
 ConditionPathExists=/app/etc/ecs/database_url.env
+ConditionPathExists=/app/etc/flags/metric.pghero
 Requires=docker.service postgresql.service
 
 [Service]

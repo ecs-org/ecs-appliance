@@ -1,6 +1,7 @@
 [Unit]
 Description=Cadvisor
 After=docker.service
+ConditionPathExists=/app/etc/flags/metric.collection
 Requires=docker.service
 
 [Service]
@@ -18,7 +19,8 @@ ExecStart=/bin/bash -c "var_lib_docker=$(readlink -e /var/lib/docker); exec /usr
     -v $var_lib_docker:/var/lib/docker:ro \
     google/cadvisor \
     --housekeeping_interval=15s"
-Restart=always
+
+Restart=on-failure
 RestartSec=30
 TimeoutStartSec=5min
 TimeoutStopSec=15

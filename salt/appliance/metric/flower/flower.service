@@ -1,0 +1,27 @@
+[Unit]
+Description=flower (celery monitor) for ecs in container
+After=docker.service
+ConditionFileNotEmpty=/run/active-env.yml
+ConditionPathExists=/app/etc/ecs/service_urls.env
+ConditionPathExists=/app/etc/flags/metric.flower
+Requires=docker.service postgresql.service appliance.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker kill %n
+ExecStartPre=-/usr/bin/docker rm %n
+ExecStartPre=/usr/bin/docker pull mher/flower
+ExecStart=/usr/bin/docker run \
+    --rm \
+    --name %n \
+    --net bridge \
+    -p 127.0.0.1:5555:5555 \
+    --env-file /app/etc/ecs/service_urls.env \
+    ankane/pghero
+
+Restart=on-failure
+RestartSec=20
+TimeoutStartSec=5min
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target

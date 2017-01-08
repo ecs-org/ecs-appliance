@@ -24,7 +24,7 @@ ExecStart=/usr/bin/docker run \
     -storage.local.chunk-encoding-version=2 \
     -alertmanager.url=http://{{ salt['pillar.get']('docker:ip') }}:9093
 
-Restart=always
+Restart=on-failure
 RestartSec=30
 TimeoutStartSec=5min
 TimeoutStopSec=15

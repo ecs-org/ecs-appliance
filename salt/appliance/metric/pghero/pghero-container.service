@@ -2,6 +2,7 @@
 Description=pghero for ecs in container
 After=docker.service
 ConditionPathExists=/app/etc/ecs/database_url.env
+ConditionPathExists=/app/etc/flags/metric.pghero
 Requires=docker.service postgresql.service
 
 [Service]
@@ -18,7 +19,7 @@ ExecStart=/usr/bin/docker run \
     --env MAX_THREADS=2 \
     ankane/pghero
 
-Restart=always
+Restart=on-failure
 RestartSec=20
 TimeoutStartSec=5min
 TimeoutStopSec=10

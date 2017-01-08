@@ -2,7 +2,7 @@ include:
   - systemd.reload
   - docker
 
-{% macro metric_install(name, start=false) %}
+{% macro metric_install(name) %}
 /etc/systemd/system/{{ name }}.service:
   file.managed:
     - source: salt://appliance/metric/{{ name }}.service
@@ -10,17 +10,15 @@ include:
     - watch_in:
       - cmd: systemd_reload
 
-service_{{ name }}:
-  {% if start %}
-  service.running:
-    - enable: true
-  {% else %}
+metric_service_{{ name }}:
   service.enabled:
-  {% endif %}
     - name: {{ name }}
     - require:
       - sls: docker
       - file: /etc/systemd/system/{{ name }}.service
+  # restarts service if changed and already running
+  cmd.wait:
+    - name: systemctl try-restart {{ name }}.service
     - watch:
       - file: /etc/systemd/system/{{ name }}.service
 
@@ -36,15 +34,21 @@ service_{{ name }}:
   file.managed:
     - source: salt://appliance/metric/prometheus.yml
     - template: jinja
+    - watch_in:
+      - cmd: metric_service_prometheus
 
 /app/etc/alertmanager.yml:
   file.managed:
     - source: salt://appliance/metric/alertmanager.yml
     - template: jinja
+    - watch_in:
+      - cmd: metric_service_alertmanager
 
 /app/etc/alert.rules:
   file.managed:
     - source: salt://appliance/metric/alert.rules
+    - watch_in:
+      - cmd: metric_service_alertmanager
 
 {{ metric_install('cadvisor') }}
 {{ metric_install('node-exporter') }}
