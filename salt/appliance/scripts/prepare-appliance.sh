@@ -90,6 +90,31 @@ fi
 tune_postgresql
 
 
+# ### metric collection
+# set/clear flags and start/stop services connected to flags
+services="cadvisor.service node-exporter.service postgres_exporter.service process-exporter.service"
+if is_truestr "$APPLIANCE_METRIC_COLLECTION"; then
+    flag_and_service_enable "metric.collection" "$services"
+else
+    flag_and_service_disable "metric.collection" "$services"
+fi
+services="prometheus.service alertmanager.service"
+if is_truestr "$APPLIANCE_METRIC_SERVER"; then
+    flag_and_service_enable "metric.server" "$services"
+else
+    flag_and_service_disable "metric.server" "$services"
+fi
+if is_truestr "$APPLIANCE_METRIC_GUI"; then
+    flag_and_service_enable "metric.gui" "grafana.service"
+else
+    flag_and_service_disable "metric.gui" "grafana.service"
+fi
+if is_truestr "$APPLIANCE_METRIC_PGHERO"; then
+    flag_and_service_enable "metric.pghero" "pghero-container.service"
+else
+    flag_and_service_disable "metric.pghero" "pghero-container.service"
+fi
+
 # ### storagevault keys setup
 echo "writing storage vault keys to ecs-gpg"
 # wipe directory clean of *.gpg files, but not eg. random_seed and do not remove directory

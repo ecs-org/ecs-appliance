@@ -149,6 +149,16 @@ is_falsestr () {
     test "$(printf "%s" "$1" | tr A-Z a-z)" != "true"
 }
 
+flag_and_service_enable () {
+    touch /app/etc/flags/$1
+    systemctl start $2
+}
+
+flag_and_service_disable () {
+    if test -e /app/etc/flags/$1; then rm /app/etc/flags/$1; fi
+    systemctl stop $2
+}
+
 tune_postgresql () {
     local mem_kb mem_mb cores pg_mb
     local MAX_CONNECTIONS SHARED_BUFFERS WORK_MEM EFFECTIVE_CACHE_SIZE

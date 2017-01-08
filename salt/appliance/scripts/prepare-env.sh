@@ -4,16 +4,6 @@
 #  but this doesnt matter because we dont use it here
 . /usr/local/share/appliance/appliance.include
 
-flag_and_service_enable () {
-    touch /app/etc/flags/$1
-    systemctl start $2
-}
-
-flag_and_service_disable () {
-    if test -e /app/etc/flags/$1; then rm /app/etc/flags/$1; fi
-    systemctl stop $2
-}
-
 # ### environment setup, read userdata
 userdata_yaml=$(get_userdata)
 if test $? -ne 0; then
@@ -33,28 +23,4 @@ fi
 # check if standby is true
 if is_truestr "$APPLIANCE_STANDBY"; then
     appliance_exit "Appliance Standby" "Appliance is in standby" "debug"
-fi
-
-# set/clear flags and start/stop services connected to flags
-services="cadvisor.service node-exporter.service postgres_exporter.service process-exporter.service"
-if is_truestr "$APPLIANCE_METRIC_COLLECTION"; then
-    flag_and_service_enable "metric.collection" "$services"
-else
-    flag_and_service_disable "metric.collection" "$services"
-fi
-services="prometheus.service alertmanager.service"
-if is_truestr "$APPLIANCE_METRIC_SERVER"; then
-    flag_and_service_enable "metric.server" "$services"
-else
-    flag_and_service_disable "metric.server" "$services"
-fi
-if is_truestr "$APPLIANCE_METRIC_GUI"; then
-    flag_and_service_enable "metric.gui" "grafana.service"
-else
-    flag_and_service_disable "metric.gui" "grafana.service"
-fi
-if is_truestr "$APPLIANCE_METRIC_PGHERO"; then
-    flag_and_service_enable "metric.pghero" "pghero-container.service"
-else
-    flag_and_service_disable "metric.pghero" "pghero-container.service"
 fi
