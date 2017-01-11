@@ -47,6 +47,7 @@ base_packages:
       - socat
       - swaks
       - tmux
+      - jq
 
 system_timezone:
   timezone.system:
