@@ -1,10 +1,16 @@
 #!/bin/bash
 
+if ! $(gosu postgres psql -qtc "\du" | grep -iq "app.*superuser"); then
+    echo "Alter postgres user app as superuser for pg_stat_statements_reset support"
+    gosu postgres psql -qtc "ALTER USER app WITH SUPERUSER;"
+fi
 if ! $(gosu postgres psql ecs -qtc "\dt" | grep -q pghero_query_stats); then
-    gosu postgres psql ecs -c 'CREATE TABLE "pghero_query_stats" ("id" serial primary key,
+    echo "add table pghero_query_stats"
+    gosu app psql ecs -c 'CREATE TABLE "pghero_query_stats" ("id" serial primary key,
         "database" text, "user" text, "query" text, "query_hash" bigint,
         "total_time" float, "calls" bigint, "captured_at" timestamp);'
 fi
 if ! $(gosu postgres psql ecs -qtc "\di" | grep -q pghero_query_stats); then
-    gosu postgres psql ecs -c 'CREATE INDEX ON "pghero_query_stats" ("database", "captured_at");'
+    echo "add index pghero_query_stats"
+    gosu app psql ecs -c 'CREATE INDEX ON "pghero_query_stats" ("database", "captured_at");'
 fi
