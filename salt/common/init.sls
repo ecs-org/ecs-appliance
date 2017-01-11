@@ -23,15 +23,13 @@ ubuntu_ppa_support:
       - apt-transport-https
     - order: 10
 
-# upgrade everything
+# let upgrade stay on same release
 update_system:
   file.replace:
     - name: /etc/update-manager/release-upgrades
     - pattern: "^Prompt=.*$"
     - repl: Prompt=never
     - onlyif: test -e /etc/update-manager/release-upgrades
-  pkg.uptodate:
-    - refresh: True
 
 base_packages:
   pkg.installed:
