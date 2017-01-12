@@ -46,7 +46,6 @@ base_packages:
       - swaks
       - tmux
       - jq
-      - bsd-mailx
 
 system_timezone:
   timezone.system:

@@ -15,6 +15,7 @@ postfix:
   pkg.installed:
     - pkgs:
       - postfix
+      - bsd-mailx
     - require:
       - file: /etc/postfix/main.cf
   service.running:
