@@ -11,21 +11,27 @@ Contents:
 
 ## Install Appliance
 
+The base of the appliance is Ubuntu Xenial (16.04).
 
-### to an empty xenial vm via ssh
+You either need:
++ a already running Ubuntu Xenial and a ssh key to login
+    + use any xenial cloud-image if you want to use the appliance in a cloud.
+    + use the xenial server iso as a install image on your local hypervisor.
++ a local development machine with vagrant and a hypervisor for vagrant installed.
+    + vagrant will setup the base machine for you
 
-+ copy the env.yml you want to execute to target vm as /app/env.yml
-```
-ssh root@target.vm.ip '/bin/bash -c "mkdir -p /app/"'
-scp target.domain.name.env.yml root@target.vm.ip:/app/env.yml
-```
+The partition layout should be flat with the 1 partition taking all space as root.
+
+### ssh install to a empty xenial vm
+
+on your local machine:
 
 + if cloning from a private repository,
     copy the repository readonly ssh key to the target vm,
     the saltstack part will correct permissions later
 ```
 ssh root@target.vm.ip '/bin/bash -c "mkdir -p /app/.ssh"'
-scp cloneecs_id_ed25519 root@target.vm.ip:/app/.ssh/id_ed25519
+scp id_ed25519 root@target.vm.ip:/app/.ssh/id_ed25519
 ```
 
 on target vm:
@@ -33,18 +39,17 @@ on target vm:
 + clone from public repository
 ```
 apt-get -y update; apt-get -y install git
-git clone https://github.com/ethikkom/ecs-appliance /app/apppliance
+git clone https://github.com/ethikkom/ecs-appliance /app/appliance
 ```
 
 + clone from private repository
 ```
 apt-get -y update; apt-get -y install git
 GIT_SSH_COMMAND="ssh -i /app/.ssh/id_ed25519 " git clone \
-    ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs-appliance.git /app/appliance
+    ssh://git@gogs.target.domain:22/ecs/ecs-appliance.git /app/appliance
 ```
 
-+ in both cases
-
++ install saltstack and appliance software
 ```
 cd /
 mkdir -p /etc/salt
@@ -52,36 +57,33 @@ cp /app/appliance/salt/minion /etc/salt/minion
 curl -o /tmp/bootstrap_salt.sh -L https://bootstrap.saltstack.com
 chmod +x /tmp/bootstrap_salt.sh
 /tmp/bootstrap_salt.sh -X
-
-chmod 0600 /app/env.yml
-cp /app/env.yml /run/active-env.yml
 salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
-gosu postgres createdb ecs -T template0 -l de_DE.utf8
 reboot
 ```
 
 ### using vagrant
 
-+ copy env.yml to the git repository root
-+ Execute `vagrant up`
-+ login into machine using `vagrant ssh`
-+ become root `sudo -i`
-+ create database: `gosu postgres createdb ecs -T template0 -l de_DE.utf8`
-+ copy env: `cp /app/appliance/env.yml /app/env.yml`
-+ update and start appliance: `reboot`
+on your local machine:
 
-### upgrade developer vm
++ clone ecs-appliance repository and start appliance install
+```
+git clone https://github.com/ethikkom/ecs-appliance ~/ecs-appliance
+cd ~/ecs-appliance
+vagrant up
+```
 
-on developer vm:
+### upgrade a developer vm
+
+on a developer vm:
 
 ```
-# clone from public repository
+# either clone from public repository
 git clone https://github.com/ethikkom/ecs-appliance /app/appliance
 
-# clone from private repository
-git clone ssh://git@gogs.omoikane.ep3.at:10022/ecs/ecs-appliance.git /app/appliance
+# or clone from private repository
+git clone ssh://git@gogs.target.domain:22/ecs/ecs-appliance.git /app/appliance
 
-# install saltstack
+# install saltstack and start appliance install
 curl -o /tmp/bootstrap_salt.sh -L https://bootstrap.saltstack.com
 sudo bash -c "mkdir -p /etc/salt; cp /app/appliance/salt/minion /etc/salt/minion; \
     chmod +x /tmp/bootstrap_salt.sh; /tmp/bootstrap_salt.sh -X; \
@@ -123,8 +125,10 @@ appliance gets build using packer.
 
 ## Configure Appliance
 
+ 
 ### for a development server
-+ login in devserver
+
+on your devserver:
 + make a development env.yml: `cp /app/appliance/salt/pillar/default-env.sls /app/env.yml`
 + edit your settings in /app/env.yml and change your domainname
 
@@ -138,11 +142,30 @@ on your local machine:
 + print out /app/env.yml.pdf
 + save and keep env.yml.tar.gz.gpg
 + copy env.yml to appliance /app/env.yml
+```
+ssh root@target.vm.ip '/bin/bash -c "mkdir -p /app/"'
+scp env.yml root@target.vm.ip:/app/env.yml
+```
 
-on the target appliance vm:
-+ copy env.yml from local machine to target vm at /app/env.yml
-+ login into appliance
-+ create a empty ecs database: `sudo -u postgres createdb ecs -T template0  -l de_DE.utf8`
+### for both
+
+on the target vm:
+```
+# create a empty ecs database
+sudo -u postgres createdb ecs -T template0  -l de_DE.utf8
+# activate env
+chmod 0600 /app/env.yml
+cp /app/env.yml /run/active-env.yml
+# apply new environment
+systemctl start appliance-update
+```
+
+### Reconfigure a running Appliance
+
++ edit /app/env.yml
++ activate changes into current environment, call `env-update.sh`
++ optional: build new config package: call `env-build.sh /app/env.yml`
++ restart and apply new environment: `systemctl start appliance-update`
 
 ## Start, Stop & Update Appliance
 + Start appliance: `systemctl start appliance`
@@ -213,15 +236,25 @@ Host:
 + follow frontend nginx: `journalctl -u nginx -f`
 + search for salt-call output: `journalctl $(which salt-call)`
 
-### Reporting
+### Alerting
 
-if ECS_SETTINGS:SENTRY_DSN and APPLIANCE_SENTRY_DSN is defined,
+if ECS_SETTINGS_SENTRY_DSN and APPLIANCE_SENTRY_DSN is defined,
 the appliance will report the following items to sentry:
 
 + python exceptions in web, worker, beat, smtpd
 + salt-call exceptions and state returns with error states
 + systemd service exceptions where appliance-failed is triggered,
     or appliance_failed, appliance_exit, sentry_entry is called
+
+### Metrics
+
++ if APPLIANCE_METRIC_EXPORTER is set, metrics are exported from the subsystems
++ if APPLIANCE_METRIC_SERVER is set, these exported metrics are collected and stored by a prometheus server
++ if APPLIANCE_METRIC_GUI is set, a grafana server for displaying the collected metrics is available at http://localhost:3000
++ if APPLIANCE_METRIC_PGHERO is set, a pghero instance for postgres inspection is avaiable at http://localhost:5081 
+
+
+Use ssh port forwarding to access the server ports 3000 and 5081, eg. "ssh root@hostname -L 3000:localhost:3000"
 
 ## Development
 
