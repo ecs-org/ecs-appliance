@@ -26,4 +26,4 @@ shred -u env.yml.gz env.yml.gz.pdf env.yml.txt.pdf qrpdf2data.sh.pdf
 genisoimage -volid cidata -joliet -rock -input-charset utf-8 -output env-cidata.iso -graft-points user-data=env.yml meta-data env.yml.pdf
 rm meta-data
 tar cz env.yml env.yml.pdf env-cidata.iso | \
-    gpg --encrypt > "${APPLIANCE_DOMAIN}.ecs.env.$(date +%Y-%m-%d_%H.%M).tar.gz.gpg"
+    gpg --encrypt > "${APPLIANCE_DOMAIN}.env.$(date +%Y-%m-%d_%H.%M).tar.gz.gpg"

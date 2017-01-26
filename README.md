@@ -26,9 +26,10 @@ The partition layout should be flat with the 1 partition taking all space as roo
 
 on your local machine:
 
-+ if cloning from a private repository,
-    copy the repository readonly ssh key to the target vm,
-    the saltstack part will correct permissions later
+if cloning from a private repository,
+copy the repository readonly ssh key to the target vm,
+the saltstack part will correct permissions later.
+
 ```
 ssh root@target.vm.ip '/bin/bash -c "mkdir -p /app/.ssh"'
 scp id_ed25519 root@target.vm.ip:/app/.ssh/id_ed25519
@@ -142,6 +143,7 @@ on your local machine:
 + print out /app/env.yml.pdf
 + save and keep env.yml.tar.gz.gpg
 + copy env.yml to appliance /app/env.yml
+
 ```
 ssh root@target.vm.ip '/bin/bash -c "mkdir -p /app/"'
 scp env.yml root@target.vm.ip:/app/env.yml
