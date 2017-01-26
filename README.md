@@ -126,14 +126,15 @@ appliance gets build using packer.
 
 ## Configure Appliance
 
- 
-### for a development server
+### Initial Setup
+
+#### for a development server
 
 on your devserver:
 + make a development env.yml: `cp /app/appliance/salt/pillar/default-env.sls /app/env.yml`
 + edit your settings in /app/env.yml and change your domainname
 
-### for a production server
+#### for a production server
 
 on your local machine:
 + vagrant up
@@ -149,17 +150,50 @@ ssh root@target.vm.ip '/bin/bash -c "mkdir -p /app/"'
 scp env.yml root@target.vm.ip:/app/env.yml
 ```
 
-### for both
+#### for both
 
 on the target vm:
 ```
 # create a empty ecs database
 sudo -u postgres createdb ecs -T template0  -l de_DE.utf8
-# activate env
+
+# activate env and apply new environment settings
 chmod 0600 /app/env.yml
 cp /app/env.yml /run/active-env.yml
-# apply new environment
 systemctl start appliance-update
+
+# open a django management shell
+docker exec -it ecs_ecs.web_1 /start run ./manage.py shell_plus
+
+# create first internal office user
+email='usermail@domain.name'; first_name='Firstname'; last_name='Lastname'; gender='m'
+
+import math, string
+from random import SystemRandom
+from ecs.users.utils import create_user
+PASSPHRASE_ENTROPY = 80
+PASSPHRASE_CHARS = string.ascii_lowercase + string.digits
+PASSPHRASE_LEN = math.ceil(PASSPHRASE_ENTROPY / math.log2(len(PASSPHRASE_CHARS)))
+
+u = create_user(email, first_name=first_name, last_name=last_name)
+p = u.profile
+p.gender = gender
+p.is_internal = True
+p.save()
+passphrase = ''.join(SystemRandom().choice(PASSPHRASE_CHARS) for i in range(PASSPHRASE_LEN))
+u.set_password(passphrase)
+print(passphrase)
+u.save()
+u.groups.add(Group.objects.get(name='EC-Office'))
+
+# create a temporary client certificate for first office user and send it via email
+cert, passphrase = Certificate.create_for_user('/tmp/user.p12', u, cn='Initial_Office_Cert1', days=60)
+pkcs12 = open('/tmp/user.p12', 'rb').read()
+from ecs.communication.mailutils import deliver
+deliver(u.email, subject='Certificate', message='See attachment', from_email=settings.DEFAULT_FROM_EMAIL, attachments=(('user.p12', pkcs12, 'application/x-pkcs12'),), nofilter=True)
+print(passphrase)
+exit()
+
 ```
 
 ### Reconfigure a running Appliance
@@ -180,15 +214,11 @@ if the appliance.service enters fail state, it creates a file named
 "/run/appliance_failed".
 
 You have to remove this file using `rm /run/appliance_failed` before running
-the service again using `systemctl restart appliance.service`
+the service again using `systemctl restart appliance`
 
 ## Maintenance
 
 All snippets expect root.
-
-+ activate /run/active-env.yml in current shell of appliance vm:
-    + `. /usr/local/share/appliance/env.include; ENV_YML=/run/active-env.yml userdata_to_env ecs,appliance`
-    + to also set *GIT_SOURCE defaults: `. /usr/local/share/appliance/appliance.include` 
 
 + enter a running ecs container
     for most ecs commands it is not important to which
@@ -210,6 +240,14 @@ All snippets expect root.
 
 + manual run letsencrypt client (do not call as root): `gosu app dehydrated --help`
 
++ destroy and recreate database
+```
+gosu app dropdb ecs
+gosu postgres createdb ecs -T template0 -l de_DE.utf8
+rm /app/etc/tags/last_running_ecs
+systemctl restart appliance
+```
+
 + quick update appliance code:
     + `cd /app/appliance; gosu app git pull; salt-call state.highstate pillar='{"appliance":{"enabled":true}}'; rm /var/www/html/503.html`
 
@@ -219,7 +257,13 @@ All snippets expect root.
 + read details of a container in yaml:
     + `docker inspect 1b17069fe3ba | python -c 'import sys, yaml, json; yaml.safe_dump(json.load(sys.stdin), sys.stdout, default_flow_style=False)' | less`
 
-+ untested: `docker-compose -f /app/etc/ecs/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
++ activate /run/active-env.yml in current shell of appliance vm:
+    + `. /usr/local/share/appliance/env.include; ENV_YML=/run/active-env.yml userdata_to_env ecs,appliance`
+    + to also set *GIT_SOURCE defaults: `. /usr/local/share/appliance/appliance.include` 
+
++ untested:
+    +  `docker-compose -f /app/etc/ecs/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
+    + most spent time in high.state: `journalctl -u appliance-update | grep -B 5 -E "Duration: [0-9]{3,5}\."`
 
 ### Logging
 
