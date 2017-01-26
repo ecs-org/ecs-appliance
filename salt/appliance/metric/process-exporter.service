@@ -2,7 +2,7 @@
 Description=Prometheus exporter that mines /proc to report on selected processes
 After=docker.service postgresql.service
 Requires=docker.service
-ConditionPathExists=/app/etc/flags/metric.collection
+ConditionPathExists=/app/etc/flags/metric.exporter
 
 [Service]
 ExecStartPre=-/usr/bin/docker kill %n

@@ -1,6 +1,6 @@
 # reset known metric flags
-flag=/app/etc/flags/metric.collection
-if is_truestr "$APPLIANCE_METRIC_COLLECTION"; then
+flag=/app/etc/flags/metric.exporter
+if is_truestr "$APPLIANCE_METRIC_EXPORTER"; then
     touch $flag
 else
     if test -e $flag; then rm $flag; fi

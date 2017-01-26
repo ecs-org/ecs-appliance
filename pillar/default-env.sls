@@ -27,15 +27,15 @@ appliance:
   # #   must be the same as ecs_settings: SENTRY_DSN
   # sentry:
   #   dsn: 'https://url'
-  # # metric:collection default false, if set will also start metric services
+  # # metric:exporter default false, if set will also start metric exporter
   # # metric:server default false, if set will also start metric server
   # # metric:gui default false, if set will also start metric gui
   # # metric:pghero default false, if set will start pghero
   # metric:
-  #   pghero: false
-  #   collection: false
+  #   exporter: false
   #   server: false
   #   gui: false
+  #   pghero: false
   # git:
   #   # default see appliance.include
   #   branch: master

@@ -1,7 +1,7 @@
 [Unit]
 Description=Prometheus Node Exporter
 After=docker.service
-ConditionPathExists=/app/etc/flags/metric.collection
+ConditionPathExists=/app/etc/flags/metric.exporter
 Requires=docker.service
 
 [Service]

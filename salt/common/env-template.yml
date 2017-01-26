@@ -54,10 +54,10 @@ appliance:
 {{ extra.appliance.metric|yaml(false)|indent(4,True) }}
 {%- else %}
   # metric:
-  #   pghero: false
-  #   collection: false
+  #   exporter: false
   #   server: false
   #   gui: false
+  #   pghero: false
 {%- endif %}
 {%- if extra.appliance.git.source|d(false) %}
   git:
