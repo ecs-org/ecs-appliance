@@ -15,17 +15,17 @@ The base of the appliance is Ubuntu Xenial (16.04).
 
 You either need:
 + a already running Ubuntu Xenial and a ssh key to login
+    + use the xenial server iso as a install image on a local hypervisor.
     + use any xenial cloud-image if you want to use the appliance in a cloud.
-    + use the xenial server iso as a install image on your local hypervisor.
 + a local development machine with vagrant and a hypervisor for vagrant installed.
     + vagrant will setup the base machine for you
 
 ### Partitioning
 
-Unless a good reason to do otherwise, the partition layout should be the same
+Unless there is a good reason to do otherwise, the partition layout should be the same
 as the default xenial cloud & vagrant images layout.
 
-This image consists of a DOS-MBR and partition one taking all the space as root partition.
+This image consists of a DOS-MBR and partition one taking all the space as the root partition.
 The Vagrant version has initrd grow-root support, so p1 will resize to maximum on reboot.
 
 For custom storage partitions or network attached storage, the appliance can be told 
@@ -139,35 +139,27 @@ appliance gets build using packer.
 
 ## Configure Appliance
 
-### Create new env
+### Create Config
 
-#### for a development server
+for a development server, run `cp /app/appliance/salt/pillar/default-env.sls /app/env.yml`
+and edit settings in /app/env.yml like changing the domainname.
 
-on your devserver:
-+ make a development env.yml: `cp /app/appliance/salt/pillar/default-env.sls /app/env.yml`
-+ edit settings in /app/env.yml and change domainname
-
-#### for a production server
-
-on your local machine:
-+ vagrant up
-+ make a new env.yml: `env-create.sh domainname.domain /app/`
-+ edit your settings in /app/env.yml , select correct ethic commission id
-+ optional: build env into different formats
-```
-salt-call state.sls common.env-package-req
-env-package.sh /app/env.yml
-```
-+ print out /app/env.yml.pdf
-+ save and keep env.yml.tar.gz.gpg
-+ copy env.yml to appliance /app/env.yml
+to create a new config for a production server execute on your local machine:
++ start development server: `vagrant up`
++ make a new env.yml: `env-create.sh domainname.domain /root/new/`
++ edit settings in /root/new/env.yml , select correct ethic commission id
++ optional, package env into different formats
+    +  `env-package.sh --requirements; env-package.sh /root/new/env.yml`
++ print out /root/new/env.yml.pdf
++ save and keep /root/new/domainname.env.date_time.tar.gz.gpg
++ copy /root/new/env.yml to appliance machine at /app/env.yml
 
 ```
 ssh root@target.vm.ip '/bin/bash -c "mkdir -p /app/"'
 scp env.yml root@target.vm.ip:/app/env.yml
 ```
 
-#### for both
+### Activate Config
 
 on the target vm:
 ```
@@ -187,6 +179,8 @@ create-client-cert.sh useremail@domain.name cert_name [daysvalid]
 
 # Write down user password and client certificate transport password
 ```
+
+## Maintenance
 
 ### Reconfigure a running Appliance
 
@@ -209,16 +203,16 @@ create-client-cert.sh useremail@domain.name cert_name [daysvalid]
 if the appliance.service enters fail state, it creates a file named
 "/run/appliance_failed".
 
-You have to remove this file using `rm /run/appliance_failed` before running
+Remove this file using `rm /run/appliance_failed` before running
 the service again using `systemctl restart appliance`
 
-## Maintenance
+### Howto
 
 All snippets expect root.
 
 + enter a running ecs container
-    for most ecs commands it is not important to which
-    instance (web,worker) you connect to, so ecs_ecs.web_1 is used in Examples
+    for most ecs commands it is not important to which instance (web,worker) 
+    you connect to, "ecs_ecs.web_1" is used in examples
 
     + image = ecs, mocca, pdfas, memcached, redis
     + ecs .startcommand = web, worker, beat, smtpd
@@ -266,7 +260,7 @@ systemctl restart appliance
 Container:
 + all container log to stdout and stderr
 + docker has the logs of every container available
-    + you can look at a log stream using eg. `docker logs ecs_ecs.web_1`
+    + look at a log stream using eg. `docker logs ecs_ecs.web_1`
 + journald will get the container logs via the appliance.service which calls docker-compose
     + this includes backend nginx, uwsgi, beat, worker, smtpd, redis, memcached, pdfas, mocca
     + to follow use `journalctl -u appliance -f`
