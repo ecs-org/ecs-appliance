@@ -7,41 +7,45 @@
 {%- set gpg_call = 'gpg --quiet --no-default-keyring --enable-special-filenames --batch --yes --armor --gen-key' -%}
 {{ salt['cmd.run_stdout'](gpg_call, stdin=batch) }}
 {%- endmacro %}
-# # exchange ip number and add this to your domain config
+# ecs configuration settings
+# ##########################
+# change ecs:settings: EMAIL_BACKEND to 'django.core.mail.backends.smtp.EmailBackend'
+# change ecs:settings: ETHICS_COMMISSION_UUID to the desired uuid
+# change ip number to target ip and add this to your dns config:
 # {{ domain }}.   IN  A     1.2.3.4
 # {{ domain }}.   IN  MX    10  {{ domain }}
 # {{ domain }}.   IN  TXT   "v=spf1 mx ptr -all"
 
 ssh_authorized_keys:
+  # # you can put your ssh keys here, this is also used by cloud-init
+  # - "ssh-rsa and some long glibberish somebody@somewhere"
 {%- if extra.ssh_authorized_keys|d(false) %}
   {%- for key in extra.ssh_authorized_keys %}
   - {{ key }}
   {%- endfor %}
 {%- else %}
-  # - "ssh-rsa and some long glibberish somebody@somewhere"
 {%- endif %}
-  # # you can put your ssh keys here, this is also used by cloud-init
 ssh_deprecated_keys:
-  # - "ssh-rsa and some long glibberish somebody@somewhere"
   # # you can copy deprecated keys here,
-  # # state.highstate will remove these old keys from users,
-  # # and have a log of past access keys
+  # # state.highstate will remove these keys from allowed login,
+  # # additionaly this section serves as log of past access keys
+  # - "ssh-rsa and some long glibberish somebody@somewhere"
 appliance:
+  # # standby: default false, if set appliance will not activate
   # standby: true
-  # # if set appliance will not activate, default false
   domain: {{ domain }}
   allowed_hosts: {{ domain }}
   ssl:
     letsencrypt:
       enabled: true
+    # # client_certs_mandatory, default false, if true, always need a client certificate
     # client_certs_mandatory: true
-    # # if true, always need a client certificate, default false
     client_certs_mandatory: false
+    # # key: if set ssl key for https host will be used, default empty
     # key: filename-key.pem
-    # # if set ssl key for https host will be used, default empty
+    # # cert: if set ssl key for https host will be used, default empty
     # cert: filename-cert.pem
-    # # if set ssl key for https host will be used, default empty
-  # # set to your sentry url, must be the same as ecs_settings: SENTRY_DSN
+  # # sentry:dsn set to your sentry url, must be the same as ecs_settings: SENTRY_DSN
 {%- if extra.appliance.sentry.dsn|d(false) %}
   sentry:
 {{ extra.appliance.sentry|yaml(false)|indent(4,True) }}
@@ -93,14 +97,32 @@ appliance:
   #       owner: user:group
   #       permissions: "0600"
 {%- endif %}
+{%- if extra.appliance.env.package.keys|d(false) %}
+  env:
+    package:
+      # # recipients: list of email addresses to send encrypted env package to
+  {%- if extra.appliance.env.package.recipients|d(false) %}
+      recipients: {{ extra.appliance.env.package.recipients }}
+  {%- else %}
+      # recipients: "email@address email@address"
+  {%- endif %}
+      keys:
+  {%- for key in extra.appliance.env.package.keys %}
+        - |
+{{ key|indent(12,True) }}
+  {%- endfor %}
+{%- else %}
   # env:
-  #   recipients: # list of user that get the gpg encrypted tar.gz archive of the new env
-  #     - email: key_name@another.domain.name
-  #       key: : |
-  #         # your public gpg key here
+  #   package:
+  #     # # recipients: list of email addresses to send encrypted env package to
+  #     recipients: "email@address email@address"
+  #     keys: # list of public keys to be used by gpg to encrypt the env package
+  #       - |
+  #           # public gpg key here
+{%- endif %}
   storage:
+    # # setup: optional, will be executed via state.sls storage if volatile or data can not be found
     # setup: |
-    # # optional, will be executed if volatile or data can not be found
     # proxy_cache: true
     # # default false, if true 10 additional GB diskspace are used
     # # for operating polipo, a http proxy cache
