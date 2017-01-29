@@ -12,11 +12,11 @@ arrange them in a 2x2 matrix per page pdf and output to \${datafile}.pdf
     + 3378 base32 chars alphanumeric + overhead (13) = 3391 chars total
     + 1 Code Bytes = 2111 Bytes (8 Bit) Max
 
-+ linked QRCode, Medium Error Correction, Version 32
++ linked QRCode, Medium Error Correction, Version 31
     + 100 linked Codes maximum, 4 Codes per A4 Page, 25 A4 Pages
-    + 1 Code Characters Chunksize = 2225 Chars (2238 Chars -6 padding -3 split header -4 safety)
-    + 1 Code Bytes Chunksize = 1390 Bytes (base32decode(2225 chars))
-    + 100 Codes Bytes = 139100 Bytes (8 Bit)
+    + 1 Code Characters Chunksize = 2100 Chars (2113 Chars -6 padding -3 split header -4 safety)
+    + 1 Code Bytes Chunksize = 1312 Bytes (base32decode(2225 chars))
+    + 100 Codes Bytes = 131200 Bytes (8 Bit)
 
 QR-Code (type alphanumeric) Dimensions:
     + Minimum Module Size on 300dpi(12dot/mm): 0.33mm
@@ -121,8 +121,8 @@ data2pdf() {
 }
 
 # main
-maxchars_chunk=2225
-maxbytes_chunk=1390
+maxchars_chunk=2100
+maxbytes_chunk=1312
 maxbytes_single=2111
 maxbytes_chained=$(( maxbytes_chunk * 100))
 level="M"
