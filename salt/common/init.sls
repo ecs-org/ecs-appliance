@@ -88,7 +88,7 @@ set_locale:
     - source: salt://common/env.include
     - makedirs: True
 
-{% for n in ['env-new.sh', 'env-build.sh', 'env-update.sh'] %}
+{% for n in ['env-create.sh', 'env-package.sh', 'env-update.sh'] %}
 /usr/local/sbin/{{ n }}:
   file.managed:
     - source: salt://common/{{ n }}
