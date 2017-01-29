@@ -15,7 +15,7 @@ appliance:
       # use snakeoil certs, because eg. 80,443 is behind ssh tunneling
       enabled: false
     # # client_certs_mandatory default false,
-    # #   if true, always need a client certificate
+    # #   if true, always need a client certificate to use the site
     # client_certs_mandatory: true
     client_certs_mandatory: false
     # # key default empty, if set, ssl key for https host will be used
@@ -48,9 +48,13 @@ appliance:
   #       owner: user:group
   #       permissions: "0600"
   # env:
-  #   recipients: # list of user that get the gpg encrypted tar.gz archive of the new env
-  #     key_name@another.domain.name: |
-  #         # public gpg key here
+  #   package:
+  #     # list of email addresses to send encrypted env package to
+  #     recipients: email@address email@address
+  #     keys: # list of public keys to be used by gpg to encrypt the env package
+  #       - |
+  #           # public gpg key here
+  #
   storage:
     # # setup default empty, will be executed if volatile or data can not be found
     # setup: |
