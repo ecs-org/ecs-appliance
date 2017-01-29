@@ -20,15 +20,28 @@ You either need:
 + a local development machine with vagrant and a hypervisor for vagrant installed.
     + vagrant will setup the base machine for you
 
-The partition layout should be flat with the 1 partition taking all space as root.
+### Partitioning
 
-### ssh install to a empty xenial vm
+Unless a good reason to do otherwise, the partition layout should be the same
+as the default xenial cloud & vagrant images layout.
+
+This image consists of a DOS-MBR and partition one taking all the space as root partition.
+The Vagrant version has initrd grow-root support, so p1 will resize to maximum on reboot.
+
+For custom storage partitions or network attached storage, the appliance can be told 
+in env.yml to setup storage partitions and mountpoints for /data and /volatile
+to the requested custom configuration.
+
++ /volatile: All cache and work files are written to /volatile
++ /data: All data worth saving is written to /data
+
+### install via ssh to a empty xenial vm
 
 on your local machine:
 
 if cloning from a private repository,
-copy the repository readonly ssh key to the target vm,
-the saltstack part will correct permissions later.
+copy the repository readonly ssh key to the target vm.
+(the saltstack part will correct permissions later)
 
 ```
 ssh root@target.vm.ip '/bin/bash -c "mkdir -p /app/.ssh"'
@@ -62,7 +75,7 @@ salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
 reboot
 ```
 
-### using vagrant
+### install using vagrant
 
 on your local machine:
 
@@ -87,7 +100,7 @@ git clone ssh://git@gogs.target.domain:22/ecs/ecs-appliance.git /app/appliance
 # install saltstack and start appliance install
 curl -o /tmp/bootstrap_salt.sh -L https://bootstrap.saltstack.com
 sudo bash -c "mkdir -p /etc/salt; cp /app/appliance/salt/minion /etc/salt/minion; \
-    chmod +x /tmp/bootstrap_salt.sh; /tmp/bootstrap_salt.sh -X; \
+    chmod +x /tmp/bootstrap_salt.sh; /tmp/bootstrap_salt.sh -X"
 sudo salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
 ```
 
@@ -97,7 +110,7 @@ if you also want the builder (for building the appliance image) installed:
 sudo salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance": {"enabled": true}}'
 ```
 
-### upgrade [empty] xenial desktop
+### upgrade a xenial desktop
 
 This is the same procedure as for the developer vm,
 but be aware that compared to a typical desktop the appliance
@@ -126,21 +139,25 @@ appliance gets build using packer.
 
 ## Configure Appliance
 
-### Initial Setup
+### Create new env
 
 #### for a development server
 
 on your devserver:
 + make a development env.yml: `cp /app/appliance/salt/pillar/default-env.sls /app/env.yml`
-+ edit your settings in /app/env.yml and change your domainname
++ edit settings in /app/env.yml and change domainname
 
 #### for a production server
 
 on your local machine:
 + vagrant up
-+ make a new env.yml: `env-new.sh domainname.domain /app/`
-+ edit your settings in /app/env.yml
-+ build env into different formats: `env-build.sh /app/env.yml`
++ make a new env.yml: `env-create.sh domainname.domain /app/`
++ edit your settings in /app/env.yml , select correct ethic commission id
++ optional: build env into different formats
+```
+salt-call state.sls common.env-package-req
+env-package.sh /app/env.yml
+```
 + print out /app/env.yml.pdf
 + save and keep env.yml.tar.gz.gpg
 + copy env.yml to appliance /app/env.yml
@@ -162,48 +179,27 @@ chmod 0600 /app/env.yml
 cp /app/env.yml /run/active-env.yml
 systemctl start appliance-update
 
-# open a django management shell
-docker exec -it ecs_ecs.web_1 /start run ./manage.py shell_plus
+# create first internal office user 
+create-internal-user.sh useremail@domain.name "First Name" "Second Name" "f" 
 
-# create first internal office user
-email='usermail@domain.name'; first_name='Firstname'; last_name='Lastname'; gender='m'
+# create and send matching client certificate
+create-client-cert.sh useremail@domain.name cert_name [daysvalid]
 
-import math, string
-from random import SystemRandom
-from ecs.users.utils import create_user
-PASSPHRASE_ENTROPY = 80
-PASSPHRASE_CHARS = string.ascii_lowercase + string.digits
-PASSPHRASE_LEN = math.ceil(PASSPHRASE_ENTROPY / math.log2(len(PASSPHRASE_CHARS)))
-
-u = create_user(email, first_name=first_name, last_name=last_name)
-p = u.profile
-p.gender = gender
-p.is_internal = True
-p.save()
-passphrase = ''.join(SystemRandom().choice(PASSPHRASE_CHARS) for i in range(PASSPHRASE_LEN))
-u.set_password(passphrase)
-print(passphrase)
-u.save()
-u.groups.add(Group.objects.get(name='EC-Office'))
-
-# create a temporary client certificate for first office user and send it via email
-cert, passphrase = Certificate.create_for_user('/tmp/user.p12', u, cn='Initial_Office_Cert1', days=60)
-pkcs12 = open('/tmp/user.p12', 'rb').read()
-from ecs.communication.mailutils import deliver
-deliver(u.email, subject='Certificate', message='See attachment', from_email=settings.DEFAULT_FROM_EMAIL, attachments=(('user.p12', pkcs12, 'application/x-pkcs12'),), nofilter=True)
-print(passphrase)
-exit()
-
+# Write down user password and client certificate transport password
 ```
 
 ### Reconfigure a running Appliance
 
 + edit /app/env.yml
++ optional, build new env package:
+    + first time requisites install, call `env-package.sh --requirements`
+    + build new env package call `env-package.sh /app/env.yml`
 + activate changes into current environment, call `env-update.sh`
-+ optional: build new config package: call `env-build.sh /app/env.yml`
++ optional: build new config package: call `env-package.sh /app/env.yml`
 + restart and apply new environment: `systemctl start appliance-update`
 
 ## Start, Stop & Update Appliance
+
 + Start appliance: `systemctl start appliance`
 + Stop appliance: `systemctl stop appliance`
 + Update Appliance (appliance and ecs): `systemctl start appliance-update`
@@ -315,8 +311,9 @@ Path | Description
 /salt/top.sls                   | defines the root of the state tree
 /salt/common/init.sls           | common install
 /salt/common/env-template.yml   | template used to generate a new env.yml
-/salt/common/env-new.sh         | cli for env generation
-/salt/common/env-build.sh       | cli for building pdf,iso,tar.gz.gpg
+/salt/common/env-create.sh      | cli for env generation
+/salt/common/env-package.sh     | cli for building pdf,iso,tar.gz.gpg out of env
+/salt/common/env-update.sh      | get env, test conversion and write to /run/active-env.yml
 /salt/appliance/init.sls        | ecs appliance install
 /salt/appliance/scripts/prepare-env.sh       | script started first to read environment
 /salt/appliance/scripts/prepare-appliance.sh | script started next to setup services
@@ -440,17 +437,3 @@ Runtime Environment:
         + ECS_SETTINGS
     + docker compose passes the following to the mocca and pdfas container
         + APPLIANCE_DOMAIN as HOSTNAME
-
-### Partitioning
-
-+ default xenial cloud image partition layout:
-  + dos-mbr
-  + p1 Boot ext4 label cloudimg-rootfs (10G)
-
-+ developer setup:
-  + Vagrantfile has grow-root baked into it, therefore p1 will take all space
-  + appliance will not create additional partitions
-  + storage setup will create the directories but do not expect a mountpoint
-
-+ production setup:
-  + appliance will (if told in env.yml) setup storage to desired partitioning
