@@ -2,19 +2,27 @@
 
 usage(){
     cat << EOF
-Usage:  $0 email@domain "first name" "Last Name" "m/f"
+Usage:  $0 email@domain "first name" "Last Name" "f/m"
 
 Creates a internal office user.
-gender can be "f" or "m"
+Gender can be "f" or "m".
+Requirements: Appliance must be running.
 
 EOF
     exit 1
 }
 
+email="$1"
+first="$2"
+last="$3"
+gender=$(echo "$4" | tr '[:upper:]' '[:lower:]')
+if test "$gender" != "m" -a "$gender" != "f"; then
+    usage
+fi
 
 cat << EOF | docker exec -it ecs_ecs.web_1 /start run ./manage.py shell
 
-email='$1'; first_name='$2'; last_name='$3'; gender='$4'
+email='$email'; first_name='$first'; last_name='$last'; gender='$gender'
 
 import math, string
 from random import SystemRandom

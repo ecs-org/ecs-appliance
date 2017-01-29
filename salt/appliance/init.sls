@@ -19,6 +19,13 @@ include:
     - makedirs: true
 {% endfor %}
 
+{% for n in ['create-client-cert.sh', 'create-internal-user.sh'] %}
+/usr/local/sbin/{{ n }}:
+  file.managed:
+    - source: salt://appliance/scripts/{{ n }}
+    - mode: "0755"
+{% endfor %}
+
 {% for n in ['ecs', 'tags', 'flags'] %}
 create_app_etc_{{ n }}:
   file.directory:
