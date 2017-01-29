@@ -142,17 +142,23 @@ appliance gets build using packer.
 ### Create Config
 
 for a development server, run `cp /app/appliance/salt/pillar/default-env.sls /app/env.yml`
-and edit settings in /app/env.yml like changing the domainname.
+and edit settings in /app/env.yml .
 
-to create a new config for a production server execute on your local machine:
-+ start development server: `vagrant up`
-+ make a new env.yml: `env-create.sh domainname.domain /root/new/`
-+ edit settings in /root/new/env.yml , select correct ethic commission id
+to create a new config for a production server:
++ either use vagrant to start a development server which can create new environments
+    + start development server: `vagrant up`
++ or if you have saltstack installed on a linux machine you can execute env-create.sh & env-package.sh on your local machine
+    + `git clone https://github.com/ethikkom/ecs-appliance  ~/path-to-project/ecs-appliance`
+    + add ~/path-to-project/ecs-appliance/salt/common/ to env-create.sh, env-package.sh calling
+
++ make a new env.yml: `env-create.sh domainname.domain ~/new/`
++ edit settings in ~/new/env.yml , select correct ethic commission id
 + optional, package env into different formats
-    +  `env-package.sh --requirements; env-package.sh /root/new/env.yml`
-+ print out /root/new/env.yml.pdf
-+ save and keep /root/new/domainname.env.date_time.tar.gz.gpg
-+ copy /root/new/env.yml to appliance machine at /app/env.yml
+    +  `env-package.sh --requirements; env-package.sh ~/new/env.yml`
+
++ print out ~/new/env.yml.pdf
++ save and keep ~/new/domainname.env.date_time.tar.gz.gpg
++ copy ~/new/env.yml to appliance machine at /app/env.yml
 
 ```
 ssh root@target.vm.ip '/bin/bash -c "mkdir -p /app/"'
@@ -189,7 +195,6 @@ create-client-cert.sh useremail@domain.name cert_name [daysvalid]
     + first time requisites install, call `env-package.sh --requirements`
     + build new env package call `env-package.sh /app/env.yml`
 + activate changes into current environment, call `env-update.sh`
-+ optional: build new config package: call `env-package.sh /app/env.yml`
 + restart and apply new environment: `systemctl start appliance-update`
 
 ## Start, Stop & Update Appliance
