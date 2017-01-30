@@ -81,6 +81,8 @@ services:
   memcached:
     image: memcached
     network_mode: "bridge"
+    command: memcached -m 128m -I 5m
+    # max-memory= 128mb, max-item-size= 5mb
 
   memcached-exporter:
     image: prom/memcached-exporter
