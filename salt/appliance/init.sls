@@ -19,7 +19,7 @@ include:
     - makedirs: true
 {% endfor %}
 
-{% for n in ['create-client-cert.sh', 'create-internal-user.sh'] %}
+{% for n in ['create-client-certificate.sh', 'create-internal-user.sh'] %}
 /usr/local/sbin/{{ n }}:
   file.managed:
     - source: salt://appliance/scripts/{{ n }}
