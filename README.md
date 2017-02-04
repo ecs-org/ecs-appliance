@@ -28,12 +28,12 @@ as the default xenial cloud & vagrant images layout.
 This image consists of a DOS-MBR and partition one taking all the space as the root partition.
 The Vagrant version has initrd grow-root support, so p1 will resize to maximum on reboot.
 
-For custom storage partitions or network attached storage, the appliance can be told 
-in env.yml to setup storage partitions and mountpoints for /data and /volatile
-to the requested custom configuration.
-
-+ /volatile: All cache and work files are written to /volatile
-+ /data: All data worth saving is written to /data
+For custom storage partitions or network attached storage, 
+add a custom storage:setup object to setup storage partitions.
+Change storage:ignore:volatile and/or storage:ignore:data to false to automatically setup mountpoints for /data and /volatile.
+The volatile volume must be labeled "ecs-volatile", the data volume "ecs-data".
+Use appliance:extra:states and :packages if storage setup needs additional packages installed.
+See salt/storage/README.md for futher information about storage:setup.
 
 ### install via ssh to a empty xenial vm
 
@@ -147,7 +147,7 @@ and edit settings in /app/env.yml .
 to create a new config for a production server:
 + either use vagrant to start a development server which can create new environments
     + start development server: `vagrant up`
-+ or if you have saltstack installed on a linux machine you can execute env-create.sh & env-package.sh on your local machine
++ or if you have saltstack installed on a linux machine you can execute env-create.sh & env-package.sh on your local machine without installing the appliance
     + `git clone https://github.com/ethikkom/ecs-appliance  ~/path-to-project/ecs-appliance`
     + add ~/path-to-project/ecs-appliance/salt/common/ to env-create.sh, env-package.sh calling
 
@@ -177,7 +177,7 @@ chmod 0600 /app/env.yml
 cp /app/env.yml /run/active-env.yml
 systemctl start appliance-update
 
-# create first internal office user 
+# create first internal office user (f=female, m=male)
 create-internal-user.sh useremail@domain.name "First Name" "Second Name" "f" 
 
 # create and send matching client certificate
