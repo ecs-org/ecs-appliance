@@ -1,6 +1,7 @@
 include:
   - docker
   - systemd.reload
+  - .extra
   - .ssl
   - .nginx
   - .postfix

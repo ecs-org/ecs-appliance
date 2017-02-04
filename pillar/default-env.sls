@@ -23,7 +23,7 @@ appliance:
     # # cert default empty, if set, ssl cert for https host will be used
     # cert: filename-cert.pem
 
-  # # sentry_dsn (the sentry target url) default empty, if set will report errors to sentry
+  # # sentry:dsn (the sentry target url) default empty, if set will report errors to sentry
   # #   must be the same as ecs_settings: SENTRY_DSN
   # sentry:
   #   dsn: 'https://url'
@@ -40,13 +40,17 @@ appliance:
   #   # default see appliance.include
   #   branch: master
   #   source: git_url
-  # extra:  # write out extra files on appliance configure
-  #   files:
+  # extra:
+  #   files:  # write out extra files on appliance configure
   #     - path: /path/of/filename
   #       content: |
   #           # content here
   #       owner: user:group
   #       permissions: "0600"
+  #   states: # include extra states at state.highstate
+  #     - qrcode
+  #   packages: # include extra packages at state.highstate
+  #     - ghostscript
   # env:
   #   package:
   #     # list of email addresses to send encrypted env package to
