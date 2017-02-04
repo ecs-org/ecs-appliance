@@ -97,6 +97,10 @@ appliance:
   #       owner: user:group
   #       permissions: "0600"
 {%- endif %}
+  #   states: # include extra states at state.highstate
+  #     - qrcode
+  #   packages: # include extra packages at state.highstate
+  #     - ghostscript
 {%- if extra.appliance.env.package.keys|d(false) %}
   env:
     package:
