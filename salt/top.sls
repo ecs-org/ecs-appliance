@@ -1,11 +1,11 @@
 base:
   '*':
     - http_proxy
-    - guest-tools
+    - virtual-tools
+    - hardware-tools
     - ssh
     - python
     - common
-    - extra
 
   'appliance:enabled:true':
     - match: pillar
