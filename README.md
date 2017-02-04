@@ -197,19 +197,30 @@ create-client-cert.sh useremail@domain.name cert_name [daysvalid]
 + activate changes into current environment, call `env-update.sh`
 + restart and apply new environment: `systemctl start appliance-update`
 
-## Start, Stop & Update Appliance
+### Start, Stop & Update Appliance
 
 + Start appliance: `systemctl start appliance`
 + Stop appliance: `systemctl stop appliance`
 + Update Appliance (appliance and ecs): `systemctl start appliance-update`
 
-### Recover from failed state
+#### Recover from failed state
 
 if the appliance.service enters fail state, it creates a file named
 "/run/appliance_failed".
 
 Remove this file using `rm /run/appliance_failed` before running
 the service again using `systemctl restart appliance`
+
+### Desaster Recovery from backup
+
++ install a new unconfigured appliance as described in chapter install
++ copy old saved env.yml to new target machine at /app/env.yml
++ reboot new target machine, appliance will configure but stop because of empty database
+
+on new target machine:
+```
+recover-from-backup.sh --yes-i-am-sure
+```
 
 ### Howto
 
@@ -235,13 +246,17 @@ All snippets expect root.
 
 + manual run letsencrypt client (do not call as root): `gosu app dehydrated --help`
 
-+ destroy and recreate database
++ destroy and recreate database:
+
 ```
 gosu app dropdb ecs
 gosu postgres createdb ecs -T template0 -l de_DE.utf8
 rm /app/etc/tags/last_running_ecs
 systemctl restart appliance
 ```
+
++ get latest dump from backup to /root/ecs.pgdump.gz:
+    + `duply /root/.duply/appliance-backup fetch ecs-pgdump/ecs.pgdump.gz /root/ecs.pgdump.gz`
 
 + quick update appliance code:
     + `cd /app/appliance; gosu app git pull; salt-call state.highstate pillar='{"appliance":{"enabled":true}}'; rm /var/www/html/503.html`

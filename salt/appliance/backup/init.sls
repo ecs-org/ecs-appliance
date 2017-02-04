@@ -10,6 +10,11 @@ backup:
       - gnupg
       # https://sourceforge.net/projects/pgbarman/
 
+/usr/local/sbin/recover-from-backup.sh:
+  file.managed:
+    - source: salt://appliance/backup/recover-from-backup.sh
+    - mode: "0755"
+
 /root/.duply/appliance-backup/conf.template:
   file.managed:
     - source: salt://appliance/backup/duply.conf.template
