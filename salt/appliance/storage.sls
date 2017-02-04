@@ -73,7 +73,7 @@ postfix_relocate_{{ source }}:
        not salt['file.file_exists']('/dev/disk/by-label/ecs-data')) %}
 
   {% from 'storage/lib.sls' import storage_setup with context %}
-  {{ storage_setup(salt['pillar.get']("appliance:storage:setup", {})) }}
+{{ storage_setup(salt['pillar.get']("appliance:storage:setup", {})) }}
 {% endif %}
 
 # ### Volatile Setup

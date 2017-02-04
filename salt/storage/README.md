@@ -170,10 +170,8 @@ format:
 Example:
 ```
 format:
-  /var/cache/apt-cacher-ng:
-    destination: /mnt/cache
-    copy_content: false
-    watch_in: "service: apt-cacher-ng"
+  /dev/mapper/vg0-host_cache:
+    watch_in: "service: cacher-setup"
 ```
 
 ### parameter "expand" in lvm:lv:
