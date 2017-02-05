@@ -9,7 +9,7 @@ ENV CATALINA_OPTS "-Xms512m -Xmx1536m"
 RUN mkdir -p /app/mocca /app/import
 RUN rm -rf $CATALINA_HOME/webapps/*
 
-RUN curl -f -m 120 --connect-timeout 10 -s -S -o /app/mocca/bkuonline.war https://joinup.ec.europa.eu/system/files/project/bkuonline-1.3.23.war
+RUN curl -f -m 120 --insecure --connect-timeout 10 -s -S -o /app/mocca/bkuonline.war https://joinup.ec.europa.eu/system/files/project/bkuonline-1.3.23.war
 RUN echo "f43f49cbd7ef4df56741097ff5f0637a83cf6cb64701bc484633257ec122dc6a */app/mocca/bkuonline.war" | sha256sum -c -
 
 RUN mkdir -p /usr/local/tomcat/conf/Catalina/localhost; printf "%s" '\

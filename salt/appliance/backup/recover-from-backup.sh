@@ -2,7 +2,7 @@
 
 usage(){
     cat << EOF
-Usage:  $0 --yes-i-am-sure
+Usage:  $0 [--only-restore] --yes-i-am-sure
 
 recovers database and files from backup.
 
@@ -13,10 +13,17 @@ Requirements:
 + /data/ecs-pgdump directory, must exist and be empty
 + postgresql database ecs must not exist
 
+Option: --only-restore: do not import database dump after restore, do not restart appliance
+
 EOF
     exit 1
 }
 
+onlyrestore=false
+if test "$1" = "--only-restore"; then
+    onlyrestore=true
+    shift
+fi
 if test "$1" != "--yes-i-am-sure"; then
     usage
 fi
@@ -62,7 +69,17 @@ cat /root/.duply/appliance-backup/conf.template | \
 echo "restore files and database dump from backup"
 duply /root/.duply/appliance-backup restore /data/restore
 
-exit 0
+echo "move restored files to target directory"
+if test -e "/data/ecs-storage-vault-old"; then rm -r "/data/ecs-storage-vault-old"; fi
+if test -e "/data/ecs-pgdump-old"; then rm -r "/data/ecs-pgdump-old"; fi
+mv /data/ecs-storage-vault /data/ecs-storage-vault-old
+mv /data/ecs-pgdump /data/ecs-pgdump-old
+mv /data/restore/ecs-storage-vault /data/ecs-storage-vault
+mv /data/restore/ecs-pgdump /data/ecs-pgdump
+
+if $onlyrestore; then
+    exit 0
+fi
 
 echo "import database from dump"
 gosu postgres createuser app
