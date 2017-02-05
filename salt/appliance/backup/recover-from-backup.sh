@@ -61,8 +61,6 @@ cat /root/.duply/appliance-backup/conf.template | \
 
 echo "restore files and database dump from backup"
 duply /root/.duply/appliance-backup restore /data
-# # remove old duplicity cache files
-rm -r /.cache/duplicity/duply_appliance-backup
 
 echo "import database from dump"
 gosu postgres createuser app

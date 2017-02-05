@@ -27,6 +27,20 @@ if test "$?" -ne 0; then
 fi
 mv ${dbdump}.new ${dbdump}
 
+# check if we need to remove duplicity cache files, because backup url changed
+confdir=/root/.duply/appliance-backup
+cachedir=/root/.cache/duplicity/duply_appliance-backup
+if test -e $cachedir/conf; then
+    cururl=$(cat $confdir/conf   | grep "^TARGET=" | sed -r 's/^TARGET=[ \'"]*([^\'"]+).*/\1/')
+    lasturl=$(cat $cachedir/conf | grep "^TARGET=" | sed -r 's/^TARGET=[ \'"]*([^\'"]+).*/\1/')
+    if test "$cururl" != "$lasturl"; then
+        sentry_entry "Appliance Backup" "warning: different backup url, deleting backup cache directory"
+        rm -r $cachedir
+        mkdir -p $cachedir
+    fi
+fi
+cp $confdir/conf $cachedir/conf
+
 # duplicity to thirdparty of /data/ecs-storage-vault, /data/ecs-pgdump
 /usr/bin/duply /root/.duply/appliance-backup cleanup --force
 if test "$?" -ne "0"; then

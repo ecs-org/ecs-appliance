@@ -208,19 +208,15 @@ create-client-cert.sh useremail@domain.name cert_name [daysvalid]
 if the appliance.service enters fail state, it creates a file named
 "/run/appliance_failed".
 
-Remove this file using `rm /run/appliance_failed` before running
-the service again using `systemctl restart appliance`
+After resolving the issue, remove this file using `rm /run/appliance_failed`
+before running the service again using `systemctl restart appliance`.
 
 ### Desaster Recovery from backup
 
 + install a new unconfigured appliance as described in chapter install
 + copy old saved env.yml to new target machine at /app/env.yml
 + reboot new target machine, appliance will configure but stop because of empty database
-
-on new target machine:
-```
-recover-from-backup.sh --yes-i-am-sure
-```
++ ssh into new target machine, execute `recover-from-backup.sh --yes-i-am-sure`
 
 ### Howto
 
