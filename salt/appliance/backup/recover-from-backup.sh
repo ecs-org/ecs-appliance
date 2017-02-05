@@ -68,6 +68,8 @@ gosu postgres createdb ecs -T template0 -l de_DE.utf8
 gosu postgres psql -c "ALTER DATABASE ecs OWNER TO app;"
 gosu app /bin/bash -c "cat ecs.pg_dump.gz | gzip -d | pg_restore -1 --format=custom --schema=public --no-owner --dbname=ecs"
 
+exit 0
+
 echo "configure and restart appliance"
 rm /run/appliance-failed
 systemctl start appliance-update
