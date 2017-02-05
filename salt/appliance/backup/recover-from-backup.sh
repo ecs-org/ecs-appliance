@@ -34,7 +34,7 @@ for d in /data/ecs-storage-vault /data/ecs-pgdump; do
         usage
     fi
     files_found=$(find $d -mindepth 1 -type f -exec echo true \; -quit)
-    if test "$files_found" != "true"; then
+    if test "$files_found" = "true"; then
         echo "error: directory $d is not empty. it must be empty"
         usage
     fi
