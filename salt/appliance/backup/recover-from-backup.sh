@@ -68,6 +68,8 @@ cat /root/.duply/appliance-backup/conf.template | \
 
 echo "restore files and database dump from backup"
 duply /root/.duply/appliance-backup restore /data/restore
+# add last backup config to cachedir, so we can detect if backup url has changed
+cp /root/.duply/appliance-backup/conf  /root/.cache/duplicity/duply_appliance-backup/conf
 
 echo "move restored files to target directory"
 if test -e "/data/ecs-storage-vault-old"; then rm -r "/data/ecs-storage-vault-old"; fi

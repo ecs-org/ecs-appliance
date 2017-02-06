@@ -31,14 +31,15 @@ mv ${dbdump}.new ${dbdump}
 confdir=/root/.duply/appliance-backup
 cachedir=/root/.cache/duplicity/duply_appliance-backup
 if test -e $cachedir/conf; then
-    cururl=$(cat $confdir/conf   | grep "^TARGET=" | sed -r 's/^TARGET=[ \'"]*([^\'"]+).*/\1/')
-    lasturl=$(cat $cachedir/conf | grep "^TARGET=" | sed -r 's/^TARGET=[ \'"]*([^\'"]+).*/\1/')
+    cururl=$(cat $confdir/conf   | grep "^TARGET=" | sed -r 's/^TARGET=[ '\''"]*([^ '\''"]+).*/\1/')
+    lasturl=$(cat $cachedir/conf | grep "^TARGET=" | sed -r 's/^TARGET=[ '\''"]*([^ '\''"]+).*/\1/')
     if test "$cururl" != "$lasturl"; then
         sentry_entry "Appliance Backup" "warning: different backup url, deleting backup cache directory"
         rm -r $cachedir
         mkdir -p $cachedir
     fi
 fi
+# add last backup config to cachedir, so we can detect if backup url has changed
 cp $confdir/conf $cachedir/conf
 
 # duplicity to thirdparty of /data/ecs-storage-vault, /data/ecs-pgdump
