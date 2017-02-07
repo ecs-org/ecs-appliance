@@ -125,7 +125,7 @@ appliance:
   #           # public gpg key here
 {%- endif %}
   storage:
-    # # setup: optional, will be executed via state.sls storage if volatile or data can not be found
+    # # setup: optional, will be executed by appliance.storage.setup if volatile or data can not be found
     # setup: |
     # proxy_cache: true
     # # default false, if true 10 additional GB diskspace are used

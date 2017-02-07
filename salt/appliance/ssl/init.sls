@@ -2,6 +2,12 @@ include:
   - common.user
   - .snakeoil
 
+/usr/local/share/appliance/prepare-ssl.sh:
+  file.managed:
+    - source: salt://appliance/storage/prepare-ssl.sh
+    - mode: "0755"
+    - makedirs: true
+
 # dehydrated is a letsencrypt shell client
 /usr/local/etc/dehydrated/config:
   file.managed:

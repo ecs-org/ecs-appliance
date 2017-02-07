@@ -2,6 +2,12 @@ include:
   - docker
   - systemd.reload
 
+/usr/local/share/appliance/prepare-postgresql.sh:
+  file.managed:
+    - source: salt://appliance/storage/prepare-postgresql.sh
+    - mode: "0755"
+    - makedirs: true
+
 late_postgresql.service:
   file.managed:
     - name: /etc/systemd/system/late_postgresql.service

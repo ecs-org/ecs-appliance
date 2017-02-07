@@ -158,34 +158,3 @@ flag_and_service_disable () {
     if test -e /app/etc/flags/$1; then rm /app/etc/flags/$1; fi
     systemctl stop $2
 }
-
-tune_postgresql () {
-    local mem_kb mem_mb cores pg_mb
-    local MAX_CONNECTIONS SHARED_BUFFERS WORK_MEM EFFECTIVE_CACHE_SIZE
-    local pgcfg=/etc/postgresql/9.5/main/postgresql.conf
-    #local template=/etc/postgresql/9.5/main/ecs.conf.template
-    #fixme: disabled template until tested
-    local template=/dev/null
-    # tune postgresql to current vm memory and cores
-    mem_kb=$(cat /proc/meminfo  | grep -i memtotal | sed -r "s/[^:]+: *([0-9]+) .*/\1/g")
-    mem_mb=$(( mem_kb / 1024))
-    cores=$(nproc)
-    pg_mb=$((mem_mb - 1024 - cores * 1024)) # memory available for postgresql tuning
-    if test "$pg_mb" -le 256; then pg_mb=256; fi
-    MAX_CONNECTIONS=$((2+ cores+ 1+ cores+ 1+ 8)) # 1 core=14, 8 core=28
-    SHARED_BUFFERS=$((pg_mb / 4))MB
-    WORK_MEM=$((pg_mb / 4 * 1024 / MAX_CONNECTIONS))kB
-    EFFECTIVE_CACHE_SIZE=$((192 * pg_mb/256))MB
-
-    cp ${pgcfg} ${pgcfg}.org
-    cat ${pgcfg}.org | \
-        sed '/### ECS-CONFIG-BEGIN ###/,/### ECS-CONFIG-END ###/d' | \
-        cat - $template | \
-        sed -r "s/##MAX_CONNECTIONS##/$MAX_CONNECTIONS/g;s/##EFFECTIVE_CACHE_SIZE##/$EFFECTIVE_CACHE_SIZE/g" | \
-        sed -r "s/##WORK_MEM##/$WORK_MEM/g;s/##SHARED_BUFFERS##/$SHARED_BUFFERS/g" > ${pgcfg}.new
-    if ! diff -q ${pgcfg}.org ${pgcfg}.new; then
-        echo "Changed postgresql ecs config"
-        cp ${pgcfg}.new ${pgcfg}
-        systemctl restart postgresql
-    fi
-}

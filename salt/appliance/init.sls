@@ -7,6 +7,7 @@ include:
   - .postfix
   - .stunnel
   - .postgresql
+  - .storage
   - .backup
   - .metric
   - .legacy

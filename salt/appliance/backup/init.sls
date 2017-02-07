@@ -10,6 +10,12 @@ backup:
       - gnupg
       # https://sourceforge.net/projects/pgbarman/
 
+/usr/local/share/appliance/prepare-backup.sh:
+  file.managed:
+    - source: salt://appliance/storage/prepare-backup.sh
+    - mode: "0755"
+    - makedirs: true
+
 /usr/local/sbin/recover-from-backup.sh:
   file.managed:
     - source: salt://appliance/backup/recover-from-backup.sh

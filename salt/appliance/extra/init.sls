@@ -15,3 +15,9 @@ appliance_extra_packages:
       - {{ pkg }}
   {% endfor %}
 {% endif %}
+
+/usr/local/share/appliance/prepare-extra.sh:
+  file.managed:
+    - source: salt://appliance/storage/prepare-extra.sh
+    - mode: "0755"
+    - makedirs: true

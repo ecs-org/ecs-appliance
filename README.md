@@ -340,7 +340,7 @@ Path | Description
 |-- prepare-env
 |-- prepare-appliance
 |   |
-|   |-- optional: call salt-call state.sls storage
+|   |-- optional: call salt-call state.sls appliance.storage.setup
 |---|
 |
 |-- prepare-ecs
@@ -439,7 +439,7 @@ Runtime Environment:
 + appliance-update, prepare-appliance, prepare-ecs, appliance.service
     + parse /run/active-env.yml
     + include defaults from appliance.include (GIT_SOURCE*)
-+ Storage Setup (`salt-call state.sls storage.sls`) parses /run/active-env.yml
++ Storage Setup (`salt-call state.sls appliance.storage.setup`) parses /run/active-env.yml
 + appliance-update will call `salt-call state.highstate` which will use /run/active-env.yml
 + appliance.service calls docker-compose up with active env from /run/active-env.yml
     + docker compose passes the following to the ecs/ecs* container
