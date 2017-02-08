@@ -1,4 +1,5 @@
 #!/bin/bash
+set -o pipefail
 . /usr/local/share/appliance/appliance.include
 . /usr/local/share/appliance/prepare-storage.sh
 . /usr/local/share/appliance/prepare-extra.sh
@@ -6,11 +7,24 @@
 . /usr/local/share/appliance/prepare-metric.sh
 . /usr/local/share/appliance/prepare-backup.sh
 . /usr/local/share/appliance/prepare-ssl.sh
+. /usr/local/share/appliance/prepare-postfix.sh
+. /usr/local/share/appliance/prepare-stunnel.sh
+. /usr/local/share/appliance/prepare-nginx.sh
 
-set -o pipefail
+# ### Runtime Configuration
+# Dependency order:
+# + hostname
+# + nginx start
+# + prepare_storage
+# ...
+# + prepare_database (before other service starts, eg. metric, backup, ssl)
+# ...
+# + prepare_ssl (before postfix, stunnel and nginx, may change certs, service have to restart)
+# ...
+# + prepare_nginx
 
-# set hostname from env if different
 if test "$APPLIANCE_DOMAIN" != "$(hostname -f)"; then
+    # set hostname from env if different
     echo "setting hostname to $APPLIANCE_DOMAIN"
     hostnamectl set-hostname $APPLIANCE_DOMAIN
 fi
@@ -18,45 +32,14 @@ fi
 appliance_status "Appliance Startup" "Starting up"
 systemctl enable nginx
 systemctl start nginx
-
-# ### storage setup
-prepare_storage
-
-# ### storagevault keys setup
-prepare_storagevault
-
-# ### write out extra files from env
-prepare_extra_files
-
-# ### database setup
-prepare_database
-prepare_postgresql
-
-# ### metric collection
-prepare_metric
-
-# ### backup setup
-prepare_backup
-
-# ### ssl setup
-prepare_ssl
-
-# ### postfix: rewrite postfix main.cf with APPLIANCE_DOMAIN, restart postfix (ssl keys change)
-sed -i.bak  "s/^myhostname.*/myhostname = $APPLIANCE_DOMAIN/;s/^mydomain.*/mydomain = $APPLIANCE_DOMAIN/" /etc/postfix/main.cf
-if ! diff -q /etc/postfix/main.cf /etc/postfix/main.cf.bak; then
-    echo "postfix configuration changed"
-fi
-systemctl restart postfix
-
-# ### stunnel: restart stunnel with new keys
-systemctl restart stunnel
-
-# ### nginx: set identity and client cert config and restart
-if is_truestr "${APPLIANCE_SSL_CLIENT_CERTS_MANDATORY:-false}"; then
-    client_certs="on"
-else
-    client_certs="optional"
-fi
-cat /app/etc/template.identity |
-    sed "s/##ALLOWED_HOSTS##/$APPLIANCE_DOMAIN/g;s/##VERIFY_CLIENT##/$client_certs/g" > /app/etc/server.identity
-systemctl reload-or-restart nginx
+prepare_storage         # storage setup
+prepare_storagevault    # storagevault gpg keys setup
+prepare_extra_files     # write out extra files from env
+prepare_database        # database setup
+prepare_postgresql      # postgresql tuning
+prepare_metric          # metric collection
+prepare_backup          # backup setup
+prepare_ssl             # ssl key,certs,dhparam setup
+prepare_postfix         # postfix setup
+prepare_stunnel         # stunnel setup
+prepare_nginx           # nginx setup

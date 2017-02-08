@@ -2,6 +2,11 @@ include:
   - appliance.ssl
   - systemd.reload
 
+/usr/local/share/appliance/prepare-stunnel.sh:
+  file.managed:
+    - source: salt://appliance/stunnel/prepare-stunnel.sh
+    - makedirs: true
+
 /app/etc/stunnel.conf:
   file.managed:
     - source: salt://appliance/stunnel/stunnel.conf

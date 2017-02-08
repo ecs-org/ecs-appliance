@@ -4,8 +4,7 @@ include:
 
 /usr/local/share/appliance/prepare-postgresql.sh:
   file.managed:
-    - source: salt://appliance/storage/prepare-postgresql.sh
-    - mode: "0755"
+    - source: salt://appliance/postgresql/prepare-postgresql.sh
     - makedirs: true
 
 late_postgresql.service:

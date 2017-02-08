@@ -1,6 +1,11 @@
 include:
   - docker
 
+/usr/local/share/appliance/prepare-postfix.sh:
+  file.managed:
+    - source: salt://appliance/postfix/prepare-postfix.sh
+    - makedirs: true
+
 /etc/postfix/main.cf:
   file.managed:
     - source: salt://appliance/postfix/main.cf

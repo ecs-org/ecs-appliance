@@ -7,7 +7,7 @@ After=network.target
 
 [Service]
 Type=oneshot
-# max time for fullbackup is 5hours (equal 175GB using 10mb per Second)
+# max time for fullbackup is 5hours (equal 350GB using 20mb per Second)
 TimeoutStartSec=300min
 Environment=UNITNAME=%n
 Environment=ENV_YML=/run/active-env.yml

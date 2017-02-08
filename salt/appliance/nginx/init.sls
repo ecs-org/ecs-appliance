@@ -19,6 +19,11 @@ nginx:
       - file: /etc/nginx/prometheus.lua
       - file: /app/etc/server.identity
 
+/usr/local/share/appliance/prepare-nginx.sh:
+  file.managed:
+    - source: salt://appliance/nginx/prepare-nginx.sh
+    - makedirs: true
+
 {% for a in ['app-template.html', 'snakeoil.identity', 'template.identity'] %}
 /app/etc/{{ a }}:
   file.managed:

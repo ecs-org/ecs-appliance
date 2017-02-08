@@ -4,6 +4,5 @@ include:
 
 /usr/local/share/appliance/prepare-metric.sh:
   file.managed:
-    - source: salt://appliance/storage/prepare-metric.sh
-    - mode: "0755"
+    - source: salt://appliance/metric/prepare-metric.sh
     - makedirs: true

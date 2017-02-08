@@ -12,8 +12,7 @@ backup:
 
 /usr/local/share/appliance/prepare-backup.sh:
   file.managed:
-    - source: salt://appliance/storage/prepare-backup.sh
-    - mode: "0755"
+    - source: salt://appliance/backup/prepare-backup.sh
     - makedirs: true
 
 /usr/local/sbin/recover-from-backup.sh:
