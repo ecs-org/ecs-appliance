@@ -15,11 +15,14 @@ ExecStart=/usr/bin/docker run \
     -v /proc:/host/proc:ro \
     -v /sys:/host/sys:ro \
     -v /:/rootfs:ro \
+    -v /app/prometheus/metric_import:/host/metric_import \
     prom/node-exporter \
     -web.listen-address {{ salt['pillar.get']('docker:ip') }}:9100 \
+    -collector.textfile.directory /host/metric_import \
     -collector.procfs /host/proc \
     -collector.sysfs /host/sys \
-    -collector.filesystem.ignored-mount-points "^/(sys|proc|dev|host|etc)($|/)"
+    -collector.filesystem.ignored-mount-points "^/(sys|proc|dev|host|etc)($|/)" \
+    -collectors.enabled  "diskstats,entropy,filefd,filesystem,hwmon,loadavg,mdadm,meminfo,netdev,netstat,stat,textfile,time,uname,vmstat"
 
 Restart=on-failure
 RestartSec=30

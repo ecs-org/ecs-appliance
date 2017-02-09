@@ -50,6 +50,12 @@ metric_service_{{ name }}:
     - watch_in:
       - cmd: metric_service_alertmanager
 
+/app/prometheus/metric_import:
+  file.directory:
+    - makedirs: true
+    - user: 1000
+    - group: 1000
+
 {{ metric_install('cadvisor') }}
 {{ metric_install('node-exporter') }}
 {{ metric_install('postgres_exporter') }}

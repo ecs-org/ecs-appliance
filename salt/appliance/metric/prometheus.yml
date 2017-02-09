@@ -4,7 +4,7 @@ global:
   # Attach these labels to any time series or alerts when communicating with
   # external systems (federation, remote storage, Alertmanager).
   external_labels:
-      monitor: 'ecs-hostname'
+    site: 'ecs-hostname'
 
 # Load and evaluate rules in this file every 'evaluation_interval' seconds.
 rule_files:
@@ -22,7 +22,7 @@ scrape_configs:
       - targets:
         - '{{ salt['pillar.get']('docker:ip') }}:9090'
 
-  - job_name: 'node-exporter'
+  - job_name: 'node'
     static_configs:
       - targets:
         - '{{ salt['pillar.get']('docker:ip') }}:9100'
@@ -43,7 +43,7 @@ scrape_configs:
       - targets:
         - '{{ salt['pillar.get']('docker:ip') }}:9187'
 
-  - job_name: 'process-exporter'
+  - job_name: 'process'
     static_configs:
       - targets:
         - '{{ salt['pillar.get']('docker:ip') }}:9256'

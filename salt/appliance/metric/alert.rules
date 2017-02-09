@@ -1,9 +1,51 @@
-ALERT service_down
-  IF up == 0
+#ALERT JobInstanceDown
+#    IF up == 0
+#    FOR 3m
+#    ANNOTATIONS {
+#        summary = "Instance {{ $labels.instance }} down",
+#        description = "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 3 minutes.",
+#    }
 
-#ALERT high_load
-#  IF node_load1 > 0.5
-#  ANNOTATIONS {
-#      summary = "Instance {{ $labels.instance }} under high load",
-#      description = "{{ $labels.instance }} of job {{ $labels.job }} is under high load.",
-#}
+ALERT NodeRebootsTooOften
+    IF changes(node_boot_time[1d]) > 1
+    ANNOTATIONS {
+        summary = "Node rebooots too often",
+        description = "Node {{ $labels.instance }} reboots too often ({{ $value }} is more than 1 time per 1d)",
+    }
+
+ALERT NodeFilesystemFreeLowRoot
+    IF node_filesystem_free{mountpoint="/rootfs"} / node_filesystem_size{mountpoint="/rootfs"} < 0.2
+    ANNOTATIONS {
+        summary = "Node filesystem free space on {{ $labels.device }} is low",
+        description = "Node {{ $labels.instance }}'s filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 20% disk space remaining.",
+    }
+
+ALERT NodeFilesystemFreeLowData
+    IF node_filesystem_free{mountpoint="/rootfs/data"} / node_filesystem_size{mountpoint="/rootfs/data"} < 0.2
+    ANNOTATIONS {
+        summary = "Node filesystem free space on {{ $labels.device }} is low",
+        description = "Node {{ $labels.instance }}'s filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 20% disk space remaining.",
+    }
+
+ALERT NodeFilesystemFreeLowVolatile
+    IF node_filesystem_free{mountpoint="/rootfs/volatile"} / node_filesystem_size{mountpoint="/rootfs/volatile"} < 0.2
+    ANNOTATIONS {
+        summary = "Node filesystem free space on {{ $labels.device }} is low",
+        description = "Node {{ $labels.instance }}'s filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 20% disk space remaining.",
+    }
+
+# {job='node'}
+ALERT NodeMemoryUsageHigh
+    IF (node_memory_MemFree + node_memory_Cached - node_memory_Inactive) / 1048576 < 512
+    ANNOTATIONS {
+        summary = "Instance {{ $labels.instance }} memory usage is high",
+        description = "This device's free memory is less than the threshold (512mb) with a value of {{ $value }}.",
+    }
+
+ALERT NodeLoadHigh
+    IF node_load1 > machine_cpu_cores/2
+    FOR 2m
+    ANNOTATIONS {
+        summary = "Instance {{ $labels.instance }} under high load",
+        description = "{{ $labels.instance }} of job {{ $labels.job }} is under high load.",
+    }
