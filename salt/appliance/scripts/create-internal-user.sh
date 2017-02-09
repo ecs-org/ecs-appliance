@@ -20,14 +20,14 @@ if test "$gender" != "m" -a "$gender" != "f"; then
     usage
 fi
 
-cat << EOF | docker exec -it ecs_ecs.web_1 /start run ./manage.py shell
+cat << EOF | docker exec -i ecs_ecs.web_1 /start run ./manage.py shell
 
 email='$email'; first_name='$first'; last_name='$last'; gender='$gender'
 
 import math, string
 from random import SystemRandom
-from ecs.users.utils import create_user
 from django.contrib.auth.models import Group, User
+from ecs.users.utils import create_user
 
 PASSPHRASE_ENTROPY = 80
 PASSPHRASE_CHARS = string.ascii_lowercase + string.digits

@@ -22,11 +22,14 @@ certname="$2"
 if test "$2" = ""; then usage; fi
 if test "$3" != ""; then daysvalid=$3; fi
 
-cat << EOF | docker exec -it ecs_ecs.web_1 /start run ./manage.py shell
+cat << EOF | docker exec -i ecs_ecs.web_1 /start run ./manage.py shell
 
 email="$email"; certname="$certname"; daysvalid=$daysvalid;
 
+import os
+from django.conf import settings
 from django.contrib.auth.models import Group, User
+from ecs.pki.models import Certificate
 from ecs.communication.mailutils import deliver
 
 if not User.objects.filter(email=email).exists():
@@ -37,11 +40,13 @@ u = User.objects.get(email=email)
 cert, passphrase = Certificate.create_for_user(
     '/tmp/user.p12', u, cn=certname, days=daysvalid)
 pkcs12 = open('/tmp/user.p12', 'rb').read()
+os.remove('/tmp/user.p12')
+
 deliver(u.email,
     subject='Certificate {}'.format(certname),
     message='See attachment',
     from_email=settings.DEFAULT_FROM_EMAIL,
-    attachments=(('user.p12', pkcs12, 'application/x-pkcs12'),),
+    attachments=(('{}.p12'.format(certname), pkcs12, 'application/x-pkcs12'),),
     nofilter=True)
 
 print("Create and send certificate for {} using passphrase {}".format(email, passphrase))
