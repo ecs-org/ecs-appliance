@@ -72,25 +72,24 @@ install_{{ n }}:
       - file: install_{{ n }}
 {% endfor %}
 
-/etc/systemd/system/appliance-failed@.service:
+{% for n in ['appliance-failed@.service', 'service-failed@.service',
+  'watch-ecs-ca.service', 'watch-ecs-ca.path',
+  'mail-to-sentry.service', 'mail-to-sentry.path',
+  ] %}
+install_{{ n }}:
   file.managed:
-    - source: salt://appliance/systemd/appliance-failed@.service
+    - name: /etc/systemd/system/{{ n }}
+    - source: salt://appliance/systemd/{{ n }}
     - watch_in:
       - cmd: systemd_reload
+{% endfor %}
 
-/etc/systemd/system/watch-ecs-ca.service:
-  file.managed:
-    - source: salt://appliance/systemd/watch-ecs-ca.service
-    - watch_in:
-      - cmd: systemd_reload
 
-/etc/systemd/system/watch-ecs-ca.path:
-  file.managed:
-    - source: salt://appliance/systemd/watch-ecs-ca.path
-    - watch_in:
-      - cmd: systemd_reload
+{% for n in ['watch-ecs-ca', 'mail-to-sentry',] %}
+/etc/systemd/system/{{ n }}.path:
   cmd.wait:
-    - name: systemctl enable watch-ecs-ca.path
+    - name: systemctl enable {{ n }}.path
     - watch:
-      - file: /etc/systemd/system/watch-ecs-ca.path
-      - file: /etc/systemd/system/watch-ecs-ca.service
+      - file: /etc/systemd/system/{{ n }}.path
+      - file: /etc/systemd/system/{{ n }}.service
+{% endfor %}

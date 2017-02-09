@@ -9,49 +9,87 @@ import argparse
 import mailbox
 import email
 import pwd
+import textwrap
+import datetime
+
+from html.parser import HTMLParser
 
 from raven import Client, get_version
 from raven.transport.requests import RequestsHTTPTransport
 from raven.utils.json import json
 
 
-class EnvDefault(argparse.Action):
-    def __init__(self, envvar, required=True, default=None, **kwargs):
-        if not default and envvar:
-            if envvar in os.environ:
-                default = os.environ[envvar]
-        if required and default:
-            required = False
-        super(EnvDefault, self).__init__(default=default, required=required,
-                                         **kwargs)
+class MLStripper(HTMLParser):
+    def __init__(self):
+        HTMLParser.__init__(self)
+        self.reset()
+        self.fed = []
 
-    def __call__(self, parser, namespace, values, option_string=None):
-        setattr(namespace, self.dest, values)
+    def handle_data(self, d):
+        self.fed.append(d)
 
-class JsonAction(argparse.Action):
-    def __init__(self, option_strings, dest, **kwargs):
-        super(JsonAction, self).__init__(option_strings, dest, **kwargs)
-    def __call__(self, parser, namespace, values, option_strings):
-        try:
-            values = json.loads(values)
-        except ValueError:
-            print('Invalid JSON was used for option {}.  Received: {}'.format(
-                option_strings, values), file=sys.stderr)
-            raise
-        setattr(namespace, self.dest, values)
+    def handle_entityref(self, name):
+        self.fed.append('&%s;' % name)
+
+    def handle_charref(self, name):
+        self.fed.append('&#%s;' % name)
+
+    def get_data(self):
+        return ''.join(self.fed)
+
+def _strip_once(value):
+    """
+    Internal tag stripping utility used by strip_tags.
+    """
+    s = MLStripper()
+    try:
+        s.feed(value)
+    except HTMLParseError:
+        return value
+    try:
+        s.close()
+    except HTMLParseError:
+        return s.get_data() + s.rawdata
+    else:
+        return s.get_data()
+
+def strip_tags(value):
+    """Returns the given HTML with all tags stripped."""
+    # Note: in typical case this loop executes _strip_once once. Loop condition
+    # is redundant, but helps to reduce number of executions of _strip_once.
+    while '<' in value and '>' in value:
+        new_value = _strip_once(value)
+        if len(new_value) >= len(value):
+            # _strip_once was not able to detect more tags
+            break
+        value = new_value
+    return value
+
+
+def html2text(htmltext):
+    text = HTMLParser().unescape(strip_tags(htmltext))
+    text = '\n\n'.join(re.split(r'\s*\n\s*\n\s*', text))
+    text = re.sub('\s\s\s+', ' ', text)
+    wrapper = textwrap.TextWrapper(
+        replace_whitespace=False, drop_whitespace=False, width=72)
+    return '\n'.join(wrapper.wrap(text))
+
 
 def exist_dir(x):
     if not os.path.isdir(x):
         raise argparse.ArgumentTypeError("{0} does not exist".format(x))
     return x
 
+
 def exist_file(x):
     if not os.path.exists(x):
         raise argparse.ArgumentTypeError("{0} does not exist".format(x))
     return x
 
+
 def get_uid():
     return pwd.getpwuid(os.geteuid())[0]
+
 
 def send_message(client, message, options):
     eventid = client.captureMessage(
@@ -76,31 +114,73 @@ def send_message(client, message, options):
 
     return (success, eventid)
 
+
+def send_mailbox(mbox, client, args):
+    margs = args.__dict__
+
+    for key, message in mbox.iteritems():
+        margs['culprit'] = message['From']
+        margs['timestamp'] = email.utils.parsedate_to_datetime(
+            message['Date']).astimezone(datetime.timezone.utc).replace(tzinfo=None).isoformat()
+        margs['logger'] = 'mailbox.maildir'
+        plain = ""
+        html = ""
+
+        for part in message.walk():
+            content_type = part.get_content_type()
+            if content_type == 'text/plain':
+                plain = part.get_payload(decode=True).decode()
+                break
+            elif content_type == 'text/html':
+                html = html2text(part.get_payload(decode=True).decode())
+
+        text = plain or html
+        margs['extra'] = {'content': text.splitlines()}
+        success, eventid = send_message(client, message['subject'], margs)
+        if success:
+            mbox.remove(key)
+
+
 def send_mbox(client, args):
     try:
         mbox = mailbox.mbox(args.mbox_message)
-        margs = args.__dict__
-
-        for message in mbox:
-            margs['culprit'] = message['From']
-            margs['date'] = email.utils.parsedate_to_datetime(message['Date'])
-            margs['logger'] = 'mailbox.mbox'
-
-            for k in message.walk():
-                if k.get_content_type() == 'text/plain':
-                    margs['extra'] = {'content': k.get_payload().splitlines()}
-                    break
-
-            success, eventid = send_message(client, message['subject'], margs)
-            if success:
-                # TODO: delete message from mbox
-                pass
+        send_mailbox(mbox, client, args)
     finally:
         if mbox:
             mbox.close()
 
-def send_maildir():
-    pass
+
+def send_maildir(client, args):
+    mbox = mailbox.Maildir(args.maildir_message)
+    send_mailbox(mbox, client, args)
+
+
+class EnvDefault(argparse.Action):
+    def __init__(self, envvar, required=True, default=None, **kwargs):
+        if not default and envvar:
+            if envvar in os.environ:
+                default = os.environ[envvar]
+        if required and default:
+            required = False
+        super(EnvDefault, self).__init__(default=default, required=required,
+                                         **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, values)
+
+
+class JsonAction(argparse.Action):
+    def __init__(self, option_strings, dest, **kwargs):
+        super(JsonAction, self).__init__(option_strings, dest, **kwargs)
+    def __call__(self, parser, namespace, values, option_strings):
+        try:
+            values = json.loads(values)
+        except ValueError:
+            print('Invalid JSON was used for option {}.  Received: {}'.format(
+                option_strings, values), file=sys.stderr)
+            raise
+        setattr(namespace, self.dest, values)
+
 
 def main():
     logging_choices= ('critical', 'error', 'warning', 'info', 'debug')
@@ -165,6 +245,7 @@ def main():
 
         success, eventid = send_message(client, args.message, args.__dict__)
         sys.exit(0 if success else 1)
+
 
 if __name__ == '__main__':
     main()

@@ -16,6 +16,8 @@ alias_maps = hash:/etc/aliases
 biff = no
 append_dot_mydomain = no
 readme_directory = no
+# use Maildir type spool directories
+mail_spool_directory = /var/mail/
 
 # TLS Incoming
 smtpd_use_tls=yes
