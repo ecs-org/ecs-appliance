@@ -4,6 +4,7 @@ ConditionFileNotEmpty=/run/active-env.yml
 ConditionFileNotEmpty=/root/.gnupg/secring.gpg
 ConditionFileNotEmpty=/root/.duply/appliance-backup/conf
 After=network.target
+OnFailure=service-failed@%n.service
 
 [Service]
 Type=oneshot
