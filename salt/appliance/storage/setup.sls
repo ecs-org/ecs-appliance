@@ -90,6 +90,7 @@ postfix_relocate_{{ source }}:
   ('prometheus', 1000, ''),
   ('alertmanager', 1000, ''),
   ('grafana', 1000, ''),
+  ('duplicity', '',''),
   ], salt['pillar.get']("appliance:storage:ignore:volatile",false)) }}
 
 {{ relocate_setup([
@@ -100,6 +101,7 @@ postfix_relocate_{{ source }}:
   ('/volatile/prometheus', '/app/prometheus', '', ''),
   ('/volatile/alertmanager', '/app/alertmanager', '', ''),
   ('/volatile/grafana', '/app/grafana', '', ''),
+  ('/volatile/duplicity', '/root/.cache/duplicity', '', ''),
   ]) }}
 
 # ### Data Setup
