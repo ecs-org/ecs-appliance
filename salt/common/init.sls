@@ -65,12 +65,25 @@ set_locale:
     - watch:
       - file: /etc/default/locale
 
-# XXX double the default RateLimitBurst, appliance startup is noisy
-/etc/systemd/journald.conf:
+# journald: double the default RateLimitBurst, appliance startup is noisy
+# journald: do not forward to syslog for storing, because we let journald store on disk
+{% for p,r in [
+  ("RateLimitBurst", "RateLimitBurst=2000"),
+  ("ForwardToSyslog", "ForwardToSyslog=No"),
+  ("Storage", "Storage=persistent"),
+  ] %}
+
+/etc/systemd/journald.conf_{{ p }}:
   file.replace:
-    - pattern: ^RateLimitBurst=.*
-    - repl: RateLimitBurst=2000
+    - name: /etc/systemd/journald.conf
+    - pattern: |
+        ^{{ p }}.*
+    - repl: |
+        {{ r }}
     - append_if_not_found: true
+{% endfor %}
+
+/etc/systemd/journald.conf:
   cmd.run:
     - name: systemctl restart systemd-journald
     - onchanges:
