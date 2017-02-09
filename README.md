@@ -35,36 +35,16 @@ The volatile volume must be labeled "ecs-volatile", the data volume "ecs-data".
 Use appliance:extra:states and :packages if storage setup needs additional packages installed.
 See salt/storage/README.md for futher information about storage:setup.
 
+qemu-img resize seedtest.img +8G
+qemu-img info seedtest.img
+
 ### install via ssh to a empty xenial vm
 
-on your local machine:
+ssh into target vm:
 
-if cloning from a private repository,
-copy the repository readonly ssh key to the target vm.
-(the saltstack part will correct permissions later)
-
-```
-ssh root@target.vm.ip '/bin/bash -c "mkdir -p /app/.ssh"'
-scp id_ed25519 root@target.vm.ip:/app/.ssh/id_ed25519
-```
-
-on target vm:
-
-+ clone from public repository
 ```
 apt-get -y update; apt-get -y install git
-git clone https://github.com/ethikkom/ecs-appliance /app/appliance
-```
-
-+ clone from private repository
-```
-apt-get -y update; apt-get -y install git
-GIT_SSH_COMMAND="ssh -i /app/.ssh/id_ed25519 " git clone \
-    ssh://git@gogs.target.domain:22/ecs/ecs-appliance.git /app/appliance
-```
-
-+ install saltstack and appliance software
-```
+git clone https://github.com/ecs-org/ecs-appliance /app/appliance
 cd /
 mkdir -p /etc/salt
 cp /app/appliance/salt/minion /etc/salt/minion
@@ -79,24 +59,21 @@ reboot
 
 on your local machine:
 
-+ clone ecs-appliance repository and start appliance install
 ```
-git clone https://github.com/ethikkom/ecs-appliance ~/ecs-appliance
+git clone https://github.com/ecs-org/ecs-appliance ~/ecs-appliance
 cd ~/ecs-appliance
 vagrant up
 ```
 
 ### upgrade a developer vm
 
+Requirement: you need at least 3gb total memory for the appliance.
+
 on a developer vm:
 
 ```
-# either clone from public repository
-git clone https://github.com/ethikkom/ecs-appliance /app/appliance
-
-# or clone from private repository
-git clone ssh://git@gogs.target.domain:22/ecs/ecs-appliance.git /app/appliance
-
+# clone from public repository
+git clone https://github.com/ecs-org/ecs-appliance /app/appliance
 # install saltstack and start appliance install
 curl -o /tmp/bootstrap_salt.sh -L https://bootstrap.saltstack.com
 sudo bash -c "mkdir -p /etc/salt; cp /app/appliance/salt/minion /etc/salt/minion; \
@@ -110,32 +87,6 @@ if you also want the builder (for building the appliance image) installed:
 sudo salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance": {"enabled": true}}'
 ```
 
-### upgrade a xenial desktop
-
-This is the same procedure as for the developer vm,
-but be aware that compared to a typical desktop the appliance
-configures strange defaults, enables and take over services.
-
-+ postgres data is relocated to /data/postgresql
-+ docker data is relocated to /volatile/docker
-+ a app user is created with homedir /app
-+ postgresql config, postgres user "app" and database "ecs"
-    + set password of user app for tcp connect to postgresql
-    + does not drop any data, unless told
-+ docker and docker container
-    + stops all container on first installation
-    + expects docker0 to be the default docker bridge with default ip values
-+ overwrites nginx, postfix, postgresql, stunnel configuration
-+ listens on default route interface on ports 22,25,80,443,465
-
-### Build Disk Image of unconfigured Appliance
-
-appliance gets build using packer.
-
-+ `vagrant up` installs all packages needed for builder
-    + to add builder on top of developer-vm or appliance:
-        + `sudo salt-call state.highstate pillar='{"builder": "enabled": true}}'`
-
 
 ## Configure Appliance
 
@@ -148,7 +99,7 @@ to create a new config for a production server:
 + either use vagrant to start a development server which can create new environments
     + start development server: `vagrant up`
 + or if you have saltstack installed on a linux machine you can execute env-create.sh & env-package.sh on your local machine without installing the appliance
-    + `git clone https://github.com/ethikkom/ecs-appliance  ~/path-to-project/ecs-appliance`
+    + `git clone https://github.com/ecs-org/ecs-appliance  ~/path-to-project/ecs-appliance`
     + add ~/path-to-project/ecs-appliance/salt/common/ to env-create.sh, env-package.sh calling
 
 + make a new env.yml: `env-create.sh domainname.domain ~/new/`
@@ -297,16 +248,28 @@ the appliance will report the following items to sentry:
 + salt-call exceptions and state returns with error states
 + systemd service exceptions where appliance-failed is triggered,
     or appliance_failed, appliance_exit, sentry_entry is called
++ mails to root, eg. prometheus alerts, smartmond
 
 ### Metrics
 
 + if APPLIANCE_METRIC_EXPORTER is set, metrics are exported from the subsystems
-+ if APPLIANCE_METRIC_SERVER is set, these exported metrics are collected and stored by a prometheus server
-+ if APPLIANCE_METRIC_GUI is set, a grafana server for displaying the collected metrics is available at http://localhost:3000
-+ if APPLIANCE_METRIC_PGHERO is set, a pghero instance for postgres inspection is avaiable at http://localhost:5081 
+    + export metrics of: 
+        frontend nginx, redis, memcached, uwsgi, cadvisor,
+        process details(uwsgi, postgres, nginx, celery), 
+        prometheus node(diskstats, entropy, filefd, filesystem, hwmon, loadavg,
+            mdadm, meminfo, netdev, netstat, stat, textfile, time, uname, vmstat)
+    + additional service metrics from: appliance-backup, appliance-update
++ if APPLIANCE_METRIC_SERVER is set, these exported metrics are collected and 
+    stored by a prometheus server and alerts are issued using the prometheus alert server
+    + there are alerts for: NodeRebootsTooOften, NodeFilesystemFree, NodeMemoryUsageHigh, NodeLoadHigh
+    + the prometheus gui is at http://172.17.0.1:9090
+    + the prometheus alert gui is at  http://172.17.0.1:9093
++ if APPLIANCE_METRIC_GUI is set, start a grafana server for displaying the collected metrics
+    + grafana is available at http://localhost:3000
++ if APPLIANCE_METRIC_PGHERO is set, a pghero instance for postgres inspection
+    + pghero is avaiable at http://localhost:5081 
 
-
-Use ssh port forwarding to access the server ports 3000 and 5081, eg. "ssh root@hostname -L 3000:localhost:3000"
+Use ssh port forwarding to access these ports, eg. for 172.17.0.1:9090 use "ssh root@hostname -L 9090:172.17.0.1:9090"
 
 ## Development
 
@@ -359,7 +322,9 @@ Path | Description
 |
 |-- appliance-update
 |   |
+|   |-- apt-daily unattended-upgrades
 |   |-- salt-call state.highstate
+?   ?-- optional reboot
 |   |-- systemctl restart appliance
 ```
 
@@ -401,12 +366,12 @@ path | remark
 /data/etc        | symlink target of /app/etc
 /data/ecs-pgdump | database migration dump and backup dump diretory
 /data/postgresql | referenced from moved /var/lib/postgresql
-/volatile  | data that can get deleted
 
 Volatile:
 
 path | remark
 --- | ---
+/volatile  | data that can get deleted
 /volatile/docker | referenced from moved /var/lib/docker
 /volatile/ecs-cache | Shared Cache Directory
 /volatile/ecs-backup-test | default target directory of unconfigured backup
