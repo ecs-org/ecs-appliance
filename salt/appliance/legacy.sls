@@ -1,32 +1,55 @@
-# custom legacy remove
+# #### custom legacy remove
 /var/mail/root:
   file.absent:
     - onlyif: test -f /var/mail/root
     - watch_in:
       - service: postfix
 
-# everything that should be absent but is not because of legacy
-# Example: 'memcached-exporter.service',
-{% set services_remove= [
+# services that need to be disabled
+# Example: 'appliance-cleanup.service',
+{% set services_disable= [
+'appliance-cleanup.service',
+'prepare-appliance.service',
+'prepare-ecs.service',
+'prepare-env.service',
   ]
 %}
+# services that need to be disabled, stopped and removed
+# Example: 'memcached-exporter.service',
+{% set services_remove= [
+]
+%}
+# paths that need to be removed
 # Example: '/root/.gpg',
 {% set paths_remove= [
   ]
 %}
-
-# everything that should have different user/group/permissions but is not because of legacy
+# paths that should have different user/group/permissions
 # Example: ('/app/etc/dehydrated/', 'app', 'app', '0755', '0664'),
 {% set path_user_group_dmode_fmode= [
   ]
 %}
 
 
-{% for f in services_remove %}
-service_remove_{{ f }}:
+# #### Functions
+
+{% for f in services_disable %}
+service_disable_{{ f }}:
   cmd.run:
     - name: systemctl disable {{ f }} || true
-    - onlyif: test -e /etc/systemd/system/{{ f }}
+    - onlyif: systemctl is-enabled {{ f }}
+{% endfor %}
+
+{% for f in services_remove %}
+service_disable_{{ f }}:
+  cmd.run:
+    - name: systemctl disable {{ f }} || true
+    - onlyif: systemctl is-enabled {{ f }}
+service_stop_{{ f }}:
+  cmd.run:
+    - name: systemctl stop {{ f }} || true
+    - onlyif: systemctl is-active {{ f }}
+service_remove_{{ f }}:
   file.absent:
     - name: /etc/systemd/system/{{ f }}
 {% endfor %}

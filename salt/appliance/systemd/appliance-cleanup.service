@@ -1,9 +1,8 @@
 [Unit]
 Description=Appliance Cleanup
-Requires=docker.service appliance.service
-PartOf=appliance.service
+Requires=docker.service
+Wants=appliance.service
 After=appliance.service
-ReloadPropagatedFrom=appliance.service
 
 [Service]
 Type=oneshot
@@ -12,8 +11,3 @@ ExecStart=/bin/bash -c "sleep 30; \
   docker-compose -f /app/etc/ecs/docker-compose.yml rm -v -f; \
   docker volume ls -q -f dangling=true | xargs -r docker volume rm; \
   docker images -q -f dangling=true | xargs -r docker rmi --force"
-
-ExecReload=/bin/true
-
-[Install]
-WantedBy=multi-user.target
