@@ -33,10 +33,10 @@ scrape_configs:
         - '{{ salt['pillar.get']('docker:ip') }}:5080'
 
   - job_name: 'uwsgi'
-    # uwsgi prometheus metric is exported from ecs.web container
+    # uwsgi prometheus metric is exported from ecs_uwsgi-exporter_1 container
     static_configs:
       - targets:
-        - '{{ salt['pillar.get']('docker:ip') }}:1717'
+        - '{{ salt['pillar.get']('docker:ip') }}:9117'
 
   - job_name: 'postgresql'
     static_configs:

@@ -19,9 +19,10 @@ services:
     env_file:
       - service_urls.env
       - database_url.env
+    expose:
+      - "8017"
     ports:
       - "127.0.0.1:5000:5000"
-      - "{{ salt['pillar.get']('docker:ip') }}:1717:1717"
     links:
       - redis
       - memcached
@@ -77,6 +78,15 @@ services:
       - memcached
     network_mode: "bridge"
     command: run /app/env/bin/celery -A ecs beat -l info
+
+  uwsgi-exporter:
+    image: timonwong/uwsgi-exporter
+    network_mode: "bridge"
+    ports:
+      - "{{ salt['pillar.get']('docker:ip') }}:9117:9117"
+    links:
+      - ecs.web
+    command: -log.level warning -stats.uri http://ecs_ecs.web_1:8017 -web.listen-address :9117
 
   memcached:
     image: memcached
