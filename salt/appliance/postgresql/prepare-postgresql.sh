@@ -1,20 +1,53 @@
 prepare_postgresql () {
-    local mem_kb mem_mb cores pg_mb
+    local mem_kb mem_mb pg_mb cores
     local MAX_CONNECTIONS SHARED_BUFFERS WORK_MEM EFFECTIVE_CACHE_SIZE
     local pgcfg=/etc/postgresql/9.5/main/postgresql.conf
-    #local template=/etc/postgresql/9.5/main/ecs.conf.template
-    #fixme: disabled template until tested
-    local template=/dev/null
+    local template=/etc/postgresql/9.5/main/ecs.conf.template
+
     # tune postgresql to current vm memory and cores
     mem_kb=$(cat /proc/meminfo  | grep -i memtotal | sed -r "s/[^:]+: *([0-9]+) .*/\1/g")
     mem_mb=$(( mem_kb / 1024))
     cores=$(nproc)
-    pg_mb=$((mem_mb - 1024 - cores * 1024)) # memory available for postgresql tuning
-    if test "$pg_mb" -le 256; then pg_mb=256; fi
-    MAX_CONNECTIONS=$((2+ cores+ 1+ cores+ 1+ 8)) # 1 core=14, 8 core=28
-    SHARED_BUFFERS=$((pg_mb / 4))MB
-    WORK_MEM=$((pg_mb / 4 * 1024 / MAX_CONNECTIONS))kB
-    EFFECTIVE_CACHE_SIZE=$((192 * pg_mb/256))MB
+
+    # memory available for postgresql tuning calculation
+    #   we reserve 2,5gb plus 256mb per core out of scope for postgres because of other apps
+    #   Range: 512MB < pg_mb
+    pg_mb=$((mem_mb - 2560 - cores * 256))
+    if test $pg_mb -le 512; then pg_mb=512; fi
+
+    # max_connections: default = 100
+    #   Minimum: (uwsgi:2+ cores)+ (smtpd:1)+ (celery-worker:cores)+ (pg_hero:3)+ (buffer:5)
+    #   Range: 44 <= MAX_CONNECTIONS <= 100 (if cores <= 8)
+    MAX_CONNECTIONS=$((4 + 32 + cores * 8))
+
+    # shared_buffers: default = 128MB
+    #   with 1GB or more of RAM, a reasonable starting value for shared_buffers
+    #   is 25% of the memory in your system. This buffer directly affects the cache hit ratio
+    SHARED_BUFFERS=$((pg_mb / 4))
+
+    # work_mem: default = 4MB
+    #   This size is applied to each and every sort done by each user, and
+    #   complex queries can use multiple working memory sort buffers.
+    #   Set to 50MB, have 30 queries, using 1.5GB of real memory,
+    #   if a query involves doing merge sorts of 8 tables, that requires 8 times work_mem.
+    #   Calculation is 4mb at 512pg_mb (which translates to 96 available work_mem buffers)
+    #   Range: 4MB < WORK_MEM < 64MB
+    WORK_MEM=$(((pg_mb - SHARED_BUFFERS) * 1024 / 96 / cores))
+    if test $WORK_MEM -lt 4096; then WORK_MEM=4096; fi
+    if test $WORK_MEM -gt 65536; then WORK_MEM=65536; fi
+
+    # effective_cache_size: default= 4GB
+    #   Setting effective_cache_size to 1/2 of total memory
+    #   would be a normal conservative setting, and 3/4 of memory is a more
+    #   aggressive but still reasonable amount.
+    #   Range: 2048MB < EFFECTIVE_CACHE_SIZE
+    EFFECTIVE_CACHE_SIZE=$((3 * pg_mb / 4))
+    if test $EFFECTIVE_CACHE_SIZE -lt 2048; then EFFECTIVE_CACHE_SIZE=2048; fi
+
+    # typify values
+    SHARED_BUFFERS="${SHARED_BUFFERS}MB"
+    WORK_MEM="${WORK_MEM}kB"
+    EFFECTIVE_CACHE_SIZE="${EFFECTIVE_CACHE_SIZE}MB"
 
     cp ${pgcfg} ${pgcfg}.org
     cat ${pgcfg}.org | \
@@ -24,6 +57,7 @@ prepare_postgresql () {
         sed -r "s/##WORK_MEM##/$WORK_MEM/g;s/##SHARED_BUFFERS##/$SHARED_BUFFERS/g" > ${pgcfg}.new
     if ! diff -q ${pgcfg}.org ${pgcfg}.new; then
         echo "Changed postgresql ecs config"
+        diff ${pgcfg}.org ${pgcfg}.new
         cp ${pgcfg}.new ${pgcfg}
         systemctl restart postgresql
     fi
