@@ -2,7 +2,8 @@ include:
   - docker
   - systemd.reload
 
-{% for i in ['pghero-container.service', 'pghero-query-stats.service', 'pghero-query-stats.timer'] %}
+{% for i in ['pghero-container.service',] %}
+# XXX disabled, needs a lot of space: 'pghero-query-stats.service', 'pghero-query-stats.timer'
 /etc/systemd/system/{{ i }}:
   file.managed:
     - source: salt://appliance/metric/pghero/{{ i }}
@@ -10,10 +11,12 @@ include:
       - cmd: systemd_reload
 {% endfor %}
 
-/usr/local/bin/recreate-pghero_query_stats:
+{% for i in ['recreate-pghero_query_stats', 'remove-pghero_query_stats'] %}
+/usr/local/share/appliance/{{ i }}:
   file.managed:
-    - source: salt://appliance/metric/pghero/recreate-pghero_query_stats
+    - source: salt://appliance/metric/pghero/{{ i }}
     - mode: 0755
+{% endfor %}
 
 pghero-container:
   service.enabled:
@@ -21,9 +24,13 @@ pghero-container:
       - sls: docker
       - file: /etc/systemd/system/pghero-container.service
 
+{#
+# XXX disabled, needs a lot of space
 pghero-query-stats.timer:
   service.enabled:
     - require:
       - sls: docker
       - file: /etc/systemd/system/pghero-query-stats.timer
       - file: /etc/systemd/system/pghero-query-stats.service
+
+#}

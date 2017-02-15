@@ -17,11 +17,14 @@
 # services that need to be disabled, stopped and removed
 # Example: 'memcached-exporter.service',
 {% set services_remove= [
-]
+'pghero-query-stats.service',
+'pghero-query-stats.timer',
+  ]
 %}
 # paths that need to be removed
 # Example: '/root/.gpg',
 {% set paths_remove= [
+'/usr/local/bin/recreate-pghero_query_stats',
   ]
 %}
 # paths that should have different user/group/permissions

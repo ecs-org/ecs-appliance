@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if $(gosu postgres psql -qtc "\du" | grep -iq "app.*superuser"); then
+    echo "Alter postgres user app to normal user"
+    gosu postgres psql -qtc "ALTER USER app NOSUPERUSER;"
+fi
+if $(gosu postgres psql ecs -qtc "\dt" | grep -q pghero_query_stats); then
+    echo "remove table pghero_query_stats"
+    gosu app psql ecs -c 'DROP TABLE "pghero_query_stats";'
+fi
