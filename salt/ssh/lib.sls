@@ -21,3 +21,13 @@
   {% endif %}
 
 {% endmacro %}
+
+{% macro remove_login_as_user_keys(user) %}
+{{ user }}_remove_keys_with_options:
+  file.replace:
+    - name: {{ salt['user.info'](user).home }}/.ssh/authorized_keys
+    - pattern: |
+        no.+,no.+,no.+,command=.echo..Please login as the user.+rather than the user.+;echo;sleep 10..
+    - repl: ""
+
+{% endmacro %}

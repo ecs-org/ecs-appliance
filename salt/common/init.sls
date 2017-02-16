@@ -15,6 +15,14 @@ salt-minion:
   file.managed:
     - source: salt://minion
 
+# pin salt-stack to x.y.* release, so we get updates but no major new version
+/etc/apt/preferences.d/saltstack-preferences:
+  file.managed:
+    - contents: |
+        Package: salt-*
+        Pin: version 2016.11.*
+        Pin-Priority: 900
+
 ubuntu_ppa_support:
   pkg.installed:
     - pkgs:
@@ -46,6 +54,8 @@ base_packages:
       - swaks
       - tmux
       - jq
+      - lynx
+      - mcedit
 
 system_timezone:
   timezone.system:

@@ -7,15 +7,14 @@
 {%- set gpg_call = 'gpg --quiet --no-default-keyring --enable-special-filenames --batch --yes --armor --gen-key' -%}
 {{ salt['cmd.run_stdout'](gpg_call, stdin=batch) }}
 {%- endmacro %}
-# ecs configuration settings
-# ##########################
+#cloud-config
+# XXX keep the "#cloud-config" line first and unchanged, software expects this header
+
 # change ecs:settings: EMAIL_BACKEND to 'django.core.mail.backends.smtp.EmailBackend'
 # change ecs:settings: ETHICS_COMMISSION_UUID to the desired uuid
-# change ip number to target ip and add this to your dns config:
 # {{ domain }}.   IN  A     1.2.3.4
 # {{ domain }}.   IN  MX    10  {{ domain }}
 # {{ domain }}.   IN  TXT   "v=spf1 mx ptr -all"
-
 ssh_authorized_keys:
   # # you can put your ssh keys here, this is also used by cloud-init
   # - "ssh-rsa and some long glibberish somebody@somewhere"
@@ -30,6 +29,8 @@ ssh_deprecated_keys:
   # # state.highstate will remove these keys from allowed login,
   # # additionaly this section serves as log of past access keys
   # - "ssh-rsa and some long glibberish somebody@somewhere"
+disable_root: false
+# disable_root set to false for cloud-config compatibility, appliance expects root to be usable
 appliance:
   # # standby: default false, if set appliance will not activate
   # standby: true

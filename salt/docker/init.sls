@@ -2,6 +2,25 @@ include:
   - python
   - systemd.reload
 
+# pin docker to x.y.* release, so we get updates but no major new version
+/etc/apt/preferences.d/docker-preferences:
+  file.managed:
+    - contents: |
+        Package: docker-engine
+        Pin: version 1.12.*
+        Pin-Priority: 900
+
+# add docker options from pillar to etc/default config, add http_proxy if set
+/etc/default/docker:
+  file.managed:
+    - contents: |
+        DOCKER_OPTIONS="{{ salt['pillar.get']('docker:options', '') }}"
+{%- if salt['pillar.get']('http_proxy', '') != '' %}
+  {%- for a in ['http_proxy', 'HTTP_PROXY'] %}
+        {{ a }}="{{ salt['pillar.get']('http_proxy') }}"
+  {%- endfor %}
+{%- endif %}
+
 # enable cgroup memory and swap accounting, needs kernel restart
 docker-grub-settings:
   file.managed:
@@ -13,16 +32,6 @@ docker-grub-settings:
     - name: update-grub
     - watch:
       - file: docker-grub-settings
-
-/etc/default/docker:
-  file.managed:
-    - contents: |
-        DOCKER_OPTIONS="{{ salt['pillar.get']('docker:options', '') }}"
-{%- if salt['pillar.get']('http_proxy', '') != '' %}
-  {%- for a in ['http_proxy', 'HTTP_PROXY'] %}
-        {{ a }}="{{ salt['pillar.get']('http_proxy') }}"
-  {%- endfor %}
-{%- endif %}
 
 docker-requisites:
   pkg.installed:
@@ -68,6 +77,7 @@ docker:
       - docker-engine
     - require:
       - pkgrepo: docker
+      - file: /etc/apt/preferences.d/docker-preferences
       - network: docker-network
 
   service.running:
