@@ -45,23 +45,23 @@ else
 fi
 
 
-# ### add ecs-homepage repository to /app/ecs-homepage
-if test ! -e /app/ecs-homepage; then install -g app -o app -d /app/ecs-homepage; fi
-cd /app/ecs-homepage
+# ### add ecs-docs repository to /app/ecs-docs
+if test ! -e /app/ecs-docs; then install -g app -o app -d /app/ecs-docs; fi
+cd /app/ecs-docs
 current_source=$(gosu app git config --get remote.origin.url || echo "")
-if test "$ECS_DOC_GIT_SOURCE" != "$current_source"; then
-    cd /; rm -r /app/ecs-homepage
-    install -g app -o app -d /app/ecs-homepage; cd /app/ecs-homepage
+if test "$ECS_DOCS_GIT_SOURCE" != "$current_source"; then
+    cd /; rm -r /app/ecs-docs
+    install -g app -o app -d /app/ecs-docs; cd /app/ecs-docs
 fi
-if test ! -e /app/ecs-homepage/index.html; then
-    gosu app git clone --branch master $ECS_DOC_GIT_SOURCE /app/ecs-homepage
+if test ! -e /app/ecs-docs/index.html; then
+    gosu app git clone --branch $ECS_DOCS_GIT_BRANCH $ECS_DOCS_GIT_SOURCE /app/ecs-docs
 fi
 gosu app git fetch -a -p
-gosu app git checkout -f master
-gosu app git reset --hard $(gosu app git rev-parse origin/master)
-# ### copy /app/ecs-homepage/user-manual-de to /app/ecs/static/help
+gosu app git checkout -f $ECS_DOCS_GIT_BRANCH
+gosu app git reset --hard $(gosu app git rev-parse origin/$ECS_DOCS_GIT_BRANCH)
+# ### copy /app/ecs-docs/user-manual-de to /app/ecs/static/help
 if test -e /app/ecs/static/help; then rm -r /app/ecs/static/help; fi
-cp -Ra /app/ecs-homepage/user-manual-de/ /app/ecs/static/help
+cp -Ra /app/ecs-docs/user-manual-de/ /app/ecs/static/help
 
 
 # ### rebuild images

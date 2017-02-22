@@ -3,7 +3,8 @@
 ECS_DATABASE="${ECS_DATABASE:-ecs}"
 ECS_GIT_BRANCH="${ECS_GIT_BRANCH:-master}"
 ECS_GIT_SOURCE="${ECS_GIT_SOURCE:-https://github.com/ecs-org/ecs.git}"
-ECS_DOC_GIT_SOURCE="${ECS_DOC_GIT_SOURCE:-https://github.com/ecs-org/ecs-docs.git}"
+ECS_DOCS_GIT_SOURCE="${ECS_DOCS_GIT_SOURCE:-https://github.com/ecs-org/ecs-docs.git}"
+ECS_DOCS_GIT_BRANCH="${ECS_DOCS_GIT_BRANCH:-gh-pages}"
 APPLIANCE_GIT_BRANCH=${APPLIANCE_GIT_BRANCH:-master}
 APPLIANCE_GIT_SOURCE="${APPLIANCE_GIT_SOURCE:-https://github.com/ecs-org/ecs-appliance.git}"
 

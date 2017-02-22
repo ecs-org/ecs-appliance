@@ -25,6 +25,7 @@
 # Example: '/root/.gpg',
 {% set paths_remove= [
 '/usr/local/bin/recreate-pghero_query_stats',
+'/app/ecs-homepage',
   ]
 %}
 # paths that should have different user/group/permissions
