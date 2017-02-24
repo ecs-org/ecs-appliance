@@ -50,7 +50,7 @@ metric_service_{{ name }}:
     - watch_in:
       - cmd: metric_service_alertmanager
 
-/app/prometheus/metric_import:
+/app/etc/metric_import:
   file.directory:
     - makedirs: true
     - user: 1000

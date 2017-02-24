@@ -1,4 +1,4 @@
-prepare_metric () {
+prepare_metric() {
     # set/clear flags and start/stop services connected to flags
     services="cadvisor.service node-exporter.service postgres_exporter.service process-exporter.service"
     if is_truestr "$APPLIANCE_METRIC_EXPORTER"; then
@@ -54,23 +54,65 @@ unmute_alerts() {
 }
 
 
-manual_metric() {
-    local outputname
-    outputname=$(mktemp -p /app/prometheus/metric_import -u manual_job_XXXX.prom)
-    printf "%s" "$1" > ${outputname}.$$
-    mv ${outputname}.$$ ${outputname}
+mk_metric() {
+    local metric value_type helptext value labels timestamp
+    if test "$1" = ""; then
+        cat <<"EOF"
+$0 $1=metric, $2=value_type, $3=helptext, $4=value[, $5=labels{,}[, $6=timestamp-epoch{now}]]
+$2=value_type can be one of "counter, gauge, untyped"
+$4=value float but can have "Nan", "+Inf", and "-Inf" as valid values
+$5=labels string [name="value"[,name="value"]*]?
+$6=timestamp-epoch-milliseconds int64 , optional, default is now: "$(date +%s)000"
+EOF
+        return
+    fi
+    metric="$1"
+    value_type="$2"
+    helptext="$3"
+    value="$4"
+    labels="$5"
+    timestamp="$6"
+    if test "$labels" != ""; then labels="{$labels}"; fi
+    if test "$timestamp" = ""; then timestamp="$(date +%s)000"; fi
+    printf '# HELP %s %3s\n# TYPE %1s %2s\n%1s%5s %4s %6s\n' \
+        "$metric" "$helptext" \
+        "$metric" "$value_type" \
+        "$metric" "$labels" "$value" "$timestamp"
 }
 
+
+metric_export() {
+    # usage: $1= metric output name  $2..$x= metric data
+    local metric outputname
+    metric=$1
+    outputname=/app/etc/metric_import/${metric}.temp
+    shift
+    printf "%s\n" "$1" > ${outputname}
+    shift
+    while test "$1" != ""; do
+        printf "%s\n" "$1" >> ${outputname}
+        shift
+    done
+    chown 1000:1000 ${outputname}
+    mv ${outputname} $(dirname ${outputname})/${metric}.prom
+}
+
+
 simple_metric() {
-    # call with $1=id , $2=type , $3=help , $4=value [,$5=timestamp-epoch]
-    # make $5 (timestamp-epoch) the current time by using $(date +%s)
-    # type can be one of "counter, gauge, untyped"
-    # value if float but can take "Nan", ""+Inf", and ""-Inf" as valid values
     local data
-    data="
-# HELP $1 $3
-# TYPE $1 $2
-$1 $4 $5
-"
-    manual_metric $data
+    if test "$1" = ""; then
+        cat <<"EOF"
+see mk_metric for detailed usage
+
+example:
+simple_metric appliance_version_info gauge "ecs and appliance version" 1 \
+"appliance_git_rev=\"$(gosu app git -C /app/appliance rev-parse HEAD)\",\
+appliance_git_branch=\"$(gosu app git -C /app/appliance rev-parse --abbrev-ref HEAD)\",\
+ecs_git_rev=\"$(gosu app git -C /app/ecs rev-parse HEAD)\",\
+ecs_git_branch=\"$(gosu app git -C /app/ecs rev-parse --abbrev-ref HEAD)\""
+EOF
+        return
+    fi
+    data=$(mk_metric "$@")
+    metric_export "$1" "$data"
 }

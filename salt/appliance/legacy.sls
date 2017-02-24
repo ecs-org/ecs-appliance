@@ -26,6 +26,7 @@
 {% set paths_remove= [
 '/usr/local/bin/recreate-pghero_query_stats',
 '/app/ecs-homepage',
+'/app/prometheus/metric_import',
   ]
 %}
 # paths that should have different user/group/permissions

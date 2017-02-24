@@ -135,7 +135,7 @@ def send_mailbox(mbox, client, args):
                 html = html2text(part.get_payload(decode=True).decode())
 
         text = plain or html
-        margs['extra'] = {'content': text.splitlines()}
+        margs['extra'] = {'content': [a for a in text.splitlines() if a.strip()]}
         success, eventid = send_message(client, message['subject'], margs)
         if success:
             mbox.remove(key)

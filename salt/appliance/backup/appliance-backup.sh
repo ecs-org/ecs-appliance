@@ -1,5 +1,9 @@
 #!/bin/bash
 . /usr/local/share/appliance/appliance.include
+. /usr/local/share/appliance/prepare-metric.sh
+
+# remember start time
+start_epoch_seconds=$(date +%s)
 
 # assure database exists
 gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw ecs
@@ -59,3 +63,22 @@ if test "$?" -ne "0"; then
     sentry_entry "Appliance Backup" "duply purge-full error" "warning" \
         "$(service_status appliance-backup.service)"
 fi
+
+# calculate used space
+volumesizekb=$(( 25*1024))
+volumes=$(/usr/bin/duply /root/.duply/appliance-backup/ status | \
+    grep "Total number of contained volumes:" | \
+    sed -r "s/[^:]+[^0-9]*([0-9]+)/\1/g" | \
+    awk '{s+=$1} END {print s}')
+backupspacekb=$(( volumes * volumesizekb ))
+
+# calculate runtime
+end_epoch_seconds=$(date +%s)
+duration=$(( end_epoch_seconds - start_epoch_seconds ))
+
+# create and export metric to prometheus
+backup_running_time=$(mk_metric backup_running_time gauge "The number of seconds for a backup run" \
+    $duration "" ${start_epoch_seconds}000)
+backup_space_usage=$(mk_metric backup_space_usage gauge "The number of kilo-bytes used in backupspace" \
+    $backupspacekb "volumes=\"$volumes\"")
+metric_export backup "${backup_running_time}" "${backup_space_usage}"

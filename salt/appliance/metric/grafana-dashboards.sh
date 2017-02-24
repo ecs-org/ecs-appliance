@@ -1,5 +1,13 @@
 #!/bin/bash
 
+dashboard_exists () {
+    printf "%s" "$2" | grep -q "\"$1\""
+}
+
+dashboard_id () {
+    printf "%s" "$2" | grep "\"$1\"" | sed -r "s/..id.:([0-9]+).*/\1/"
+}
+
 usage () {
   cat << EOF
 
@@ -30,6 +38,8 @@ if test "$1" = "export"; then
 elif test "$1" = "import"; then
     server=$3
     targetdir=$2
+elif test "$1" = "list"; then
+    server=$2
 else
     echo "error: either export or import is required"
     usage
@@ -54,18 +64,52 @@ if test "$cmd" = "export"; then
     if test ! -d "$targetdir"; then
         mkdir -p "$targetdir"
     fi
-    for dashboard in $(curl -sSL -k -H "Authorization: Bearer ${GRAFANA_KEY}" "${HOST}/api/search?query=&" | jq '.' |grep -i uri|awk -F '"uri": "' '{ print $2 }'|awk -F '"' '{print $1 }'); do
+
+    for dashboard in $(curl -sSLk "${HOST}/api/search?query=&" \
+        -H "Authorization: Bearer ${GRAFANA_KEY}" | \
+        jq '.' | grep -i uri | awk -F '"uri": "' '{ print $2 }' | \
+        awk -F '"' '{print $1 }'); do
+
         dashboardfile=$(echo ${dashboard}|sed 's,db/,,g').json
         echo "Processing $dashboardfile"
-        curl -s -k -H "Authorization: Bearer ${GRAFANA_KEY}" "${HOST}/api/dashboards/${dashboard}" | jq '.dashboard.id = null | .overwrite = true | del(.meta) | del(.__inputs) | del(.__requires) ' > "$targetdir/$dashboardfile"
+        curl -sSLk "${HOST}/api/dashboards/${dashboard}" \
+            -H "Authorization: Bearer ${GRAFANA_KEY}" | \
+            jq '.dashboard.id = null | .overwrite = true | del(.meta) | del(.__inputs) | del(.__requires)' > "$targetdir/$dashboardfile"
     done
-else
+
+elif test "$cmd" = "import"; then
+    current_list=$(curl -sSLk "${HOST}/api/search?query=&" \
+        -H "Authorization: Bearer ${GRAFANA_KEY}" | \
+        jq -r ".[]| {id,title} |tostring ")
+
     for dashboardfile in $targetdir/*.json; do
-        echo "Processing $dashboardfile"
-        curl -s -k -XPOST "${HOST}/api/dashboards/db" --data-binary @./$dashboardfile \
-      		-H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: Bearer ${GRAFANA_KEY}"
-      	printf "\n"
+        title=$(cat $dashboardfile | jq -r ".dashboard.title")
+        echo "Processing $dashboardfile ($title)"
+
+        if dashboard_exists "$title" "$current_list"; then
+            id=$(dashboard_id "$title" "$current_list")
+            echo "Updating: $title with id $id "
+            cat $dashboardfile | jq '.overwrite = true | .dashboard.id = '$id | \
+                curl -sSLk -XPOST "${HOST}/api/dashboards/db" \
+                -H "Authorization: Bearer ${GRAFANA_KEY}" \
+                -H "Content-Type: application/json" \
+                -H "Accept: application/json" \
+                --data-binary @-
+        else
+            echo "New Dashboard: $title"
+            cat $dashboardfile | jq '.overwrite = false' | \
+                curl -sSLk -XPOST "${HOST}/api/dashboards/db" \
+                -H "Authorization: Bearer ${GRAFANA_KEY}" \
+                -H "Content-Type: application/json" \
+                -H "Accept: application/json" \
+                --data-binary @-
+        fi
+        printf "\n"
   	done
+else
+    current_list=$(curl -sSLk -H "Authorization: Bearer ${GRAFANA_KEY}" "${HOST}/api/search?query=&" | \
+        jq -r ".[]| {id,title} |tostring ")
+    echo "$current_list"
 fi
 
 kill $tunnel_pid
