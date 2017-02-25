@@ -56,6 +56,7 @@ base_packages:
       - jq
       - lynx
       - mcedit
+      - htop
 
 system_timezone:
   timezone.system:
