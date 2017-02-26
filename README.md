@@ -220,8 +220,9 @@ systemctl restart appliance
 
 + untested:
     +  `docker-compose -f /app/etc/ecs/docker-compose.yml run --no-deps ecs.web run ./manage.py shell_plus`
-    + most spent time in high.state: `journalctl -u appliance-update | grep -B 5 -E "Duration: [0-9]{3,5}\."`
-
+    + most spent time in high.state:
+        + `journalctl -u appliance-update | grep -B 5 -E "Duration: [0-9]{3,5}\."`
+        + `journalctl -u appliance-update | grep "ID:" -A6 | grep -E "(ID:|Function:|Duration:)" | sed -r "s/.*(ID:|Function:|Duration)(.*)/\1 \2/g" | paste -s -d '  \n'  - | sed -r "s/ID: +([^ ]+) Function: +([^ ]+) Duration : ([^ ]+ ms)/\3 \2 \1/g" |sort -n`
 ### Logging
 
 Container:

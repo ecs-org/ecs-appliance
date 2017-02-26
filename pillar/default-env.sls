@@ -51,14 +51,6 @@ appliance:
   #     - qrcode
   #   packages: # include extra packages at state.highstate
   #     - ghostscript
-  # env:
-  #   package:
-  #     # list of email addresses to send encrypted env package to
-  #     recipients: email@address email@address
-  #     keys: # list of public keys to be used by gpg to encrypt the env package
-  #       - |
-  #           # public gpg key here
-  #
   storage:
     # # setup default empty, will be executed if volatile or data can not be found
     # setup: |

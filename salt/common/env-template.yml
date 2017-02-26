@@ -1,3 +1,5 @@
+#cloud-config
+# XXX keep the "#cloud-config" line first and unchanged, software expects this header
 {%- macro ssl_secret(len=39) -%}
 {{ salt['cmd.run_stdout']('openssl rand -base64 39') }}
 {%- endmacro %}
@@ -7,14 +9,15 @@
 {%- set gpg_call = 'gpg --quiet --no-default-keyring --enable-special-filenames --batch --yes --armor --gen-key' -%}
 {{ salt['cmd.run_stdout'](gpg_call, stdin=batch) }}
 {%- endmacro %}
-#cloud-config
-# XXX keep the "#cloud-config" line first and unchanged, software expects this header
 
 # change ecs:settings: EMAIL_BACKEND to 'django.core.mail.backends.smtp.EmailBackend'
 # change ecs:settings: ETHICS_COMMISSION_UUID to the desired uuid
+# change dns domain to include:
 # {{ domain }}.   IN  A     1.2.3.4
 # {{ domain }}.   IN  MX    10  {{ domain }}
 # {{ domain }}.   IN  TXT   "v=spf1 mx ptr -all"
+# 4.3.2.1.in-addr.arpa. IN  PTR  {{ domain }}.
+
 ssh_authorized_keys:
   # # you can put your ssh keys here, this is also used by cloud-init
   # - "ssh-rsa and some long glibberish somebody@somewhere"
@@ -31,6 +34,7 @@ ssh_deprecated_keys:
   # - "ssh-rsa and some long glibberish somebody@somewhere"
 disable_root: false
 # disable_root set to false for cloud-config compatibility, appliance expects root to be usable
+
 appliance:
   # # standby: default false, if set appliance will not activate
   # standby: true
@@ -47,7 +51,7 @@ appliance:
     # # cert: if set ssl key for https host will be used, default empty
     # cert: filename-cert.pem
   # # sentry:dsn set to your sentry url, must be the same as ecs_settings: SENTRY_DSN
-{%- if extra.appliance.sentry.dsn|d(false) %}
+{%- if extra.appliance.sentry|d(false) %}
   sentry:
 {{ extra.appliance.sentry|yaml(false)|indent(4,True) }}
 {%- else %}
@@ -64,7 +68,7 @@ appliance:
   #   gui: false
   #   pghero: false
 {%- endif %}
-{%- if extra.appliance.git.source|d(false) %}
+{%- if extra.appliance.git|d(false) %}
   git:
 {{ extra.appliance.git|yaml(false)|indent(4,True) }}
 {%- else %}
@@ -73,7 +77,8 @@ appliance:
   #   branch: master
   #   source: git_url
 {%- endif %}
-{%- if extra.appliance.extra.files|d(false) %}
+{%- if extra.appliance.extra|d(false) and
+    extra.appliance.extra.files|d(false) %}
   extra:
     files:
   {%- for f_dict in extra.appliance.extra.files %}
@@ -102,29 +107,6 @@ appliance:
   #     - qrcode
   #   packages: # include extra packages at state.highstate
   #     - ghostscript
-{%- if extra.appliance.env.package.keys|d(false) %}
-  env:
-    package:
-      # # recipients: list of email addresses to send encrypted env package to
-  {%- if extra.appliance.env.package.recipients|d(false) %}
-      recipients: {{ extra.appliance.env.package.recipients }}
-  {%- else %}
-      # recipients: "email@address email@address"
-  {%- endif %}
-      keys:
-  {%- for key in extra.appliance.env.package.keys %}
-        - |
-{{ key|indent(12,True) }}
-  {%- endfor %}
-{%- else %}
-  # env:
-  #   package:
-  #     # # recipients: list of email addresses to send encrypted env package to
-  #     recipients: "email@address email@address"
-  #     keys: # list of public keys to be used by gpg to encrypt the env package
-  #       - |
-  #           # public gpg key here
-{%- endif %}
   storage:
     # # setup: optional, will be executed by appliance.storage.setup if volatile or data can not be found
     # setup: |
@@ -140,7 +122,7 @@ appliance:
 {{ gpg_secret('ecs_backup')|indent(8,True) }}
 
 ecs:
-{%- if extra.ecs.git.source|d(false) %}
+{%- if extra.ecs.git|d(false) %}
   git:
 {{ extra.ecs.git|yaml(false)|indent(4,True) }}
 {%- else %}
@@ -158,7 +140,7 @@ ecs:
       SECURE_PROXY_SSL = True
       ECS_REQUIRE_CLIENT_CERTS = True
       DEBUG = False
-{%- if extra.appliance.sentry.dsn|d(false) %}
+{%- if extra.appliance.sentry|d(false) %}
       SENTRY_DSN = '{{ extra.appliance.sentry.dsn }}'
 {%- else %}
       # SENTRY_DSN = 'https://url' # set to sentry url if available
