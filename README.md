@@ -14,9 +14,13 @@ Contents:
 The base of the appliance is Ubuntu Xenial (16.04).
 
 You either need:
-+ a already running Ubuntu Xenial and a ssh key to login
-    + use the xenial server iso as a install image on a local hypervisor.
-    + use any xenial cloud-image if you want to use the appliance in a cloud.
++ a standard ubuntu cloud image from http://cloud-images.ubuntu.com/xenial/current/ for executing on your hypervisor
+    + a cloud-init cidata iso volume with your public key 
+        + a prebuilt cidata iso with the vagrant user and the insecure vagrant ssh key
+            + https://raw.githubusercontent.com/ecs-org/cidata-seed/master/vagrant-growroot.iso
+        + you can build your own iso using https://github.com/ecs-org/cidata-seed/
++ an already running empty Ubuntu Xenial and a ssh key to login
+    + eg. if your rootserver hoster has a default xenial image
 + a local development machine with vagrant and a hypervisor for vagrant installed.
     + vagrant will setup the base machine for you
 
@@ -28,15 +32,16 @@ as the default xenial cloud & vagrant images layout.
 This image consists of a DOS-MBR and partition one taking all the space as the root partition.
 The Vagrant version has initrd grow-root support, so p1 will resize to maximum on reboot.
 
-For custom storage partitions or network attached storage, 
-add a custom storage:setup object to setup storage partitions.
-Change storage:ignore:volatile and/or storage:ignore:data to false to automatically setup mountpoints for /data and /volatile.
+#### custom storage partitions or network attached storage
+
+Add a custom storage:setup object to setup storage partitions.
+To have seperate volatile and/or data partitions, 
+change storage:ignore:volatile and/or storage:ignore:data to false.
+Setup will add mountpoints for /data and /volatile.
 The volatile volume must be labeled "ecs-volatile", the data volume "ecs-data".
 Use appliance:extra:states and :packages if storage setup needs additional packages installed.
-See salt/storage/README.md for futher information about storage:setup.
+See salt/storage/README.md for further information about storage:setup.
 
-qemu-img resize seedtest.img +8G
-qemu-img info seedtest.img
 
 ### install via ssh to a empty xenial vm
 
@@ -52,7 +57,6 @@ curl -o /tmp/bootstrap_salt.sh -L https://bootstrap.saltstack.com
 chmod +x /tmp/bootstrap_salt.sh
 /tmp/bootstrap_salt.sh -X
 salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
-reboot
 ```
 
 ### install using vagrant
@@ -95,26 +99,28 @@ sudo salt-call state.highstate pillar='{"builder": {"enabled": true}, "appliance
 for a development server, run `cp /app/appliance/salt/pillar/default-env.sls /app/env.yml`
 and edit settings in /app/env.yml .
 
-to create a new config for a production server:
-+ either use vagrant to start a development server which can create new environments
-    + start development server: `vagrant up`
-+ or if you have saltstack installed on a linux machine you can execute env-create.sh & env-package.sh on your local machine without installing the appliance
-    + `git clone https://github.com/ecs-org/ecs-appliance  ~/path-to-project/ecs-appliance`
-    + add ~/path-to-project/ecs-appliance/salt/common/ to env-create.sh, env-package.sh calling
-
-+ make a new env.yml: `env-create.sh domainname.domain ~/new/`
-+ edit settings in ~/new/env.yml , select correct ethic commission id
-+ optional, package env into different formats
-    +  `env-package.sh --requirements; env-package.sh ~/new/env.yml`
-
-+ print out ~/new/env.yml.pdf
-+ save and keep ~/new/domainname.env.date_time.tar.gz.gpg
-+ copy ~/new/env.yml to appliance machine at /app/env.yml
+for offline environment creation, using your local machine:
++ have saltstack installed (minion does not need to run)
++ `git clone https://github.com/ecs-org/ecs-appliance  ~/path-to-project/ecs-appliance`
++ use env-create.sh and env-package.sh like explained below,
+    but add ~/path-to-project/ecs-appliance/salt/common/ to the callpath.
++ copy ~/domainname.domain/env.yml to appliance machine at /app/env.yml
 
 ```
 ssh root@target.vm.ip '/bin/bash -c "mkdir -p /app/"'
 scp env.yml root@target.vm.ip:/app/env.yml
 ```
+
+### on an installed but unconfigured appliance
+
++ enter installed but empty appliance
++ make a new env.yml: `env-create.sh domainname.domain ~/domainname.domain/`
++ edit settings in ~/domainname.domain/env.yml , see comments inside file
++ optional, package env into different formats
+    +  `env-package.sh --requirements; env-package.sh ~/domainname.domain/env.yml`
+
++ print out ~/domainname.domain/env.yml.pdf
++ transfer and keep ~/domainname.domain/domainname.env.date_time.tar.gz.gpg
 
 ### Activate Config
 
@@ -126,15 +132,24 @@ sudo -u postgres createdb ecs -T template0  -l de_DE.utf8
 # activate env and apply new environment settings
 chmod 0600 /app/env.yml
 cp /app/env.yml /run/active-env.yml
-systemctl start appliance-update
+reboot
+```
 
+#### First Internal User setup
+
+After the appliance has rebooted, it configures itself to the new environment.
+See the progress of the preperation by browsing to https://domainname.domain  
+After the appliance is ready and shows the login screen, login via ssh to create
+the first internal office user, with a corresponding client certificate.
+
+```
 # create first internal office user (f=female, m=male)
 create-internal-user.sh useremail@domain.name "First Name" "Second Name" "f" 
 
 # create and send matching client certificate
 create-client-cert.sh useremail@domain.name cert_name [daysvalid]
 
-# Write down user password and client certificate transport password
+# Communicate certificate transport password over a secure channel
 ```
 
 ## Maintenance
@@ -261,7 +276,8 @@ the appliance will report the following items to sentry:
             mdadm, meminfo, netdev, netstat, stat, textfile, time, uname, vmstat)
     + additional service metrics from: appliance-backup, appliance-update
 + if APPLIANCE_METRIC_SERVER is set, these exported metrics are collected and 
-    stored by a prometheus server and alerts are issued using the prometheus alert server
+    stored by a prometheus server and alerts are issued using email to root
+    using the prometheus alert server
     + there are alerts for: NodeRebootsTooOften, NodeFilesystemFree, NodeMemoryUsageHigh, NodeLoadHigh
     + the prometheus gui is at http://172.17.0.1:9090
     + the prometheus alert gui is at  http://172.17.0.1:9093
