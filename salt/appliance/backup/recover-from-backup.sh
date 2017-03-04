@@ -1,4 +1,6 @@
 #!/bin/bash
+. /usr/local/share/appliance/env.include
+. /usr/local/share/appliance/prepare-backup.sh
 
 usage(){
     cat << EOF
@@ -28,9 +30,8 @@ if test "$1" != "--yes-i-am-sure"; then
     usage
 fi
 
-# check a valid active environment with working backup config targeting the needed backup data
+# check if valid active environment and activate environment
 env-update.sh
-. /usr/local/share/appliance/env.include
 ENV_YML=/run/active-env.yml userdata_to_env ecs,appliance
 if test $? -ne 0; then echo "error: could not activate userdata environment"; usage; fi
 
@@ -57,19 +58,22 @@ rm /app/etc/tags/last_running_ecs
 systemctl disable appliance-backup
 
 echo "write duply config"
-mkdir -p /root/.gnupg
-find /root/.gnupg -mindepth 1 -name "*.gpg*" -delete
-echo "$APPLIANCE_BACKUP_ENCRYPT" | gpg --homedir /root/.gnupg --batch --yes --import --
-# write out backup target and gpg_key to duply config
-gpg_key_id=$(gpg --keyid-format 0xshort --list-key ecs_backup | grep pub | sed -r "s/pub.+0x([0-9A-F]+).+/\1/g")
-cat /root/.duply/appliance-backup/conf.template | \
-    sed -r "s#^TARGET=.*#TARGET=$APPLIANCE_BACKUP_URL#;s#^GPG_KEY=.*#GPG_KEY=$gpg_key_id#" > \
-    /root/.duply/appliance-backup/conf
+prepare_backup
+
+# test if appliance:backup:mount:type is set, mount backup storage
+if test "$APPLIANCE_BACKUP_MOUNT_TYPE" != ""; then
+    mount_backup_target
+fi
 
 echo "restore files and database dump from backup"
 duply /root/.duply/appliance-backup restore /data/restore
 # add last backup config to cachedir, so we can detect if backup url has changed
 cp /root/.duply/appliance-backup/conf  /root/.cache/duplicity/duply_appliance-backup/conf
+
+# test if appliance:backup:mount:type is set, unmount backup storage
+if test "$APPLIANCE_BACKUP_MOUNT_TYPE" != ""; then
+    unmount_backup_target
+fi
 
 echo "move restored files to target directory"
 if test -e "/data/ecs-storage-vault-old"; then rm -r "/data/ecs-storage-vault-old"; fi

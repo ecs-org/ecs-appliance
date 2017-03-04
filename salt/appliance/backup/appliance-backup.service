@@ -3,7 +3,8 @@ Description=Appliance Backup
 ConditionFileNotEmpty=/run/active-env.yml
 ConditionFileNotEmpty=/root/.gnupg/secring.gpg
 ConditionFileNotEmpty=/root/.duply/appliance-backup/conf
-After=network.target
+After=network.target postgresql.service
+Requires=postgresql.service
 OnFailure=service-failed@%n.service
 
 [Service]

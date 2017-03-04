@@ -24,7 +24,7 @@ appliance:
     # cert: filename-cert.pem
 
   # # sentry:dsn (the sentry target url) default empty, if set will report errors to sentry
-  # #   must be the same as ecs_settings: SENTRY_DSN
+  # #   may be the same as ecs_settings: SENTRY_DSN
   # sentry:
   #   dsn: 'https://url'
   # # metric:exporter default false, if set will also start metric exporter
@@ -67,6 +67,14 @@ appliance:
 
   backup:
     url: file:///volatile/ecs-backup-test/
+    # options: "string of options directly passed to duplicity"
+    # # mount default empty, script will mount & unmount source to target on backup run
+    # mount:
+    #   type: "cifs"
+    #   source: "//1.2.3.4/datavolume"
+    #   target: "/mnt/appliance-backup-mount"
+    #   options: "user=username,pass=password"
+    # # options are passed to mount via "-o"
     encrypt: |
         -----BEGIN PGP PRIVATE KEY BLOCK-----
         Version: GnuPG v1

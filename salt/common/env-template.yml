@@ -33,7 +33,7 @@ ssh_deprecated_keys:
   # # additionaly this section serves as log of past access keys
   # - "ssh-rsa and some long glibberish somebody@somewhere"
 disable_root: false
-# disable_root set to false for cloud-config compatibility, appliance expects root to be usable
+# disable_root set to false for cloud-init compatibility, appliance expects root to be usable
 
 appliance:
   # # standby: default false, if set appliance will not activate
@@ -50,7 +50,7 @@ appliance:
     # key: filename-key.pem
     # # cert: if set ssl key for https host will be used, default empty
     # cert: filename-cert.pem
-  # # sentry:dsn set to your sentry url, must be the same as ecs_settings: SENTRY_DSN
+  # # sentry:dsn set to your sentry url, may be the same as ecs:settings:SENTRY_DSN
 {%- if extra.appliance.sentry|d(false) %}
   sentry:
 {{ extra.appliance.sentry|yaml(false)|indent(4,True) }}
@@ -118,6 +118,14 @@ appliance:
       data: true
   backup:
     url: file:///volatile/ecs-backup-test/
+    # options: "string of options directly passed to duplicity"
+    # # mount default empty, script will mount & unmount source to target on backup run
+    # mount:
+    #   type: "cifs"
+    #   source: "//1.2.3.4/datavolume"
+    #   target: "/mnt/appliance-backup-mount"
+    #   options: "user=username,pass=password"
+    # # options are passed to mount via "-o"
     encrypt: |
 {{ gpg_secret('ecs_backup')|indent(8,True) }}
 

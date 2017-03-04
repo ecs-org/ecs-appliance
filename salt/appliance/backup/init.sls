@@ -8,6 +8,7 @@ backup:
       - duplicity
       - lftp
       - gnupg
+      - cifs-utils
       # https://sourceforge.net/projects/pgbarman/
 
 /usr/local/share/appliance/prepare-backup.sh:

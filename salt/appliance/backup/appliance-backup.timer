@@ -2,8 +2,8 @@
 Description=Appliance Backup Timer
 
 [Timer]
-# daily at 01:30 am
-OnCalendar=*-*-* 01:30:00
+# daily at 00:30 am
+OnCalendar=*-*-* 00:30:00
 
 [Install]
 WantedBy=timers.target
