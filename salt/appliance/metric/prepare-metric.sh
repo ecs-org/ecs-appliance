@@ -62,7 +62,8 @@ $0 $1=metric, $2=value_type, $3=helptext, $4=value[, $5=labels{,}[, $6=timestamp
 $2=value_type can be one of "counter, gauge, untyped"
 $4=value float but can have "Nan", "+Inf", and "-Inf" as valid values
 $5=labels string [name="value"[,name="value"]*]?
-$6=timestamp-epoch-milliseconds int64 , optional, default is now: "$(date +%s)000"
+$6=timestamp-epoch-milliseconds int64, optional, default is empty
+   use eg. "$(date +%s)000" for now
 EOF
         return
     fi
@@ -73,11 +74,17 @@ EOF
     labels="$5"
     timestamp="$6"
     if test "$labels" != ""; then labels="{$labels}"; fi
-    if test "$timestamp" = ""; then timestamp="$(date +%s)000"; fi
-    printf '# HELP %s %3s\n# TYPE %1s %2s\n%1s%5s %4s %6s\n' \
-        "$metric" "$helptext" \
-        "$metric" "$value_type" \
-        "$metric" "$labels" "$value" "$timestamp"
+    if test "$timestamp" != ""; then
+        printf '# HELP %s %s\n# TYPE %s %s\n%s%s %s %s\n' \
+            "$metric" "$helptext" \
+            "$metric" "$value_type" \
+            "$metric" "$labels" "$value" "$timestamp"
+    else
+        printf '# HELP %s %s\n# TYPE %s %s\n%s%s %s\n' \
+            "$metric" "$helptext" \
+            "$metric" "$value_type" \
+            "$metric" "$labels" "$value"
+    fi
 }
 
 

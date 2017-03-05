@@ -14,32 +14,45 @@ ALERT NodeRebootsTooOften
     }
 
 ALERT NodeFilesystemFreeLowRoot
-    IF node_filesystem_free{mountpoint="/rootfs"} / node_filesystem_size{mountpoint="/rootfs"} < 0.2
+    IF node_filesystem_free{mountpoint="/rootfs"} / node_filesystem_size{mountpoint="/rootfs"} < 0.15
     ANNOTATIONS {
         summary = "Node filesystem free space on {{ $labels.device }} is low",
-        description = "Node {{ $labels.instance }}'s filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 20% disk space remaining.",
+        description = "Node {{ $labels.instance }}'s filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 15% disk space remaining.",
+    }
+
+ALERT NodeFilesystemFreeLowBoot
+    IF node_filesystem_free{mountpoint="/rootfs/boot"} / node_filesystem_size{mountpoint="/rootfs/boot"} < 0.15
+    ANNOTATIONS {
+        summary = "Node filesystem free space on {{ $labels.device }} is low",
+        description = "Node {{ $labels.instance }}'s filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 15% disk space remaining.",
     }
 
 ALERT NodeFilesystemFreeLowData
-    IF node_filesystem_free{mountpoint="/rootfs/data"} / node_filesystem_size{mountpoint="/rootfs/data"} < 0.2
+    IF node_filesystem_free{mountpoint="/rootfs/data"} / node_filesystem_size{mountpoint="/rootfs/data"} < 0.15
     ANNOTATIONS {
         summary = "Node filesystem free space on {{ $labels.device }} is low",
-        description = "Node {{ $labels.instance }}'s filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 20% disk space remaining.",
+        description = "Node {{ $labels.instance }}'s filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 15% disk space remaining.",
     }
 
 ALERT NodeFilesystemFreeLowVolatile
-    IF node_filesystem_free{mountpoint="/rootfs/volatile"} / node_filesystem_size{mountpoint="/rootfs/volatile"} < 0.2
+    IF node_filesystem_free{mountpoint="/rootfs/volatile"} / node_filesystem_size{mountpoint="/rootfs/volatile"} < 0.15
     ANNOTATIONS {
         summary = "Node filesystem free space on {{ $labels.device }} is low",
-        description = "Node {{ $labels.instance }}'s filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 20% disk space remaining.",
+        description = "Node {{ $labels.instance }}'s filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 15% disk space remaining.",
     }
 
-# {job='node'}
-ALERT NodeMemoryUsageHigh
-    IF (node_memory_MemFree + node_memory_Cached - node_memory_Inactive) / 1048576 < 512
+ALERT NodeMemoryUsageHigh400mb
+    IF (node_memory_MemFree + node_memory_Cached - node_memory_Inactive) / 1048576 < 400
     ANNOTATIONS {
         summary = "Instance {{ $labels.instance }} memory usage is high",
-        description = "This device's free memory is less than the threshold (512mb) with a value of {{ $value }}.",
+        description = "This device's free memory is less than the threshold (400mb) with a value of {{ $value }}.",
+    }
+
+ALERT NodeMemoryUsageHigh10percent
+    IF (node_memory_MemFree + node_memory_Cached - node_memory_Inactive) < (node_memory_MemTotal / 10)
+    ANNOTATIONS {
+        summary = "Instance {{ $labels.instance }} memory usage is high",
+        description = "This device's free memory is less than the threshold (10%) with a value of {{ $value }}.",
     }
 
 ALERT NodeLoadHigh

@@ -7,5 +7,5 @@ Type=simple
 Environment=ENV_YML=/run/active-env.yml
 ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_to_env ecs,appliance; \
     . /usr/local/share/appliance/appliance.include; \
-    extra=$(systemctl status -l -q --no-pager -n 20 %I.service | text2json); \
+    extra=$(systemctl status -l -q --no-pager -n 40 %I | text2json); \
     sentry_entry "Service %I Error" "Service (%I) failed" error "$extra"'
