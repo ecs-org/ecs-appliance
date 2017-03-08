@@ -89,7 +89,7 @@ end_epoch_seconds=$(date +%s)
 duration=$(( end_epoch_seconds - start_epoch_seconds ))
 
 # create and export metric to prometheus
-backup_last_start_time=$(mk_metric backup_last_start_time counter "The start of the last backup run as epoch-nanoseconds" ${start_epoch_seconds}000)
+backup_last_start_time=$(mk_metric backup_last_start_time counter "The start of the last backup run as timestamp-epoch-seconds" ${start_epoch_seconds})
 backup_last_duration=$(mk_metric backup_last_duration gauge "The number of seconds of the last backup run" $duration)
 backup_last_size=$(mk_metric backup_last_size gauge "The number of kilo-bytes used in backupspace" $backupspacekb)
 backup_last_volumes=$(mk_metric backup_last_volumes gauge "The number of 25mb volumes used in backupspace" $volumes)
