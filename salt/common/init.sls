@@ -76,10 +76,10 @@ set_locale:
     - watch:
       - file: /etc/default/locale
 
-# journald: double the default RateLimitBurst, appliance startup is noisy
+# journald: triple the default RateLimitBurst, appliance startup is noisy
 # journald: do not forward to syslog for storing, because we let journald store on disk
 {% for p,r in [
-  ("RateLimitBurst", "RateLimitBurst=2000"),
+  ("RateLimitBurst", "RateLimitBurst=3000"),
   ("ForwardToSyslog", "ForwardToSyslog=No"),
   ("Storage", "Storage=persistent"),
   ] %}
