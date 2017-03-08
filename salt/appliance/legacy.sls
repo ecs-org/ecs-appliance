@@ -27,6 +27,8 @@
 '/usr/local/bin/recreate-pghero_query_stats',
 '/app/ecs-homepage',
 '/app/prometheus/metric_import',
+'/app/etc/flags/rebuild_wanted_appliance',
+'/app/etc/flags/rebuild_wanted_ecs',
   ]
 %}
 # paths that should have different user/group/permissions

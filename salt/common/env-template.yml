@@ -107,6 +107,21 @@ appliance:
   #     - qrcode
   #   packages: # include extra packages at state.highstate
   #     - ghostscript
+{%- if extra.appliance.update|d(false) %}
+  update:
+  {%- if extra.appliance.extra.update.oncalendar|d(false) %}
+    oncalendar: {{ extra.appliance.update.oncalendar }}
+  {%- endif %}
+    automatic: {{ extra.appliance.update.automatic|d(true) }}
+{%- else %}
+  # # update:oncalendar: # set a different update timer than default: "*-*-* 06:30:00"
+  # # update:automatic: # default to true, to disable automatic update set to false
+  # # XXX do not update in the time between 00:30 and 06:30 because backup runs at this time
+  # # XXX Important: use metric recording and active alert collection if you use automatic update
+  # update:
+  #   automatic: true
+  #   oncalendar: Sun *-*-* 06:30:00
+{%- endif %}
   storage:
     # # setup: optional, will be executed by appliance.storage.setup if volatile or data can not be found
     # setup: |

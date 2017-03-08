@@ -8,58 +8,6 @@ ECS_DOCS_GIT_BRANCH="${ECS_DOCS_GIT_BRANCH:-gh-pages}"
 APPLIANCE_GIT_BRANCH=${APPLIANCE_GIT_BRANCH:-master}
 APPLIANCE_GIT_SOURCE="${APPLIANCE_GIT_SOURCE:-https://github.com/ecs-org/ecs-appliance.git}"
 
-appliance_update_available(){
-    local current_source target last_running
-    local appliance_need_update=true
-    if test -e /app/appliance; then
-        cd /app/appliance
-        current_source=$(gosu app git config --get remote.origin.url || echo "")
-        if test "$APPLIANCE_GIT_SOURCE" = "$current_source"; then
-            # fetch all updates from origin
-            gosu app git fetch -a -p
-            if test "$APPLIANCE_GIT_COMMITID" != ""; then
-                target="$APPLIANCE_GIT_COMMITID"
-            else
-                target=$(gosu app git rev-parse origin/$APPLIANCE_GIT_BRANCH)
-            fi
-            last_running=$(gosu app git rev-parse HEAD)
-            if test "$last_running" = "$target"; then
-                appliance_need_update=false
-            fi
-        fi
-    fi
-    $appliance_need_update
-}
-
-ecs_update_available() {
-    local current_source target last_running
-    local ecs_need_update=true
-    if test ! -e /app/bin/devupdate.sh; then
-        if test -e /app/ecs; then
-            cd /app/ecs
-            current_source=$(gosu app git config --get remote.origin.url || echo "")
-            if test "$ECS_GIT_SOURCE" = "$current_source"; then
-                # fetch all updates from origin
-                gosu app git fetch -a -p
-                if test "$ECS_GIT_COMMITID" != ""; then
-                    target="$ECS_GIT_COMMITID"
-                else
-                    target=$(gosu app git -C /app/ecs rev-parse origin/$ECS_GIT_BRANCH)
-                fi
-                last_running=$(cat /app/etc/tags/last_running_ecs 2> /dev/null || echo "invalid")
-                if test "$last_running" = "$target"; then
-                    ecs_need_update=false
-                fi
-            fi
-        fi
-    fi
-    $ecs_need_update
-}
-
-update_available(){
-    return $(appliance_update_available || ecs_update_available)
-}
-
 text2json(){
     python3 -c "import sys, json; \
     d={\"status\": sys.stdin.read().split(\"\n\")}; json.dump(d, sys.stdout)"

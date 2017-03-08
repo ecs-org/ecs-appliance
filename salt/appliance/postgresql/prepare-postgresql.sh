@@ -57,13 +57,17 @@ prepare_postgresql () {
         sed -r "s/##WORK_MEM##/$WORK_MEM/g;s/##SHARED_BUFFERS##/$SHARED_BUFFERS/g" > ${pgcfg}.new
     if ! diff -q ${pgcfg}.org ${pgcfg}.new; then
         echo "Changed postgresql ecs config"
-        diff ${pgcfg}.org ${pgcfg}.new
+        diff -u ${pgcfg}.org ${pgcfg}.new
         cp ${pgcfg}.new ${pgcfg}
         systemctl restart postgresql
     fi
 }
 
 prepare_database () {
+    gosu postgres pg_isready --timeout=10
+    if test $? -ne 0; then
+        appliance_failed "Appliance Standby" "Appliance is in standby, postgresql is not ready after 10 seconds"
+    fi
     # check if ecs database exists
     gosu postgres psql -lqt | cut -d \| -f 1 | grep -qw "$ECS_DATABASE"
     if test $? -ne 0; then

@@ -1,3 +1,5 @@
+#cloud-config
+# XXX keep the "#cloud-config" line first and unchanged, software expects this header
 ssh_authorized_keys:
   # # put ssh keys here, this is also used by cloud-init
   # - "ssh-rsa and some long glibberish somebody@somewhere"
@@ -5,6 +7,9 @@ ssh_deprecated_keys:
   # # copy deprecated ssh keys here,
   # # state.highstate will remove these old keys from users
   # - "ssh-rsa and some long glibberish somebody@somewhere"
+disable_root: false
+# disable_root set to false for cloud-init compatibility, appliance expects root to be usable
+
 appliance:
   # # standby: default false, if set appliance will not activate
   # standby: true
@@ -51,6 +56,13 @@ appliance:
   #     - qrcode
   #   packages: # include extra packages at state.highstate
   #     - ghostscript
+  # # update:oncalendar: # set a different update timer than default: "*-*-* 06:30:00"
+  # # update:automatic: # default to true, to disable automatic update set to false
+  # # XXX: do not update in the time between 00:30 and 06:30 because backup runs at this time
+  # # XXX Important: use metric recording and active alert collection if you use automatic update
+  # update:
+  #   automatic: true
+  #   oncalendar: Sun *-*-* 06:30:00
   storage:
     # # setup default empty, will be executed if volatile or data can not be found
     # setup: |

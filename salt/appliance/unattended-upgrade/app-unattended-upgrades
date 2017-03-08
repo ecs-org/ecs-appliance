@@ -1,6 +1,0 @@
-+ run after backup complete
-
-# unattended all package upgrade
-/usr/bin/unattended-upgrade
-
-systemctl start appliance-update

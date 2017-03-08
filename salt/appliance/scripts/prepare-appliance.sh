@@ -10,6 +10,7 @@ set -o pipefail
 . /usr/local/share/appliance/prepare-postfix.sh
 . /usr/local/share/appliance/prepare-stunnel.sh
 . /usr/local/share/appliance/prepare-nginx.sh
+. /usr/local/share/appliance/prepare-update.sh
 
 # ### Runtime Configuration
 # Dependency order:
@@ -35,11 +36,12 @@ systemctl start nginx
 prepare_storage         # storage setup
 prepare_storagevault    # storagevault gpg keys setup
 prepare_extra_files     # write out extra files from env
-prepare_database        # database setup
 prepare_postgresql      # postgresql tuning
+prepare_database        # database setup
 prepare_metric          # metric collection
 prepare_backup          # backup setup
 prepare_ssl             # ssl key,certs,dhparam setup
 prepare_postfix         # postfix setup
 prepare_stunnel         # stunnel setup
+prepare_update          # update setup
 prepare_nginx           # nginx setup

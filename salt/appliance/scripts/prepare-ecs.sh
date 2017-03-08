@@ -1,6 +1,8 @@
 #!/bin/bash
 . /usr/local/share/appliance/appliance.include
+. /usr/local/share/appliance/prepare-metric.sh
 
+start_epoch_seconds=$(date +%s)
 last_running=$(cat /app/etc/tags/last_running_ecs 2> /dev/null || echo "invalid")
 need_migration=false
 target="invalid"
@@ -74,14 +76,15 @@ for n in redis:3 oliver006/redis_exporter memcached prom/memcached-exporter \
     docker pull $n
 done
 
-if test -e /app/etc/flags/rebuild_wanted_ecs -o \
+if test -e /app/etc/flags/force.update.ecs -o \
     "$last_running" = "devserver" -o \
     "$target" != "$last_running"; then
 
-    if test -e /app/etc/flags/rebuild_wanted_ecs; then
-        rm /app/etc/flags/rebuild_wanted_ecs
+    if test -e /app/etc/flags/force.update.ecs; then
+        rm /app/etc/flags/force.update.ecs
     fi
     appliance_status "Appliance Update" "Building ECS $target (current= $last_running)"
+    simple_metric ecs_last_update counter "timestamp-epoch-seconds since last update to ecs" $start_epoch_seconds
     if ! docker-compose build mocca pdfas ecs.web; then
         sentry_entry "Appliance Update" "ECS build failed" error
         if test "$last_running" = "invalid"; then
@@ -96,7 +99,9 @@ else
     exit 0
 fi
 printf "%s" "$target" > /app/etc/tags/last_build_ecs
-
+simple_metric ecs_version gauge "ecs_version" 1 \
+"git_rev=\"$(gosu app git -C /app/ecs rev-parse HEAD)\",\
+git_branch=\"$(gosu app git -C /app/ecs rev-parse --abbrev-ref HEAD)\""
 
 # ### migrate database
 if $need_migration; then
@@ -109,8 +114,10 @@ if $need_migration; then
         appliance_failed "Appliance Error" "Could not pgdump database $ECS_DATABASE before starting migration"
     fi
     appliance_status "Appliance Update" "Migrating ecs database"
+    simple_metric ecs_last_migrate counter "timestamp-epoch-seconds since last ecs database migration" $start_epoch_seconds
     (docker images -q ecs/ecs:latest || echo "invalid") > /app/etc/tags/last_running_ecs_image
     printf "%s" "$target" > /app/etc/tags/last_running_ecs
+    printf "%s" "$target" > /app/etc/tags/last_migration_ecs
     docker-compose run --no-deps --rm --name ecs.migration ecs.web migrate
     err=$?
     if test $err -ne 0; then

@@ -22,6 +22,7 @@ postgresql:
   pkg.installed:
     - pkgs:
       - postgresql
+      - postgresql-9.5
       - postgresql-contrib
   service.running:
     - enable: true

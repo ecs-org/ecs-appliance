@@ -58,7 +58,7 @@ mk_metric() {
     local metric value_type helptext value labels timestamp
     if test "$1" = ""; then
         cat <<"EOF"
-$0 $1=metric, $2=value_type, $3=helptext, $4=value[, $5=labels{,}[, $6=timestamp-epoch{now}]]
+$0 $1=metric, $2=value_type, $3=helptext, $4=value[, $5=labels{,}[, $6=timestamp-epoch-milliseconds]]
 $2=value_type can be one of "counter, gauge, untyped"
 $4=value float but can have "Nan", "+Inf", and "-Inf" as valid values
 $5=labels string [name="value"[,name="value"]*]?
@@ -112,7 +112,7 @@ simple_metric() {
 see mk_metric for detailed usage
 
 example:
-simple_metric appliance_version_info gauge "ecs and appliance version" 1 \
+simple_metric test_metric gauge "ecs and appliance version" 1 \
 "appliance_git_rev=\"$(gosu app git -C /app/appliance rev-parse HEAD)\",\
 appliance_git_branch=\"$(gosu app git -C /app/appliance rev-parse --abbrev-ref HEAD)\",\
 ecs_git_rev=\"$(gosu app git -C /app/ecs rev-parse HEAD)\",\
