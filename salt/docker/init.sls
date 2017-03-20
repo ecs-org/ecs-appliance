@@ -7,7 +7,7 @@ include:
   file.managed:
     - contents: |
         Package: docker-engine
-        Pin: version 1.12.*
+        Pin: version 1.13.*
         Pin-Priority: 900
 
 # add docker options from pillar to etc/default config, add http_proxy if set
