@@ -21,6 +21,12 @@ readme_directory = no
 # use Maildir type spool directories
 mail_spool_directory = /var/mail/
 
+# connect postfix with opendkim milter
+milter_default_action = accept
+milter_protocol   = 6
+smtpd_milters     = inet:localhost:12345
+non_smtpd_milters = inet:localhost:12345
+
 # TLS Incoming
 smtpd_use_tls=yes
 # enforce the server cipher preference

@@ -1,7 +1,13 @@
 #cloud-config
 # XXX keep the "#cloud-config" line first and unchanged, software expects this header
-{%- macro ssl_secret(len=39) -%}
+{%- macro base64_secret(len=39) -%}
 {{ salt['cmd.run_stdout']('openssl rand -base64 39') }}
+{%- endmacro %}
+{%- macro rsa_secret(len=2048) -%}
+{{ salt['cmd.run_stdout']('openssl genrsa '+ len|string) }}
+{%- endmacro %}
+{%- macro rsa_public_from_secret(secret) -%}
+{{ salt['cmd.run_stdout']("openssl rsa  -pubout | sed '1d;$d' | tr -d '\n'", stdin=secret, python_shell=True) }}
 {%- endmacro %}
 {%- macro gpg_secret(ownername) -%}
 {%- set batch = 'Key-Type: 1\nKey-Length: 2048\nExpire-Date: 0\n'+
@@ -9,13 +15,19 @@
 {%- set gpg_call = 'gpg --quiet --no-default-keyring --enable-special-filenames --batch --yes --armor --gen-key' -%}
 {{ salt['cmd.run_stdout'](gpg_call, stdin=batch) }}
 {%- endmacro %}
+{%- set dkim_secretkey= rsa_secret() %}
+{%- set dkim_publickey= rsa_public_from_secret(dkim_secretkey) %}
 
 # change ecs:settings: EMAIL_BACKEND to 'django.core.mail.backends.smtp.EmailBackend'
 # change ecs:settings: ETHICS_COMMISSION_UUID to the desired uuid
-# change dns domain to include:
-# {{ domain }}.   IN  A     1.2.3.4
-# {{ domain }}.   IN  MX    10  {{ domain }}
-# {{ domain }}.   IN  TXT   "v=spf1 mx ptr -all"
+# change dns domain to include (replace 1.2.3.4 and 4.3.2.1 with actual ip address):
+# @   IN  A     1.2.3.4
+# @   IN  MX    10  @
+# @   IN  TXT   "v=spf1 a mx ptr ~all"
+# default._domainkey    IN  TXT   ("v=DKIM1; k=rsa; t=n; s=email; "
+#    "p={{ dkim_publickey[:250] }}"
+#    "{{ dkim_publickey[250:] }}")
+# for gui-dns: default.domainkey:v=DKIM1; k=rsa; t=n; s=email; p={{ dkim_publickey }}
 # 4.3.2.1.in-addr.arpa. IN  PTR  {{ domain }}.
 
 ssh_authorized_keys:
@@ -125,12 +137,13 @@ appliance:
   storage:
     # # setup: optional, will be executed by appliance.storage.setup if volatile or data can not be found
     # setup: |
-    # proxy_cache: true
-    # # default false, if true 10 additional GB diskspace are used
-    # # for operating polipo, a http proxy cache
+    #
     ignore: # default false, if true: will not look for ecs-volatile or ecs-data filesystem
       volatile: true
       data: true
+  dkim:
+    key: |
+{{ dkim_secretkey|indent(8,True) }}
   backup:
     url: file:///volatile/ecs-backup-test/
     # options: "string of options directly passed to duplicity"
@@ -170,9 +183,9 @@ ecs:
 {%- endif %}
       ETHICS_COMMISSION_UUID = 'ecececececececececececececececec'
 
-      SECRET_KEY = '{{ ssl_secret() }}'
-      REGISTRATION_SECRET = '{{ ssl_secret() }}'
-      PASSWORD_RESET_SECRET = '{{ ssl_secret() }}'
+      SECRET_KEY = '{{ base64_secret() }}'
+      REGISTRATION_SECRET = '{{ base64_secret() }}'
+      PASSWORD_RESET_SECRET = '{{ base64_secret() }}'
 
       EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
       EMAIL_BACKEND_UNFILTERED = 'django.core.mail.backends.smtp.EmailBackend'

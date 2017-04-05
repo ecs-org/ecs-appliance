@@ -1,0 +1,5 @@
+# Command-line options specified here will override the contents of
+# /etc/opendkim.conf. See opendkim(8) for a complete list of options.
+#DAEMON_OPTS=""
+#
+SOCKET="inet:12345@localhost"
