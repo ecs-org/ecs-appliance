@@ -16,6 +16,19 @@ include:
         additional_net: {{ salt['pillar.get']('docker:net') }}
         domain: {{ salt['pillar.get']('appliance:domain') }}
 
+# remove if is file, because we switch to maildir
+/var/mail/root:
+  file.absent:
+    - onlyif: test -f /var/mail/root
+    - watch_in:
+      - service: postfix
+
+opendkim:
+  pkg.installed:
+    - pkgs:
+      - opendkim
+      - opendkim-tools
+
 /etc/opendkim.conf:
   file.managed:
     - source: salt://appliance/postfix/opendkim.conf
@@ -28,14 +41,7 @@ include:
   file.managed:
     - source: salt://appliance/postfix/opendkim.default
 
-opendkim:
-  pkg.installed:
-    - pkgs:
-      - opendkim
-      - opendkim-tools
-
 {%- set dkimkey= salt['pillar.get']('appliance:dkim:key', False) or salt['cmd.run_stdout']('openssl genrsa 2048') %}
-
 /etc/dkimkeys/dkim.key:
   file.managed:
     - user: opendkim
@@ -51,10 +57,10 @@ opendkim.service:
     - enable: true
     - require:
       - pkg: opendkim
-      - file: /etc/dkimkeys/dkim.key
     - watch:
-      - file: /etc/dkimkeys/dkim.key
+      - file: /etc/opendkim.conf
       - file: /etc/default/opendkim
+      - file: /etc/dkimkeys/dkim.key
 
 postfix:
   pkg.installed:

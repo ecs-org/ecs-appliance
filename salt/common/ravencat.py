@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import re
 import sys
 import logging
@@ -11,12 +10,14 @@ import email
 import pwd
 import textwrap
 import datetime
-
 from html.parser import HTMLParser
 
+import chardet
 from raven import Client, get_version
 from raven.transport.requests import RequestsHTTPTransport
 from raven.utils.json import json
+
+logger = logging.getLogger(__name__)
 
 
 class MLStripper(HTMLParser):
@@ -37,6 +38,7 @@ class MLStripper(HTMLParser):
     def get_data(self):
         return ''.join(self.fed)
 
+
 def _strip_once(value):
     """
     Internal tag stripping utility used by strip_tags.
@@ -52,6 +54,7 @@ def _strip_once(value):
         return s.get_data() + s.rawdata
     else:
         return s.get_data()
+
 
 def strip_tags(value):
     """Returns the given HTML with all tags stripped."""
@@ -73,6 +76,20 @@ def html2text(htmltext):
     wrapper = textwrap.TextWrapper(
         replace_whitespace=False, drop_whitespace=False, width=72)
     return '\n'.join(wrapper.wrap(text))
+
+
+def _get_content(message_part):
+    payload = message_part.get_payload(decode=True)
+    if message_part.get_content_charset() is None:
+        charset = chardet.detect(payload)['encoding']
+        logger.info(
+            'no content charset declared, detection result: {0}'.format(charset))
+    else:
+        charset = message_part.get_content_charset()
+    content = str(payload, charset, "replace")
+    logger.debug('message-part: type: {0} charset: {1}'.format(
+        message_part.get_content_type(), charset))
+    return content
 
 
 def exist_dir(x):
@@ -118,25 +135,28 @@ def send_message(client, message, options):
 def send_mailbox(mbox, client, args):
     margs = args.__dict__
 
-    for key, message in mbox.iteritems():
-        margs['culprit'] = message['From']
+    for key, msg in mbox.iteritems():
+        margs['culprit'] = msg['From']
         margs['timestamp'] = email.utils.parsedate_to_datetime(
-            message['Date']).astimezone(datetime.timezone.utc).replace(tzinfo=None).isoformat()
+            msg['Date']).astimezone(datetime.timezone.utc).replace(tzinfo=None).isoformat()
         margs['logger'] = 'mailbox.maildir'
         plain = ""
         html = ""
 
-        for part in message.walk():
-            content_type = part.get_content_type()
-            if content_type == 'text/plain':
-                plain = part.get_payload(decode=True).decode()
-                break
-            elif content_type == 'text/html':
-                html = html2text(part.get_payload(decode=True).decode())
+        for part in msg.walk():
+            if part.get_content_maintype() == 'multipart':
+                continue
+            elif part.get_content_type() == 'text/plain':
+                plain = _get_content(part)
+            elif part.get_content_type() == 'text/html':
+                html = html2text(_get_content(part))
+            else:
+                print('skipping {0}'.format(part.get_content_type()))
+                continue
 
         text = plain or html
         margs['extra'] = {'content': [a for a in text.splitlines() if a.strip()]}
-        success, eventid = send_message(client, message['subject'], margs)
+        success, eventid = send_message(client, msg['subject'], margs)
         if success:
             mbox.remove(key)
 
@@ -184,8 +204,8 @@ class JsonAction(argparse.Action):
 
 def main():
     logging_choices= ('critical', 'error', 'warning', 'info', 'debug')
-    root = logging.getLogger('sentry.errors')
-    root.setLevel(logging.DEBUG)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,

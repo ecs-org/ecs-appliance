@@ -128,6 +128,7 @@ python-common-packages:
       - python-requests
       - python3-yaml
       - python3-requests
+      - python3-chardet
     - require:
       - sls: python
 {{ pip2_install('raven') }}

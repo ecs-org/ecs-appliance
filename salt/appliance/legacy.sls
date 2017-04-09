@@ -1,9 +1,4 @@
 # #### custom legacy remove
-/var/mail/root:
-  file.absent:
-    - onlyif: test -f /var/mail/root
-    - watch_in:
-      - service: postfix
 
 # services that need to be disabled
 # Example: 'appliance-cleanup.service',
