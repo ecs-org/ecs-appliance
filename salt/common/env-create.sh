@@ -2,12 +2,16 @@
 
 usage() {
     cat << EOF
-Usage: $0 [--template custom-template]
-      [--extra additional-yaml-env]
-      domain targetdir [optional salt-call parameter]
+Usage: $0 [optional script parameter] domain targetfile [salt-call parameter]
+
+optional script parameter:
+    --template custom-template      # use a different template. Default= $template
+    --extra additional-yaml-env     # use additional yaml parameter for env
+
 EOF
     exit 1
 }
+
 
 realpath=$(dirname $(readlink -e "$0"))
 template="salt://common/env-template.yml"
@@ -32,9 +36,9 @@ fi
 if test -z "$2"; then usage; fi
 
 domain=$1
-targetdir=$(readlink -f "$2")
+targetfile=$(readlink -f "$2")
 shift 2
-echo "Domain: $domain, targetdir: $targetdir, template: $template, extra_env: $extra_env"
+echo "Domain: $domain, template: $template, extra_env: $extra_env, targetfile: $targetfile"
 
 if test -e $realpath/env-create.sls; then
     echo "Info: we are called from the repository and not from a installed appliance"
@@ -47,5 +51,5 @@ sudo -- salt-call --local $fileroot $pillarroot $minion state.sls common.env-cre
     \"domain\": \"$domain\", \
     \"template\": \"$template\", \
     \"extra_env\": \"$extra_env\", \
-    \"targetdir\": \"$targetdir\", \
+    \"targetfile\": \"$targetfile\", \
     \"appuser\": \"$appuser\" }" "$@"

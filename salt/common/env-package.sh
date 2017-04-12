@@ -3,6 +3,12 @@ if test -z "$1"; then
     cat << EOF
 Usage: $0 path/to/env.yml   # builds environment package
        $0 --requirements    # installs needed package for package building
+
+Options:
+    The following files may exist in the same directory as env.yml:
+    "meta-data.custom": custom meta-data for the seed iso, eg. static IP
+    "gpgkeys.txt": gpg ascii armored keys concatted together, used as the gpg encryption target
+    "emailto.txt": will send encrypted config to every email address listed, one per line
 EOF
     exit 1
 fi
@@ -32,18 +38,26 @@ elif test ! -e "$1"; then
     exit 1
 fi
 
+
 . $envinclude
 sourcefile=$(readlink -f "$1")
 targetdir=$(dirname $sourcefile)
 ENV_YML=$sourcefile userdata_to_env ecs,appliance
-outputname="${APPLIANCE_DOMAIN}.env.$(date +%Y-%m-%d_%H.%M).tar.gz.gpg"
+outputtime="$(date +%Y-%m-%d_%H.%M)"
+outputname="${APPLIANCE_DOMAIN}.env.$outputtime.tar.gz.gpg"
+
 
 cd $targetdir
 cp $qrpdf2data qrpdf2data.sh
-cat > meta-data << EOF
+if test -e $targetdir/meta-data.custom; then
+    cp $targetdir/meta-data.custom $targetdir/meta-data
+else
+    cat > meta-data << EOF
 instance-id: iid-cloud-default
 local-hostname: $APPLIANCE_DOMAIN
 EOF
+fi
+
 cat $sourcefile | gzip -9 > env.yml.gz
 data2qrpdf.sh env.yml.gz
 enscript -p - env.yml | ps2pdf - env.yml.txt.pdf
@@ -54,19 +68,16 @@ genisoimage -volid cidata -joliet -rock -input-charset utf-8 \
     -output env-cidata.iso -graft-points user-data=env.yml meta-data env.yml.pdf
 rm meta-data
 
-if test "$APPLIANCE_ENV_PACKAGE_KEYS_LEN" != ""; then
+if test -e $targetdir/gpgkeys.txt; then
     gpghome="./.envpkggnupg"
     gpgopts="--homedir $gpghome --batch --yes"
     if test -d $gpghome; then rm -r $gpghome; fi
     mkdir $gpghome
 
-    for i in $(seq 0 $(( $APPLIANCE_ENV_PACKAGE_KEYS_LEN -1 )) ); do
-        fieldname="APPLIANCE_ENV_PACKAGE_KEYS_${i}"; data="${!fieldname}"
-        echo "$data" | gpg $gpgopts --import --
-    done
-
+    cat $targetdir/gpgkeys.txt | gpg $gpgopts --import --
     keylist=$(gpg $gpgopts --keyid-format 0xLONG --list-keys | grep "pub .*/0x" | sed -r "s/pub.+0x([0-9A-F]+).+/\1/g")
 
+    echo "Package and encrypt config to $outputname"
     tar cz env.yml env.yml.pdf env-cidata.iso | \
         LANG=c gpg $gpgopts --trust-model always --encrypt \
             $(for r in $keylist; do printf " --recipient %s " "$r"; done) \
@@ -74,7 +85,17 @@ if test "$APPLIANCE_ENV_PACKAGE_KEYS_LEN" != ""; then
 
     rm -r ./.envpkggnupg
 
-    if test "$2" = "--send-email"; then
-        swaks whatever
+    if test -e $targetdir/emailto.txt; then
+        to=$(cat $targetdir/emailto.txt | grep -v '^$' | paste -s -d"," -)
+        body="This email was sent to $to.
+
+Attached is the encrypted config file $outputname
+of the ecs appliance for the domain: $APPLIANCE_DOMAIN
+
+It was last modified on: $outputtime.
+
+"
+        echo "Sending email to $to"
+        echo "$body" | swaks --to $to --attach $outputname --body -
     fi
 fi

@@ -4,7 +4,7 @@
 {% set extra= {'appliance': {}, 'ecs': {}} %}
 {% endif %}
 
-{{ salt['pillar.get']('targetdir') }}/env.yml:
+{{ salt['pillar.get']('targetfile') }}:
   file.managed:
     - template: jinja
     - source: {{ salt['pillar.get']('template') }}
