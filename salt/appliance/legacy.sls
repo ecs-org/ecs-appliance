@@ -24,6 +24,7 @@
 '/app/prometheus/metric_import',
 '/app/etc/flags/rebuild_wanted_appliance',
 '/app/etc/flags/rebuild_wanted_ecs',
+'/etc/sudoers.d/90-app-sudo',
   ]
 %}
 # paths that should have different user/group/permissions

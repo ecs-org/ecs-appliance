@@ -33,28 +33,8 @@ application_skeleton_{{ i }}:
       - user: application_user
 {% endfor %}
 
-/etc/sudoers.d/90-app-sudo:
-  file.managed:
-    - makedirs: True
-    - mode: "0440"
-    - contents: |
-        app ALL=(ALL) NOPASSWD:ALL
-
 {{ ssh_keys_update('app',
     salt['pillar.get']('ssh_authorized_keys', False),
     salt['pillar.get']('ssh_deprecated_keys', False)
     )
 }}
-
-{% for n in ['ecs', 'appliance'] %}
-ensure_app_user_on_{{ n }}:
-  file.directory:
-    - name: /app/{{ n }}
-    - user: app
-    - group: app
-    - recurse:
-      - user
-      - group
-    - require:
-      - user: application_user
-{% endfor %}
