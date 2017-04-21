@@ -17,6 +17,7 @@ Unattended-Upgrade::Package-Blacklist {
 Unattended-Upgrade::Mail "root";
 Unattended-Upgrade::MailOnlyOnError "true";
 Unattended-Upgrade::Automatic-Reboot "false";
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
 
 // let dpkg overwrite configuration files that we have not modified
 Dpkg::Options {
