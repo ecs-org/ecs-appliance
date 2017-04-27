@@ -14,7 +14,7 @@ EOF
 
 
 realpath=$(dirname $(readlink -e "$0"))
-template="salt://common/env-template.yml"
+template="salt://appliance/env-template.yml"
 minion=""
 fileroot=""
 pillarroot=""

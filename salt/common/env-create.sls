@@ -1,7 +1,7 @@
 {% if salt['pillar.get']('extra_env') != "" %}
 {% set extra= salt['cmd.run_stdout']('cat '+ pillar.get('extra_env'))|load_yaml %}
 {% else %}
-{% set extra= {'appliance': {}, 'ecs': {}} %}
+{% set extra= {} %}
 {% endif %}
 
 {{ salt['pillar.get']('targetfile') }}:
