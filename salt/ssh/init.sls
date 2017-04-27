@@ -12,11 +12,25 @@ openssh-server:
     - require:
       - pkg: openssh-server
 
-/etc/ssh/sshd_config:
-  file.append:
-    - text: "UseDNS no"
+{% for p,r in [
+  ("UseDNS", "UseDNS no"),
+  ("PasswordAuthentication", "PasswordAuthentication no"),
+  ("PermitRootLogin", "PermitRootLogin yes"),
+  ] %}
+
+/etc/ssh/sshd_config_{{ p }}:
+  file.replace:
+    - name: /etc/ssh/sshd_config
+    - pattern: |
+        ^\s*{{ p }}.*
+    - repl: |
+        {{ r }}
+    - append_if_not_found: true
+    - require:
+      - pkg: openssh-server
     - watch_in:
       - service: openssh-server
+{% endfor %}
 
 {% from "ssh/lib.sls" import ssh_keys_update %}
 
