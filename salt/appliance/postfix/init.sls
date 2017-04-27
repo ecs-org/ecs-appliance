@@ -69,11 +69,11 @@ postfix:
       - bsd-mailx
     - require:
       - file: /etc/postfix/main.cf
+      - sls: docker
   service.running:
     - enable: true
     - require:
       - pkg: postfix
       - service: opendkim.service
-      - sls: docker
     - watch:
       - file: /etc/postfix/main.cf
