@@ -2,7 +2,7 @@
 
 usage(){
     cat << EOF
-Usage:  $0 [--branch branchname] --yes
+Usage:  $0 [--branch branchname] --yes [optional salt-call parameter]
 
 install the appliance from scratch.
 
@@ -16,6 +16,7 @@ if test "$1" = "--branch"; then
     shift 2
 fi
 if test "$1" != "--yes"; then usage; fi
+shift
 
 cd /tmp
 export DEBIAN_FRONTEND=noninteractive
@@ -49,4 +50,4 @@ cp /app/appliance/salt/minion /etc/salt/minion
 curl -o /tmp/bootstrap_salt.sh -L https://bootstrap.saltstack.com
 chmod +x /tmp/bootstrap_salt.sh
 /tmp/bootstrap_salt.sh -X
-salt-call state.highstate pillar='{"appliance": {"enabled": true}}'
+salt-call state.highstate pillar='{"appliance": {"enabled": true}}' "$@"
