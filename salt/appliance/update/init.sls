@@ -1,3 +1,6 @@
+include:
+  - appliance.directories
+
 # XXX disable possible leftover from first installation (legacy, could be removed on clean install)
 disable_shutdown-unattended-upgrades:
   file.absent:
@@ -43,8 +46,9 @@ service_stop_{{ i }}:
 /usr/local/share/appliance/appliance-update.sh:
   file.managed:
     - source: salt://appliance/update/appliance-update.sh
-    - mode: 0755
-    - makedirs: true
+    - mode: "0755"
+    - require:
+      - sls: appliance.directories
 
 /usr/local/share/appliance/prepare-update.sh:
   file.managed:

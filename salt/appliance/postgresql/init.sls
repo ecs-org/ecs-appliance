@@ -1,11 +1,13 @@
 include:
   - docker
   - systemd.reload
+  - appliance.directories
 
 /usr/local/share/appliance/prepare-postgresql.sh:
   file.managed:
     - source: salt://appliance/postgresql/prepare-postgresql.sh
-    - makedirs: true
+    - require:
+      - sls: appliance.directories
 
 late_postgresql.service:
   file.managed:

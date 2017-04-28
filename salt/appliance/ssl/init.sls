@@ -1,11 +1,12 @@
 include:
-  - common.user
+  - appliance.directories
   - .snakeoil
 
 /usr/local/share/appliance/prepare-ssl.sh:
   file.managed:
     - source: salt://appliance/ssl/prepare-ssl.sh
-    - makedirs: true
+    - require:
+      - sls: appliance.directories
 
 # dehydrated is a letsencrypt shell client
 /usr/local/etc/dehydrated/config:
@@ -43,18 +44,16 @@ include:
 
 /app/etc/dehydrated:
   file.directory:
-    - makedirs: true
     - user: app
     - group: app
     - require:
-      - sls: common.user
+      - sls: appliance.directories
 
 {% for i in ['archive', 'accounts', 'acme-challenge', 'certs'] %}
 /app/etc/dehydrated/{{ i }}:
   file.directory:
-    - makedirs: true
     - user: app
     - group: app
     - require:
-      - sls: common.user
+      - file: /app/etc/dehydrated
 {% endfor %}

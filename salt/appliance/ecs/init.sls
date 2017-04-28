@@ -1,14 +1,12 @@
 include:
-  - common
+  - appliance.directories
 
 /app/etc/ecs:
   file.directory:
-    - name: /app/etc/ecs
-    - makedirs: true
-    - user: app
-    - group: app
+    - user: root
+    - group: root
     - require:
-      - sls: common
+      - sls: appliance.directories
 
 {% for i in ['mocca', 'pdfas'] %}
 /app/etc/ecs/{{ i }}:

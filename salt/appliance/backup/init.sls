@@ -1,4 +1,5 @@
 include:
+  - appliance.directories
   - systemd.reload
 
 backup:
@@ -14,7 +15,13 @@ backup:
 /usr/local/share/appliance/prepare-backup.sh:
   file.managed:
     - source: salt://appliance/backup/prepare-backup.sh
-    - makedirs: true
+    - require:
+      - sls: appliance.directories
+
+/usr/local/share/appliance/appliance-backup.sh:
+  file.managed:
+    - source: salt://appliance/backup/appliance-backup.sh
+    - mode: "0755"
 
 /usr/local/sbin/recover-from-backup.sh:
   file.managed:
@@ -29,11 +36,6 @@ backup:
 /root/.duply/appliance-backup/exclude:
   file.managed:
     - source: salt://appliance/backup/duply.files
-
-/usr/local/share/appliance/appliance-backup.sh:
-  file.managed:
-    - source: salt://appliance/backup/appliance-backup.sh
-    - mode: 0755
 
 /etc/systemd/system/appliance-backup.timer:
   file.managed:

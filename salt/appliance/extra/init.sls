@@ -1,3 +1,6 @@
+include:
+  - appliance.directories
+
 {# make variable install based on pillar values #}
 
 {% if salt['pillar.get']('appliance:extra:states', False) %}
@@ -19,4 +22,5 @@ appliance_extra_packages:
 /usr/local/share/appliance/prepare-extra.sh:
   file.managed:
     - source: salt://appliance/extra/prepare-extra.sh
-    - makedirs: true
+    - require:
+      - sls: appliance.directories

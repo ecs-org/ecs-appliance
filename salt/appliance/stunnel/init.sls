@@ -1,21 +1,23 @@
 include:
+  - appliance.directories
   - appliance.ssl
   - systemd.reload
 
 /usr/local/share/appliance/prepare-stunnel.sh:
   file.managed:
     - source: salt://appliance/stunnel/prepare-stunnel.sh
-    - makedirs: true
+    - require:
+      - sls: appliance.directories
 
 /app/etc/stunnel.conf:
   file.managed:
     - source: salt://appliance/stunnel/stunnel.conf
     - template: jinja
-    - makedirs: true
     - defaults:
         main_ip: {{ salt['network.get_route'](salt['network.default_route']('inet')[0].gateway).source }}
     - require:
       - pkg: stunnel
+      - sls: appliance.directories
 
 /etc/systemd/system/stunnel.service:
   file.managed:

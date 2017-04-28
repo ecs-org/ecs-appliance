@@ -1,3 +1,5 @@
+include:
+  - appliance.directories
 
 {% for i in ['appliance.include',
  'prepare-env.sh', 'prepare-appliance.sh', 'prepare-ecs.sh'] %}
@@ -5,7 +7,8 @@
   file.managed:
     - source: salt://appliance/scripts/{{ i }}
     - mode: "0755"
-    - makedirs: true
+    - require:
+      - sls: appliance.directories
 {% endfor %}
 
 {% for n in ['create-client-certificate.sh', 'create-internal-user.sh'] %}

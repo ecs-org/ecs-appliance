@@ -1,10 +1,12 @@
 include:
   - docker
+  - appliance.directories
 
 /usr/local/share/appliance/prepare-postfix.sh:
   file.managed:
     - source: salt://appliance/postfix/prepare-postfix.sh
-    - makedirs: true
+    - require:
+      - sls: appliance.directories
 
 /etc/postfix/main.cf:
   file.managed:
@@ -50,6 +52,8 @@ opendkim:
     - makedirs: true
     - contents: |
 {{ dkimkey|indent(8,True) }}
+    - require:
+      - pkg: opendkim
 
 opendkim.service:
   service.running:

@@ -1,6 +1,7 @@
 include:
   - docker
   - systemd.reload
+  - appliance.directories
 
 {% for i in ['pghero-container.service',] %}
 # XXX disabled, needs a lot of space: 'pghero-query-stats.service', 'pghero-query-stats.timer'
@@ -15,7 +16,9 @@ include:
 /usr/local/share/appliance/{{ i }}:
   file.managed:
     - source: salt://appliance/metric/pghero/{{ i }}
-    - mode: 0755
+    - mode: "0755"
+    - require:
+      - sls: appliance.directories
 {% endfor %}
 
 pghero-container:

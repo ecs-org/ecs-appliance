@@ -1,5 +1,5 @@
 include:
-  - common.user
+  - appliance.directories
 
 # regenerate snakeoil if key not existing or cn != hostname
 generate_snakeoil:
@@ -12,11 +12,15 @@ generate_snakeoil:
     - require:
       - pkg: generate_snakeoil
 
+/app/etc/snakeoil:
+  file.directory:
+    - require:
+      - sls: appliance.directories
+
 /app/etc/snakeoil/ssl-cert-snakeoil.key:
   file.copy:
     - source: /etc/ssl/private/ssl-cert-snakeoil.key
     - mode: "0644"
-    - makedirs: true
     - require:
       - cmd: generate_snakeoil
 
