@@ -12,7 +12,7 @@ include:
   - .storage
   - .scripts
   - .systemd
-  - .backup
-  - .update
+  - .backup {# depends on service-failed@.service from systemd #}
+  - .update {# depends on service-failed@.service from systemd #}
   - .metric
   - .legacy
