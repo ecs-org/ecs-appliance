@@ -92,5 +92,5 @@ docker:
       - file: /etc/default/docker
       - file: docker-service
 
-{% from "python/lib.sls" import pip2_install %}
+{% from "python/init.sls" import pip2_install %}
 {{ pip2_install('docker-compose') }}
