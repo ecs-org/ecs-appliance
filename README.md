@@ -11,8 +11,8 @@ See [the Administrator Manual](https://ecs-org.github.io/ecs-docs/admin-manual/i
 # bootstrap appliance
 export DEBIAN_FRONTEND=noninteractive
 apt-get -y update && apt-get -y install curl
-curl https://raw.githubusercontent.com/ecs-org/ecs-appliance/mail_to_sentry/bootstrap-appliance.sh > /tmp/bootstrap.sh
-cd /tmp; chmod +x /tmp/bootstrap.sh; /tmp/bootstrap.sh --yes
+curl https://raw.githubusercontent.com/ecs-org/ecs-appliance/master/bootstrap-appliance.sh > /tmp/bootstrap.sh
+cd /tmp; chmod +x /tmp/bootstrap.sh; /tmp/bootstrap.sh --yes 2>&1 | tee /tmp/setup.log
 
 # create a new environment
 env-create.sh domain.name /app/env.yml
