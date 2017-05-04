@@ -46,13 +46,15 @@ appliance:
   #   branch: master
   #   source: git_url
   # extra:
-  #   files:  # write out extra files on appliance configure
+  #   # write out extra files on state.highstate and prepare-appliance
+  #   files:
   #     - path: /path/of/filename
   #       content: |
   #           # content here
   #       owner: user:group
   #       permissions: "0600"
-  #   packages: # include extra packages at state.highstate
+  #   # include extra packages, will be installed on state.highstate and prepare-appliance
+  #   packages:
   #     - qrcode
   #   # states: # string to be executed as a salststack sls at state.highstate
   #   # # warning: syntax and execution errors will break initial deployment and appliance-update

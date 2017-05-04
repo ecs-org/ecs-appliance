@@ -36,6 +36,7 @@ systemctl start nginx
 prepare_storage         # storage setup
 prepare_storagevault    # storagevault gpg keys setup
 prepare_extra_files     # write out extra files from env
+prepare_extra_packages  # install extra packages if not already installed
 prepare_postgresql      # postgresql tuning
 prepare_database        # database setup
 prepare_metric          # metric collection
