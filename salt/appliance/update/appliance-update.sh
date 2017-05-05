@@ -53,6 +53,18 @@ check_docker_update(){
 }
 
 
+check_compose_update() {
+    local compose_need_update=false
+    local update_path
+    update_path=$(/usr/local/bin/pip2 list -o | grep docker-compose)
+    if test $? -eq 0; then
+        compose_need_update=true
+        echo "Information: docker-compose has update waiting: $update_path"
+    fi
+    $compose_need_update
+}
+
+
 check_postgres_update(){
     local postgres_list postgres_old postgres_new
     local postgres_need_update=false
@@ -217,6 +229,9 @@ check_ecs_update() {
     check_docker_update
     need_docker_update=$(test $? -eq 0 -o \
         -e /app/etc/flags/force.update.docker && echo true || echo false)
+    check_compose_update
+    need_compose_update=$(test $? -eq 0 -o \
+        -e /app/ecs/flags/force.update.compose && echo true || echo false)
     check_postgres_update
     need_postgres_update=$(test $? -eq 0 -o \
         -e /app/etc/flags/force.update.postgres && echo true || echo false)
@@ -226,17 +241,22 @@ check_ecs_update() {
     check_ecs_update
     need_ecs_update=$(test $? -eq 0 -o \
         -e /app/etc/flags/force.update.ecs && echo true || echo false)
-    need_service_restart=$( ($need_docker_update || $need_postgres_update ||
-        $need_letsencrypt_update || $need_appliance_update ||
-        $need_ecs_update) && echo true || echo false)
-    echo "Information: Updates available for: need_system_update=$need_system_update"
-    echo "need_docker_update=$need_docker_update need_postgres_update=$need_postgres_update"
-    echo "need_letsencrypt_update=$need_letsencrypt_update need_appliance_update=$need_appliance_update"
-    echo "need_ecs_update=$need_ecs_update need_service_restart=$need_service_restart"
+    need_service_restart=$( ($need_docker_update || $need_compose_update ||
+        $need_postgres_update || $need_letsencrypt_update ||
+        $need_appliance_update || $need_ecs_update) && echo true || echo false)
+    echo "Information: Updates available for:"
+    echo "need_system_update=$need_system_update"
+    echo "need_docker_update=$need_docker_update"
+    echo "need_compose_update=$need_compose_update"
+    echo "need_postgres_update=$need_postgres_update"
+    echo "need_letsencrypt_update=$need_letsencrypt_update"
+    echo "need_appliance_update=$need_appliance_update"
+    echo "need_ecs_update=$need_ecs_update"
+    echo "need_service_restart=$need_service_restart"
 
-    if ($need_docker_update || $need_postgres_update); then
+    if ($need_docker_update || $need_compose_update || $need_postgres_update); then
         appliance_status "Appliance Update" "Preparing for Update"
-        echo "Info: shutting down appliance, because update of docker:$need_docker_update or postgres:$need_postgres_update needs this"
+        echo "Info: shutting down appliance, because update of docker:$need_docker_update, compose:$need_compose_update or postgres:$need_postgres_update needs this"
         if $need_docker_update; then
             simple_metric docker_last_update counter "timestamp-epoch-seconds since last update to docker" $start_epoch_seconds
             if test -e /app/etc/flags/force.update.docker; then
@@ -254,6 +274,13 @@ check_ecs_update() {
         if $need_postgres_update; then
             echo "Warning: prepare postgres update, kill all postgres connections to ecs except ourself"
             gosu app psql ecs -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'ecs' AND pid <> pg_backend_pid();"
+        fi
+        if $need_compose_update; then
+            simple_metric compose_last_update counter "timestamp-epoch-seconds since last update to docker-compose" $start_epoch_seconds
+            if test -e /app/etc/flags/force.update.compose; then
+                rm /app/etc/flags/force.update.compose
+            fi
+            pip2 install -U --upgrade-strategy only-if-needed docker-compose
         fi
     fi
 
