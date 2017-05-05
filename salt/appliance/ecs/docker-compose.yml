@@ -84,9 +84,11 @@ services:
     network_mode: "bridge"
     ports:
       - "{{ salt['pillar.get']('docker:ip') }}:9117:9117"
+    depends_on:
+      - ecs.web
     links:
       - ecs.web
-    command: -log.level warning -stats.uri http://ecs_ecs.web_1:8017 -web.listen-address :9117
+    command: -log.level warning -stats.timeout 15s -stats.uri http://ecs_ecs.web_1:8017 -web.listen-address :9117
 
   memcached:
     image: memcached

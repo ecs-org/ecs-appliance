@@ -11,14 +11,16 @@ OnFailure=appliance-failed@%n.service
 Type=simple
 Restart=always
 TimeoutStartSec=5min
-StartLimitInterval=15min
+TimeoutStopSec=30s
+StartLimitInterval=5min
 StartLimitBurst=3
 Environment=UNITNAME=%n
 # XXX include env using env.include because systemd EnvironmentFile is missing multiline var support
 Environment=ENV_YML=/run/active-env.yml
 WorkingDirectory=/app/etc/ecs
 ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_to_env ecs,appliance; \
-    exec /usr/local/bin/docker-compose up --abort-on-container-exit'
+    exec /usr/local/bin/docker-compose up \
+        --abort-on-container-exit --exit-code-from ecs.web'
 ExecStartPost=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_to_env ecs,appliance; \
     sleep 30; \
     (docker images -q ecs/ecs:latest || echo "invalid") > /app/etc/tags/last_running_ecs_image; \
@@ -26,7 +28,7 @@ ExecStartPost=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_t
     . /usr/local/share/appliance/appliance.include; appliance_status --disable; \
     systemctl --no-block start appliance-cleanup'
 ExecStop=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_to_env ecs,appliance; \
-    /usr/local/bin/docker-compose -f /app/etc/ecs/docker-compose.yml stop'
+    /usr/local/bin/docker-compose -f /app/etc/ecs/docker-compose.yml stop || true'
 
 [Install]
 WantedBy=multi-user.target
