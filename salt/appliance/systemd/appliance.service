@@ -20,8 +20,7 @@ Environment=ENV_YML=/run/active-env.yml
 WorkingDirectory=/app/etc/ecs
 ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_to_env ecs,appliance; \
     exec /usr/local/bin/docker-compose up \
-        --abort-on-container-exit '
-# --exit-code-from ecs.web
+        --abort-on-container-exit --exit-code-from ecs.web'
 ExecStartPost=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_to_env ecs,appliance; \
     sleep 30; \
     (docker images -q ecs/ecs:latest || echo "invalid") > /app/etc/tags/last_running_ecs_image; \
