@@ -1,4 +1,4 @@
-FROM tomcat:8-jre8
+FROM tomcat:8.5.15-jre8
 MAINTAINER felix@erkinger.at
 # to be used with an frontend ssl webserver, expects input is comming from https
 # run script expects a fullchain server ssl cert at /import/server.cert.pem

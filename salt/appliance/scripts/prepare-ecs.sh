@@ -72,7 +72,7 @@ printf "%s" "invalid" > /app/etc/tags/last_build_ecs
 
 appliance_status "Appliance Update" "Pulling base images"
 for n in redis:3 oliver006/redis_exporter memcached prom/memcached-exporter \
-    tomcat:8-jre8 ubuntu:xenial timonwong/uwsgi-exporter; do
+    tomcat:8.5.15-jre8 ubuntu:xenial timonwong/uwsgi-exporter; do
     docker pull $n
 done
 
