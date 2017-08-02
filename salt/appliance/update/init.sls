@@ -25,7 +25,8 @@ system_updates:
       - unattended-upgrades
 
 # disable unattended-upgrades from running on shutdown, and via apt-daily service
-{% for i in ['apt-daily.service', 'apt-daily.timer', 'unattended-upgrades.service'] %}
+{% for i in ['apt-daily-upgrade.timer', 'apt-daily-upgrade.service',
+  'apt-daily.service', 'apt-daily.timer', 'unattended-upgrades.service'] %}
 service_disable_{{ i }}:
   cmd.run:
     - name: systemctl disable {{ i }} || true
