@@ -43,12 +43,14 @@ metric_service_{{ name }}:
     - template: jinja
     - watch_in:
       - cmd: metric_service_alertmanager
+      - cmd: metric_service_prometheus
 
 /app/etc/alert.rules:
   file.managed:
     - source: salt://appliance/metric/alert.rules
     - watch_in:
       - cmd: metric_service_alertmanager
+      - cmd: metric_service_prometheus
 
 /app/etc/metric_import:
   file.directory:
