@@ -6,9 +6,9 @@ relayhost =
 smtpd_banner = $myhostname ESMTP $mail_name
 smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
 inet_interfaces = 127.0.0.1, {{ additional_ip }}
-inet_protocols = all
 default_transport = smtp
-# send using the ipv4 address, because most hosting services dont provide reverse lookup for ipv6
+# only use ipv4, because ipv6 fails under some circumstances
+inet_protocols = ipv4
 smtp_address_preference = ipv4
 
 # recipient_delimiter = +
