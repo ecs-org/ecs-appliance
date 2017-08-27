@@ -97,6 +97,7 @@ if test -e /app/etc/flags/force.update.ecs -o \
     appliance_status "Appliance Update" "ECS build complete, starting ecs"
 else
     appliance_status "Appliance Update" "ECS Last version = current version = $last_running, skipping build"
+    printf "%s" "$last_running" > /app/etc/tags/last_build_ecs
     exit 0
 fi
 printf "%s" "$target" > /app/etc/tags/last_build_ecs
