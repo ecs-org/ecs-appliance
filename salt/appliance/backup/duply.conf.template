@@ -29,6 +29,7 @@ DUPL_PARAMS="$DUPL_PARAMS --volsize $VOLSIZE "
 # ### BACKUP Rotation
 MAX_AGE=4M
 MAX_FULLBKP_AGE=2M
+MAX_FULL_BACKUPS=1
 DUPL_PARAMS="$DUPL_PARAMS --full-if-older-than $MAX_FULLBKP_AGE "
 # Time frame for old backups to keep, Used for the "purge" command.
 # see duplicity man page, chapter TIME_FORMATS)

@@ -64,7 +64,7 @@ if test "$?" -ne "0"; then
         "$(service_status appliance-backup.service)"
     exit 1
 fi
-/usr/bin/duply /root/.duply/appliance-backup purge-full --force
+/usr/bin/duply /root/.duply/appliance-backup purgefull --force
 if test "$?" -ne "0"; then
     sentry_entry "Appliance Backup" "duply purge-full error" "warning" \
         "$(service_status appliance-backup.service)"
