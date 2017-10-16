@@ -17,12 +17,15 @@ ExecStart=/usr/bin/docker run \
     -v /:/rootfs:ro \
     -v /app/etc/metric_import:/host/metric_import \
     prom/node-exporter \
-    -web.listen-address {{ salt['pillar.get']('docker:ip') }}:9100 \
-    -collector.textfile.directory /host/metric_import \
-    -collector.procfs /host/proc \
-    -collector.sysfs /host/sys \
-    -collector.filesystem.ignored-mount-points "^/(sys|proc|dev|host|etc)($|/)" \
-    -collectors.enabled  "diskstats,entropy,filefd,filesystem,hwmon,loadavg,mdadm,meminfo,netdev,netstat,stat,textfile,time,uname,vmstat"
+    --web.listen-address {{ salt['pillar.get']('docker:ip') }}:9100 \
+    --path.procfs /host/proc \
+    --path.sysfs /host/sys \
+    --collector.textfile.directory /host/metric_import \
+    --collector.filesystem.ignored-mount-points "^/(sys|proc|dev|host|etc)($|/)" \
+    --no-collector.arp \
+    --no-collector.bcache \
+    --no-collector.conntrack \
+    --no-collector.sockstat
 
 Restart=on-failure
 RestartSec=30
