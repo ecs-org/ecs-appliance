@@ -7,7 +7,7 @@ ConditionPathExists=/app/etc/flags/metric.exporter
 [Service]
 ExecStartPre=-/usr/bin/docker kill %n
 ExecStartPre=-/usr/bin/docker rm %n
-ExecStartPre=/usr/bin/docker build -t process-exporter:latest https://github.com/ncabatoff/process-exporter.git
+ExecStartPre=/usr/bin/docker build -t process-exporter:latest https://github.com/ncabatoff/process-exporter.git#b42394e76d8973328e54de8dcdc1c3d8aa968ed5
 
 ExecStart=/usr/bin/docker run \
     --rm \
