@@ -90,8 +90,12 @@ EOF
 
 metric_export() {
     # usage: $1= metric output name  $2..$x= metric data
-    local metric outputname
+    local metric outputname userid groupid fmode
     metric=$1
+    # XXX node-exporter runs as nobody:nobody, change metric file owner to it
+    userid="65534"
+    groupid="65534"
+    fmode="0644"
     outputname=/app/etc/metric_import/${metric}.temp
     shift
     printf "%s\n" "$1" > ${outputname}
@@ -100,7 +104,8 @@ metric_export() {
         printf "%s\n" "$1" >> ${outputname}
         shift
     done
-    chown 1000:1000 ${outputname}
+    chown ${userid}:${groupid} ${outputname}
+    chmod "${fmode}" ${outputname}
     mv ${outputname} $(dirname ${outputname})/${metric}.prom
 }
 
