@@ -6,7 +6,6 @@ OnFailure=service-failed@%n.service
 
 [Service]
 ExecStart=/usr/bin/stunnel4 /app/etc/stunnel.conf
-User=stunnel4
 Type=simple
 
 [Install]
