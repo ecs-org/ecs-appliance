@@ -103,7 +103,7 @@ services:
       - "{{ salt['pillar.get']('docker:ip') }}:9150:9150"
     links:
       - memcached
-    command: -memcached.address ecs_memcached_1:11211
+    command: --memcached.address ecs_memcached_1:11211
 
   redis:
     image: redis:3
