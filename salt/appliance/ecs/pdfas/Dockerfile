@@ -9,12 +9,13 @@ ENV CATALINA_OPTS "-Xms350m -Xmx1024m -Dpdf-as-web.conf=/app/pdf-as-web/pdf-as-w
 RUN mkdir -p /app/pdf-as-web /app/import
 RUN rm -rf $CATALINA_HOME/webapps/*
 
-RUN curl -f -m 120 --insecure --connect-timeout 10 -s -S -o /usr/local/tomcat/webapps/pdf-as-web.war https://joinup.ec.europa.eu/site/pdf-as/releases/4.1.0/pdf-as-web-4.1.0.war
+RUN curl -f -m 120 --insecure --connect-timeout 10 -s -S -o /usr/local/tomcat/webapps/pdf-as-web.war https://ecs-org.github.io/ecs-docs/pdf-as-web-4.1.0.war
+# https://apps.egiz.gv.at/releases/pdf-as/release/4.1.1/pdf-as-web-4.1.1.war
 RUN echo "d625cd40a0baadf9ccf2a9bb46f6808efb7929e3fbe107b087b8c42f5b6c1971 */usr/local/tomcat/webapps/pdf-as-web.war" | sha256sum -c -
-
-RUN curl -f -m 120 --insecure --connect-timeout 10 -s -S -o /app/defaultConfig.zip https://joinup.ec.europa.eu/site/pdf-as/releases/4.1.0/cfg/defaultConfig.zip
-RUN echo "ea28689b77094eb03017acdfb11ed1a571ec4bdb27905a2f06205eddbe931fcc */app/defaultConfig.zip" | sha256sum -c -
-RUN unzip /app/defaultConfig.zip -d /app/pdf-as-web; rm /app/defaultConfig.zip
+# "e22d53a21d9f73388825a431dcfa96de45891d83e352f7210415116bfb259dc6 */usr/local/tomcat/webapps/pdf-as-web.war"
+RUN curl -f -m 120 --insecure --connect-timeout 10 -s -S -o /app/defaultConfig.zip https://apps.egiz.gv.at/releases/pdf-as/release/4.1.1/cfg/defaultConfig.zip
+RUN echo "392718b4b8e57582ec529061c25437b3858574a90214e429069cbc084333ca8d */app/defaultConfig.zip" | sha256sum -c -
+RUN unzip /app/defaultConfig.zip -d /app/pdf-as-web
 
 # tell connector that our uplink is a https proxy and reconnects should go to https
 RUN sed /usr/local/tomcat/conf/server.xml -r -i \
