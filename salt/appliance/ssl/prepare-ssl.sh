@@ -20,15 +20,24 @@ prepare_ssl () {
         use_snakeoil=false
     else
         if is_truestr "${APPLIANCE_SSL_LETSENCRYPT_ENABLED:-true}"; then
+            use_snakeoil=false
             echo "Information: generate certificates using letsencrypt (dehydrated client)"
             # we need a SAN (subject alternative name) for java ssl :(
             printf "%s" "$APPLIANCE_DOMAIN $APPLIANCE_DOMAIN" > $domains_file
             gosu app dehydrated -c
-            if test "$?" -eq 0; then
-                use_snakeoil=false
+            res=$?
+            if test "$res" -eq 0; then
                 echo "Information: letsencrypt was successful, using letsencrypt certificate"
             else
-                echo "Warning: letsencrypt client (dehydrated) returned an error"
+                sentry_entry "Appliance SSL-Setup" "Warning: letsencrypt client (dehydrated) returned error $res" warning
+                for i in $(cat $domains_file | sed -r "s/([^ ]+).*/\1/g"); do
+                    cert_file=/app/etc/dehydrated/certs/$i/cert.pem
+                    openssl x509 -in $cert_file -checkend $((1 * 86400)) -noout
+                    if test $? -ne 0; then
+                        use_snakeoil=true
+                        sentry_entry "Appliance SSL-Setup" "Error: letsencrypt cert ($i) is valid less than a day, defaulting to snakeoil"
+                    fi
+                done
             fi
         fi
     fi
