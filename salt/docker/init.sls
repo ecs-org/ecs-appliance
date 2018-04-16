@@ -100,9 +100,11 @@ docker-compose:
         requests >= 2.14.2
         docker <= 3.1.99
         docker-compose <= 1.20.99
+
   pip.installed:
     - requirements: /etc/default/docker-compose-constraint.txt
     - bin_env: /usr/local/bin/pip2
     - require:
       - pkg: python
       - cmd: pip2-upgrade
+      - file: docker-compose
