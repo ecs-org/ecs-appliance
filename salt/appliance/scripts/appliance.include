@@ -8,6 +8,10 @@ ECS_DOCS_GIT_BRANCH="${ECS_DOCS_GIT_BRANCH:-gh-pages}"
 APPLIANCE_GIT_BRANCH=${APPLIANCE_GIT_BRANCH:-master}
 APPLIANCE_GIT_SOURCE="${APPLIANCE_GIT_SOURCE:-https://github.com/ecs-org/ecs-appliance.git}"
 
+version_gt() {
+    test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1"
+}
+
 text2json(){
     python3 -c "import sys, json; \
     d={\"status\": sys.stdin.read().split(\"\n\")}; json.dump(d, sys.stdout)"

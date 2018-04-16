@@ -23,7 +23,7 @@ pip3-upgrade:
     - onlyif: test "$(which pip3)" = "/usr/bin/pip3"
 
 {% macro pip_install(package_or_packagelist, version="") %}
-python{{ version }}-{{ package_or_packagelist }}:
+"python{{ version }}-{{ package_or_packagelist }}":
   pip.installed:
   {%- if package_or_packagelist is iterable and package_or_packagelist is not string %}
     - pkgs: {{ package_or_packagelist}}

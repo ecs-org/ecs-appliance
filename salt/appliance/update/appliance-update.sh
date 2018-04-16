@@ -55,11 +55,22 @@ check_docker_update(){
 
 check_compose_update() {
     local compose_need_update=false
-    local update_path
-    update_path=$(/usr/local/bin/pip2 list -o | grep docker-compose)
+    local update_path, update_array, constraint_path, constraint_array
+    local current_version, target_version, max_version
+    update_path=$(/usr/local/bin/pip2 list -o --format=columns | grep docker-compose)
     if test $? -eq 0; then
-        compose_need_update=true
-        echo "Information: docker-compose has update waiting: $update_path"
+        update_array=($update_path)
+        current_version=${update_array[1]}
+        target_version=${update_array[2]}
+        constraint_path=$(cat /etc/default/docker-compose-constraint.txt | grep docker-compose)
+        constraint_array=($constraint_path)
+        max_version==${constraint_array[2]}
+        if version_gt $target_version $max_version; then
+            echo "Debug: not updating docker-compose, target>max (current: $current_version, max: $max_version, target: $target_version)"
+        else
+            compose_need_update=true
+            echo "Information: docker-compose has update waiting: (current: $current_version, max: $max_version, target: $target_version)"
+        fi
     fi
     $compose_need_update
 }
@@ -280,7 +291,7 @@ check_ecs_update() {
             if test -e /app/etc/flags/force.update.compose; then
                 rm /app/etc/flags/force.update.compose
             fi
-            pip2 install -U --upgrade-strategy only-if-needed docker-compose
+            pip2 install -U --upgrade-strategy only-if-needed -c /etc/default/docker-compose-constraint.txt docker-compose
         fi
     fi
 

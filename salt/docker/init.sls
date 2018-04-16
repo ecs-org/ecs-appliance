@@ -92,5 +92,17 @@ docker:
       - file: /etc/default/docker
       - file: docker-service
 
-{% from "python/init.sls" import pip2_install %}
-{{ pip2_install('docker-compose') }}
+# XXX docker-3.2.1 docker-compose-1.21.0 create frontend nginx timeouts
+docker-compose:
+  file.managed:
+    - name: /etc/default/docker-compose-constraint.txt
+    - contents: |
+        requests >= 2.14.2
+        docker <= 3.1.99
+        docker-compose <= 1.20.99
+  pip.installed:
+    - requirements: /etc/default/docker-compose-constraint.txt
+    - bin_env: /usr/local/bin/pip2
+    - require:
+      - pkg: python
+      - cmd: pip2-upgrade
