@@ -55,8 +55,8 @@ check_docker_update(){
 
 check_compose_update() {
     local compose_need_update=false
-    local update_path, update_array, constraint_path, constraint_array
-    local current_version, target_version, max_version
+    local update_path update_array constraint_path constraint_array
+    local current_version target_version max_version
     update_path=$(/usr/local/bin/pip2 list -o --format=columns | grep docker-compose)
     if test $? -eq 0; then
         update_array=($update_path)
