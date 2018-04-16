@@ -242,7 +242,7 @@ check_ecs_update() {
         -e /app/etc/flags/force.update.docker && echo true || echo false)
     check_compose_update
     need_compose_update=$(test $? -eq 0 -o \
-        -e /app/ecs/flags/force.update.compose && echo true || echo false)
+        -e /app/etc/flags/force.update.compose && echo true || echo false)
     check_postgres_update
     need_postgres_update=$(test $? -eq 0 -o \
         -e /app/etc/flags/force.update.postgres && echo true || echo false)
