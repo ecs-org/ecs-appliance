@@ -64,7 +64,7 @@ check_compose_update() {
         target_version=${update_array[2]}
         constraint_path=$(cat /etc/default/docker-compose-constraint.txt | grep docker-compose)
         constraint_array=($constraint_path)
-        max_version==${constraint_array[2]}
+        max_version=${constraint_array[2]}
         if version_gt $target_version $max_version; then
             echo "Debug: not updating docker-compose, target>max (current: $current_version, max: $max_version, target: $target_version)"
         else
