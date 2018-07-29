@@ -1,60 +1,33 @@
-#ALERT JobInstanceDown
-#    IF up == 0
-#    FOR 3m
-#    ANNOTATIONS {
-#        summary = "Instance {{ $labels.instance }} down",
-#        description = "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 3 minutes.",
-#    }
+# ECS prometheus alerts, needs node-exporter >= 1.6
 
 ALERT NodeRebootsTooOften
-    IF changes(node_boot_time[1d]) > 1
+    IF changes(node_boot_time_seconds[1d]) > 1
     ANNOTATIONS {
         summary = "Node rebooots too often",
         description = "Node {{ $labels.instance }} reboots too often ({{ $value }} is more than 1 time per 1d)",
     }
 
-ALERT NodeFilesystemFreeLowRoot
-    IF node_filesystem_free{mountpoint="/rootfs"} / node_filesystem_size{mountpoint="/rootfs"} < 0.15
+ALERT NodeFilesystemFreeLow
+    IF (100 * node_filesystem_avail_bytes{mountpoint=~"/rootfs(|/boot|/data|/volatile)"} / node_filesystem_size_bytes{mountpoint=~"/rootfs(|/boot|/data|/volatile)"}) < 15
     ANNOTATIONS {
-        summary = "Node filesystem free space on {{ $labels.device }} is low",
-        description = "Node {{ $labels.instance }}'s filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 15% disk space remaining.",
-    }
-
-ALERT NodeFilesystemFreeLowBoot
-    IF node_filesystem_free{mountpoint="/rootfs/boot"} / node_filesystem_size{mountpoint="/rootfs/boot"} < 0.15
-    ANNOTATIONS {
-        summary = "Node filesystem free space on {{ $labels.device }} is low",
-        description = "Node {{ $labels.instance }}'s filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 15% disk space remaining.",
-    }
-
-ALERT NodeFilesystemFreeLowData
-    IF node_filesystem_free{mountpoint="/rootfs/data"} / node_filesystem_size{mountpoint="/rootfs/data"} < 0.15
-    ANNOTATIONS {
-        summary = "Node filesystem free space on {{ $labels.device }} is low",
-        description = "Node {{ $labels.instance }}'s filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 15% disk space remaining.",
-    }
-
-ALERT NodeFilesystemFreeLowVolatile
-    IF node_filesystem_free{mountpoint="/rootfs/volatile"} / node_filesystem_size{mountpoint="/rootfs/volatile"} < 0.15
-    ANNOTATIONS {
-        summary = "Node filesystem free space on {{ $labels.device }} is low",
-        description = "Node {{ $labels.instance }}'s filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 15% disk space remaining.",
+        summary = "Node filesystem available space on {{ $labels.device }} is low",
+        description = "Node {{ $labels.instance }}'s filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 15% available disk space remaining.",
     }
 
 ALERT NodeMemoryUsageHigh400mb
-    IF (node_memory_MemFree + node_memory_Cached + node_memory_Buffers) / 1048576 < 400
+    IF (node_memory_MemFree_bytes + node_memory_Cached_bytes) / 1048576 < 400
     FOR 30s
     ANNOTATIONS {
         summary = "Instance {{ $labels.instance }} memory usage is high",
-        description = "This device's free memory is less than the threshold (400mb) with a value of {{ $value }}.",
+        description = "This device's free & cached memory together is less than the threshold (400mb) with a value of {{ $value }}.",
     }
 
-ALERT NodeMemoryUsageHigh85percent
-    IF (node_memory_MemTotal - (node_memory_MemFree + node_memory_Cached + node_memory_Buffers) ) / node_memory_MemTotal * 100 > 85
+ALERT NodeMemoryUsageHigh80percent
+    IF (node_memory_MemTotal_bytes - (node_memory_MemFree_bytes + node_memory_Cached_bytes + node_memory_Buffers_bytes) ) / node_memory_MemTotal_bytes * 100 > 80
     FOR 30s
     ANNOTATIONS {
         summary = "Instance {{ $labels.instance }} memory usage is high",
-        description = "This device's used memory is more than the threshold (85%) with a value of {{ $value }}.",
+        description = "This device's used memory is more than the threshold (80%) with a value of {{ $value }}.",
     }
 
 ALERT NodeLoadHigh
