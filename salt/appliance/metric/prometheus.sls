@@ -45,9 +45,15 @@ metric_service_{{ name }}:
       - cmd: metric_service_alertmanager
       - cmd: metric_service_prometheus
 
-/app/etc/alert.rules:
+{% if salt.file.directory_exists('/app/etc/alert.rules.yml') %}
+delete-dir-/app/etc/alert.rules.yml:
+  file.absent:
+    - name: /app/etc/alert.rules.yml
+{% endif %}
+
+/app/etc/alert.rules.yml:
   file.managed:
-    - source: salt://appliance/metric/alert.rules
+    - source: salt://appliance/metric/alert.rules.yml
     - watch_in:
       - cmd: metric_service_alertmanager
       - cmd: metric_service_prometheus
@@ -63,6 +69,19 @@ metric_service_{{ name }}:
 {{ metric_install('postgres_exporter') }}
 {{ metric_install('process-exporter') }}
 {{ metric_install('alertmanager') }}
+
+  {% if salt.cmd.run_stdout('cat /volatile/prometheus/VERSION') == '1' %}
+migrate-prometheus:
+  service.dead:
+    - name: prometheus
+  cmd.run:
+    - name: rm -rf /volatile/prometheus/*
+    - require:
+      - service: migrate-prometheus
+    - require_in:
+      - service: metric_service_prometheus
+  {% endif %}
+
 {{ metric_install('prometheus') }}
 {{ metric_install('grafana') }}
 

@@ -26,7 +26,7 @@ ExecStart=/bin/bash -c "var_lib_docker=$(readlink -e /var/lib/docker); exec /usr
     -v /var/run:/var/run:ro \
     -v $var_lib_docker:/var/lib/docker:ro \
     google/cadvisor \
-    --housekeeping_interval=15s"
+    --housekeeping_interval=30s"
 
 [Install]
 WantedBy=multi-user.target
