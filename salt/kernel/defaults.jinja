@@ -1,0 +1,63 @@
+{% load_yaml as defaults %}
+xenial:
+  select: latest
+  available:
+    - default
+    - latest
+  default:
+    physical:
+      base: linux-generic
+      kernel: linux-image-generic
+      headers: linux-headers-generic
+      tools: linux-tools-generic
+    virtual:
+      base: linux-virtual
+      kernel: linux-image-virtual
+      headers: linux-headers-virtual
+      tools: linux-tools-virtual
+  latest:
+    physical:
+      base: linux-generic-hwe-16.04
+      kernel: linux-image-generic-hwe-16.04
+      headers: linux-headers-generic-hwe-16.04
+      tools: linux-tools-generic-hwe-16.04
+    virtual:
+      base: linux-virtual-hwe-16.04
+      kernel: linux-image-virtual-hwe-16.04
+      headers: linux-headers-virtual-hwe-16.04
+      tools: linux-tools-virtual-hwe-16.04
+bionic:
+  select: default
+  available:
+    - default
+  default:
+    physical:
+      base: linux-generic
+      kernel: linux-image-generic
+      tools: linux-tools-generic
+      headers: linux-headers-generic
+    virtual:
+      base: linux-virtual
+      kernel: linux-image-virtual
+      tools: linux-tools-virtual
+      headers: linux-headers-virtual
+generic:
+  select: default
+  available:
+    - default
+  default:
+    physical:
+      base: linux-generic
+      kernel: linux-image-generic
+      tools: linux-tools-generic
+      headers: linux-headers-generic
+    virtual:
+      base: linux-virtual
+      kernel: linux-image-virtual
+      tools: linux-tools-virtual
+      headers: linux-headers-virtual
+{% endload %}
+
+{% set settings = salt['grains.filter_by'](defaults,
+  grain= 'lsb_distrib_codename', default= 'generic',
+  merge= salt['pillar.get']('kernel', {})) %}

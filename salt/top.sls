@@ -3,6 +3,7 @@ base:
     - http_proxy
     - virtual-tools
     - hardware-tools
+    - kernel
     - ssh
     - python
     - common
