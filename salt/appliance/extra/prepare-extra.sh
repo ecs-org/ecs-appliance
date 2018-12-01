@@ -6,7 +6,14 @@ prepare_extra_files () {
             fieldname="APPLIANCE_EXTRA_FILES_${i}_OWNER"; fowner="${!fieldname}"
             fieldname="APPLIANCE_EXTRA_FILES_${i}_PERMISSIONS"; fperm="${!fieldname}"
             fieldname="APPLIANCE_EXTRA_FILES_${i}_CONTENT"; fcontent="${!fieldname}"
-            echo "$fcontent" > $fname
+            if test "$fcontent" != ""; then
+                fcontents="$fcontent"
+                echo "Warning: appliance:extra:files for file $fname, content is deprecated, use contents"
+            else
+                fieldname="APPLIANCE_EXTRA_FILES_${i}_CONTENTS"
+                fcontents="${!fieldname}"
+            fi
+            echo "$fcontents" > $fname
             if test "$fowner" != ""; then chown $fowner $fname; fi
             if test "$fperm" != ""; then chmod $fperm $fname; fi
         done

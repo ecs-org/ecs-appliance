@@ -33,7 +33,11 @@ appliance_extra_files_{{ i.path }}:
     - mode:  {{ i.permissions }}
     {%- endif %}
     - contents: |
+{%- if i.content|d(false) %}
 {{ i.content|indent(8,True) }}
+{%- else %}
+{{ i.contents|indent(8,True) }}
+{%- endif %}
     - require:
       - sls: appliance.directories
   {% endfor %}

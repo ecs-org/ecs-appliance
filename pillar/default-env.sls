@@ -49,7 +49,7 @@ appliance:
   #   # write out extra files on state.highstate and prepare-appliance
   #   files:
   #     - path: /path/of/filename
-  #       content: |
+  #       contents: |
   #           # content here
   #       owner: user:group
   #       permissions: "0600"

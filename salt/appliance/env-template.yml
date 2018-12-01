@@ -102,7 +102,7 @@ appliance:
     files:
   {%- for f_dict in extra.appliance.extra.files %}
       - path: {{ f_dict.path }}
-        content: |
+        contents: |
     {%- for l in f_dict.content.split('\\n') %}
             {{ l }}
     {%- endfor %}
@@ -118,7 +118,7 @@ appliance:
   #   # write out extra files on state.highstate and prepare-appliance
   #   files:
   #     - path: /path/of/filename
-  #       content: |
+  #       contents: |
   #           # Your content here
   #       owner: user:group
   #       permissions: "0600"
