@@ -25,6 +25,7 @@
 '/app/etc/flags/rebuild_wanted_appliance',
 '/app/etc/flags/rebuild_wanted_ecs',
 '/etc/sudoers.d/90-app-sudo',
+'/etc/systemd/system/default.target.wants/appliance-backup.service',
   ]
 %}
 # paths that should have different user/group/permissions

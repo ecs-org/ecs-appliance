@@ -16,6 +16,3 @@ Environment=ENV_YML=/run/active-env.yml
 ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.include; \
     userdata_to_env ecs,appliance; \
     exec /usr/local/share/appliance/appliance-backup.sh'
-
-[Install]
-WantedBy=default.target
