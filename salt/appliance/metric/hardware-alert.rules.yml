@@ -1,0 +1,28 @@
+groups:
+- name: ecs.hardware.alert.rules
+  rules:
+
+  - alert: NodeMdadmResync
+    expr: node_md_is_active and (node_md_disks != node_md_disks_active or node_md_blocks != node_md_blocks_synced)
+    labels:
+      severity: warning
+    annotations:
+      description: "Node MDADM not synced or not all active"
+      summary: MDADM has unsynced blocks or not all disks active
+
+  - alert: NodeHwmonTemperatureHigh
+    expr: node_hwmon_temp_celsius > node_hwmon_temp_max_celsius
+    for: 1m
+    labels:
+      severity: error
+    annotations:
+      description: "Node Hardware temperature is over specified MAX value: {{ $value }} chip: {{ $labels.chip }} sensor: {{ $labels.sensor }}"
+      summary: Hardware over specified MAX Temperature
+
+  - alert: NodeHwmonTemperatureCritical
+    expr: node_hwmon_temp_celsius >= (node_hwmon_temp_critical_celsius -2)
+    labels:
+      severity: critical
+    annotations:
+      description: "Node Hardware temperature is near specified CRITICAL value: {{ $value }} chip: {{ $labels.chip }} sensor: {{ $labels.sensor }}"
+      summary: Hardware near specified CRITICAL Temperature

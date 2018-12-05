@@ -2,7 +2,7 @@ include:
   - systemd.reload
   - docker
 
-{% macro metric_install(name) %}
+{% macro metric_service_install(name) %}
 /etc/systemd/system/{{ name }}.service:
   file.managed:
     - source: salt://appliance/metric/{{ name }}.service
@@ -25,10 +25,56 @@ metric_service_{{ name }}:
 {% endmacro %}
 
 
+{% macro metric_timer_install(name) %}
+/etc/systemd/system/{{ name }}.timer:
+  file.managed:
+    - source: salt://appliance/metric/{{ name }}.timer
+    - template: jinja
+    - watch_in:
+      - cmd: systemd_reload
+
+/etc/systemd/system/{{ name }}.service:
+  file.managed:
+    - source: salt://appliance/metric/{{ name }}.service
+    - template: jinja
+    - watch_in:
+      - cmd: systemd_reload
+
+metric_timer_{{ name }}:
+  service.enabled:
+    - name: {{ name }}.timer
+    - require:
+      - file: /etc/systemd/system/{{ name }}.timer
+      - file: /etc/systemd/system/{{ name }}.service
+  # resets timer if changed and already running, but after systemd reload
+  cmd.wait:
+    - name: systemctl reenable --now {{ name }}.timer
+    - watch:
+      - file: /etc/systemd/system/{{ name }}.timer
+    - require:
+      - cmd: systemd_reload
+
+{% endmacro %}
+
+
 {% if salt['pillar.get']('name', '') %}
-{{ metric_install(pillar.name) }}
+{{ metric_service_install(pillar.name) }}
 
 {% else %}
+
+/app/etc/metric_import:
+  file.directory:
+    - makedirs: true
+    - user: 1000
+    - group: 1000
+
+/app/etc/prometheus-rules.d:
+  file.directory:
+    - makedirs: true
+
+/app/etc/alertmanager-template.d:
+  file.directory:
+    - makedirs: true
 
 /app/etc/prometheus.yml:
   file.managed:
@@ -45,44 +91,35 @@ metric_service_{{ name }}:
       - cmd: metric_service_alertmanager
       - cmd: metric_service_prometheus
 
-{% if salt.file.directory_exists('/app/etc/alert.rules.yml') %}
-delete-dir-/app/etc/alert.rules.yml:
-  file.absent:
-    - name: /app/etc/alert.rules.yml
-{% endif %}
-
-/app/etc/alert.rules.yml:
+{% for i in ["alert.rules.yml", "hardware-alert.rules.yml"] %}
+/app/etc/prometheus-rules.d/{{ i }}:
   file.managed:
-    - source: salt://appliance/metric/alert.rules.yml
+    - source: salt://appliance/metric/{{ i }}
     - watch_in:
       - cmd: metric_service_alertmanager
       - cmd: metric_service_prometheus
+{% endfor %}
 
-/app/etc/metric_import:
-  file.directory:
-    - makedirs: true
-    - user: 1000
-    - group: 1000
+/app/etc/alertmanager-template.d/email-simple.tmpl:
+  file.managed:
+    - source: salt://appliance/metric/email-simple.tmpl
+    - watch_in:
+      - cmd: metric_service_alertmanager
 
-{{ metric_install('cadvisor') }}
-{{ metric_install('node-exporter') }}
-{{ metric_install('postgres_exporter') }}
-{{ metric_install('process-exporter') }}
-{{ metric_install('alertmanager') }}
+{% for n in ['smartmon-storage-metric.sh', 'nvme-storage-metric.sh'] %}
+/usr/local/sbin/{{ n }}:
+  file.managed:
+    - source: salt://appliance/metric/{{ n }}
+    - mode: "0755"
+{% endfor %}
 
-  {% if salt.cmd.run_stdout('cat /volatile/prometheus/VERSION') == '1' %}
-migrate-prometheus:
-  service.dead:
-    - name: prometheus
-  cmd.run:
-    - name: rm -rf /volatile/prometheus/*
-    - require:
-      - service: migrate-prometheus
-    - require_in:
-      - service: metric_service_prometheus
-  {% endif %}
-
-{{ metric_install('prometheus') }}
-{{ metric_install('grafana') }}
+{{ metric_service_install('cadvisor') }}
+{{ metric_service_install('node-exporter') }}
+{{ metric_service_install('postgres_exporter') }}
+{{ metric_service_install('process-exporter') }}
+{{ metric_service_install('alertmanager') }}
+{{ metric_timer_install('storage-metric-textfile') }}
+{{ metric_service_install('prometheus') }}
+{{ metric_service_install('grafana') }}
 
 {% endif %}

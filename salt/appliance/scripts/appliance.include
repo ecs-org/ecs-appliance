@@ -102,13 +102,21 @@ is_falsestr () {
     test "$(printf "%s" "$1" | tr A-Z a-z)" != "true"
 }
 
-flag_and_service_enable () {
+flag_enable () {
     touch /app/etc/flags/$1
+}
+
+flag_disable () {
+    if test -e /app/etc/flags/$1; then rm /app/etc/flags/$1; fi
+}
+
+flag_and_service_enable () {
+    flag_enable $1
     systemctl start $2
 }
 
 flag_and_service_disable () {
-    if test -e /app/etc/flags/$1; then rm /app/etc/flags/$1; fi
+    flag_disable $1
     systemctl stop $2
 }
 

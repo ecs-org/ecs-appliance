@@ -24,7 +24,7 @@ ExecStart=/usr/bin/docker run \
     -p {{ salt['pillar.get']('docker:ip') }}:9090:9090 \
     --net bridge \
     -v /app/etc/prometheus.yml:/etc/prometheus.yml \
-    -v /app/etc/alert.rules.yml:/etc/alert.rules.yml \
+    -v /app/etc/prometheus-rules.d:/etc/prometheus-rules.d \
     -v /app/prometheus:/data \
     prom/prometheus \
     --config.file=/etc/prometheus.yml \

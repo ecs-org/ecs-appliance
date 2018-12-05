@@ -23,9 +23,11 @@ ExecStart=/usr/bin/docker run \
     -p {{ salt['pillar.get']('docker:ip') }}:9093:9093 \
     --net bridge \
     -v /app/etc/alertmanager.yml:/etc/alertmanager.yml \
+    -v /app/etc/alertmanager-template.d:/etc/alertmanager-template.d \
     -v /app/alertmanager:/data \
     prom/alertmanager \
     --config.file=/etc/alertmanager.yml \
+    --log.level=debug \
     --storage.path=/data
 
 [Install]

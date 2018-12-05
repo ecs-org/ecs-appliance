@@ -8,6 +8,7 @@ hardware-tools:
       - lvm2
       - smartmontools
       - nvme-cli
+      - hdparm
       - lm-sensors
 
 {% endif %}

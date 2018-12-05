@@ -1,5 +1,6 @@
 global:
   # How frequently to scrape targets by default.
+  # scrape_interval: 1m
   scrape_interval: 15s
   # How long until a scrape request times out.
   # scrape_timeout: 10s
@@ -13,20 +14,26 @@ global:
 
 # Load and evaluate rules in this file every 'evaluation_interval' seconds.
 rule_files:
-  - "/etc/*.rules.yml"
+- "/etc/prometheus-rules.d/*.rules.yml"
 
-# Alerting specifies settings related to the Alertmanager.
+# settings related to the Alertmanager.
 alerting:
+  # use site instead of instance for alerting purpose (site=appliance:domain)
+  alert_relabel_configs:
+  - action: replace
+    source_labels: [site]
+    target_label: instance
+  - action: labeldrop
+    regex: site
   alertmanagers:
   - static_configs:
     - targets:
-      - alertmanager:9093
+      - "{{ salt['pillar.get']('docker:ip') }}:9093"
 
-# A scrape configuration containing exactly one endpoint to scrape:
+# scrape configuration
 scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries
   # Override the global default and scrape targets
-  # scrape_interval: 5s
   # metrics_path defaults to '/metrics', scheme defaults to 'http'.
   - job_name: prometheus
     static_configs:

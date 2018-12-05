@@ -1,0 +1,16 @@
+[Unit]
+Description=storage metric textfile exporter for prometheus
+ConditionPathExists=/app/etc/flags/metric.exporter
+ConditionPathExists=/app/etc/flags/storage-metric-textfile.exporter
+
+[Service]
+Type=oneshot
+WorkingDirectory=/app
+ExecStart=/bin/bash -c '. /usr/local/share/appliance/prepare-metric.sh; \
+    if test -e "/app/etc/flags/has_smartmon.device"; then \
+        /usr/local/sbin/smartmon-storage-metric.sh | metric_pipe_save smartmon; \
+    fi; \
+    if test -e "/app/etc/flags/has_nvme.device"; then \
+        /usr/local/sbin/nvme-storage-metric.sh | metric_pipe_save nvme; \
+    fi; \
+    '

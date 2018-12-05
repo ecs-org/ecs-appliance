@@ -1,0 +1,10 @@
+[Unit]
+Description=run storage-metric-textfile exporter every 10 minutes
+
+[Timer]
+OnUnitInactiveSec=10m
+#RandomizedDelaySec=15m
+AccuracySec=1s
+
+[Install]
+WantedBy=timers.target

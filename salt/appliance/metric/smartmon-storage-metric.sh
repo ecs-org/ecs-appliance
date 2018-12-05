@@ -1,13 +1,28 @@
 #!/bin/bash
-# Script informed by the collectd monitoring script for smartmontools (using smartctl)
-# by Samuel B. <samuel_._behan_(at)_dob_._sk> (c) 2012
-# source at: http://devel.dob.sk/collectd-scripts/
+# metric from smartctl values prometheus text collection
+# based on http://devel.dob.sk/collectd-scripts/
+# see also http://arstechnica.com/civis/viewtopic.php?p=22062211
 
-# TODO: This probably needs to be a little more complex.  The raw numbers can have more
-#       data in them than you'd think.
-#       http://arstechnica.com/civis/viewtopic.php?p=22062211
+toolname="smartctl"
+storagesystem="smart"
 
-disks="$(/usr/sbin/smartctl --scan | awk '{print $1 "|" $3}')"
+usage() {
+    cat <<EOF
+usage: $0 [--has-devices]
+
+without parameter $(basename $0) will output all metric from all $storagesystem drives,
+or exit 0 if no drives are available
+
+$(basename $0) --has-devices
+    will check for devices and exit 0 if at least one device is found,
+    and exit 1 if no device is found
+
+$(basename $0) will exit 1 if collection tool $toolname is not present, or at unsupported version
+
+EOF
+    exit 1
+}
+
 
 parse_smartctl_attributes_awk="$(cat << 'SMARTCTLAWK'
 $1 ~ /^[0-9]+$/ && $2 ~ /^[a-zA-Z0-9_-]+$/ {
@@ -118,51 +133,34 @@ format_output() {
   | awk -F'{' "${output_format_awk}"
 }
 
-smartctl_version="$(/usr/sbin/smartctl -V | head -n1  | awk '$1 == "smartctl" {print $2}')"
+
+if test "$1" = "--help"; then usage; fi
+if ! which $toolname > /dev/null; then
+    (>&2 echo "ERROR: program $toolname not found, can not collect metrics")
+    exit 1
+fi
+
+smartctl_version="$(${toolname} -V | head -n1  | awk '$1 == "smartctl" {print $2}')"
+
+if [[ "$(expr "${smartctl_version}" : '\([0-9]*\)\..*')" -lt 6 ]] ; then
+    (>&2 echo "ERROR: unsupported ${toolname} version $smartctl_version")
+    exit 1
+fi
+
+device_list="$(${toolname} --scan-open | grep -v "^#" | awk '{print $1 "|" $3}')"
+
+if test "$1" = "--help"; then usage; fi
+if test "$1" = "--has-devices"; then
+    if test "$device_list" != ""; then exit 0; else exit 1; fi
+fi
+if test "$device_list" = ""; then exit 0; fi
 
 echo "smartctl_version{version=\"${smartctl_version}\"} 1" | format_output
 
-if [[ "$(expr "${smartctl_version}" : '\([0-9]*\)\..*')" -lt 6 ]] ; then
-  exit
-fi
-disks="$(/usr/sbin/smartctl --scan | awk '{print $1 "|" $3}')"
-
-device_list="$(/usr/sbin/smartctl --scan-open | awk '{print $1 "|" $3}')"
-echo "$device_list"
 for device in ${device_list}; do
-  disk="$(echo ${device} | cut -f1 -d'|')"
-  type="$(echo ${device} | cut -f2 -d'|')"
-  echo "smartctl_run{disk=\"${disk}\",type=\"${type}\"}" $(TZ=UTC date '+%s')
-  # Get the SMART information
-  /usr/sbin/smartctl -i -d "${type}" "${disk}" | parse_smartctl_info "${disk}" "${type}"
-  # Get the SMART attributes
-  /usr/sbin/smartctl -A -d "${type}" "${disk}" | parse_smartctl_attributes "${disk}" "${type}"
+    disk="$(echo ${device} | cut -f1 -d'|')"
+    type="$(echo ${device} | cut -f2 -d'|')"
+    echo "smartctl_run{disk=\"${disk}\",type=\"${type}\"}" $(TZ=UTC date '+%s')
+    ${toolname} -i -d "${type}" "${disk}" | parse_smartctl_info "${disk}" "${type}"
+    ${toolname} -A -d "${type}" "${disk}" | parse_smartctl_attributes "${disk}" "${type}"
 done | format_output
-
-nvme smart-log /dev/nvme0 | sed '1d' | tr "A-Z" "a-z" | sed -r "s/(([a-z0-9_]+ ?)+) +: ([0-9,]+).*/nvme_\1#\3/g" | sed -r "s/(.*) (#.*)/\1\2/g" | tr -d "," | tr " #" "_ "
-
-nvme_critical_warning 0
-nvme_temperature 66
-nvme_available_spare 100
-nvme_available_spare_threshold 10
-nvme_percentage_used 1
-nvme_data_units_read 5726790
-nvme_data_units_written 3370403
-nvme_host_read_commands 4732547409
-nvme_host_write_commands 45489895
-nvme_controller_busy_time 992
-nvme_power_cycles 11
-nvme_power_on_hours 547
-nvme_unsafe_shutdowns 4
-nvme_media_errors 0
-nvme_num_err_log_entries 0
-nvme_warning_temperature_time 20
-nvme_critical_composite_temperature_time 0
-nvme_temperature_sensor_1 66
-nvme_temperature_sensor_2 0
-nvme_temperature_sensor_3 0
-nvme_temperature_sensor_4 0
-nvme_temperature_sensor_5 0
-nvme_temperature_sensor_6 0
-nvme_temperature_sensor_7 0
-nvme_temperature_sensor_8 0

@@ -3,29 +3,19 @@
 # services that need to be disabled
 # Example: 'appliance-cleanup.service',
 {% set services_disable= [
-'appliance-cleanup.service',
-'prepare-appliance.service',
-'prepare-ecs.service',
-'prepare-env.service',
   ]
 %}
 # services that need to be disabled, stopped and removed
 # Example: 'memcached-exporter.service',
 {% set services_remove= [
-'pghero-query-stats.service',
-'pghero-query-stats.timer',
   ]
 %}
 # paths that need to be removed
 # Example: '/root/.gpg',
 {% set paths_remove= [
-'/usr/local/bin/recreate-pghero_query_stats',
-'/app/ecs-homepage',
-'/app/prometheus/metric_import',
-'/app/etc/flags/rebuild_wanted_appliance',
-'/app/etc/flags/rebuild_wanted_ecs',
-'/etc/sudoers.d/90-app-sudo',
 '/etc/systemd/system/default.target.wants/appliance-backup.service',
+'/app/etc/alert.rules',
+'/app/etc/alert.rules.yml',
   ]
 %}
 # paths that should have different user/group/permissions

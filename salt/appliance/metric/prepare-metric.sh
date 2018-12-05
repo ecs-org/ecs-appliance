@@ -1,11 +1,26 @@
 prepare_metric() {
     # set/clear flags and start/stop services connected to flags
-    services="cadvisor.service node-exporter.service postgres_exporter.service process-exporter.service"
+    services="cadvisor.service node-exporter.service postgres_exporter.service process-exporter.service storage-metric-textfile.timer"
+
+    flag_disable "storage-metric-textfile.exporter"
+    if /usr/local/sbin/smartmon-storage-metric.sh --has-devices; then
+        flag_enable "has_smartmon.device"
+        flag_enable "storage-metric-textfile.exporter"
+    else
+        flag_disable "has_smartmon.device"
+    fi
+    if /usr/local/sbin/nvme-storage-metric.sh --has-devices; then
+        flag_enable "has_nvme.device"
+        flag_enable "storage-metric-textfile.exporter"
+    else
+        flag_disable "has_nvme.device"
+    fi
     if is_truestr "$APPLIANCE_METRIC_EXPORTER"; then
         flag_and_service_enable "metric.exporter" "$services"
     else
         flag_and_service_disable "metric.exporter" "$services"
     fi
+
     services="prometheus.service alertmanager.service"
     if is_truestr "$APPLIANCE_METRIC_SERVER"; then
         flag_and_service_enable "metric.server" "$services"
@@ -109,6 +124,20 @@ metric_export() {
     mv ${outputname} $(dirname ${outputname})/${metric}.prom
 }
 
+metric_pipe_save() {
+    # usage: $1= metric output name  STDIN= metric data
+    local metric outputname userid groupid fmode
+    metric=$1
+    # XXX node-exporter runs as nobody:nobody, change metric file owner to it
+    userid="65534"
+    groupid="65534"
+    fmode="0644"
+    outputname=/app/etc/metric_import/${metric}.temp
+    cat - > ${outputname}
+    chown ${userid}:${groupid} ${outputname}
+    chmod "${fmode}" ${outputname}
+    mv ${outputname} $(dirname ${outputname})/${metric}.prom
+}
 
 simple_metric() {
     local data

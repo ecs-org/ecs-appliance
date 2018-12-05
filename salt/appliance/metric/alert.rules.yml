@@ -4,45 +4,67 @@ groups:
 
   - alert: NodeRebootsTooOften
     expr: changes(node_boot_time_seconds[1d]) > 1
+    labels:
+      severity: warning
     annotations:
-      description: Node {{ $labels.instance }} reboots too often ({{ $value }} is more than 1 time per 1d)
-      summary: Node rebooots too often
+      description: "Node reboots too often ({{ $value }} is more than 1 time per 1d)"
+      summary: Node reboots too often
 
   - alert: NodeFilesystemFreeLow
-    expr: (100 * node_filesystem_avail_bytes{mountpoint=~"/rootfs(|/boot|/data|/volatile)"} / node_filesystem_size_bytes{mountpoint=~"/rootfs(|/boot|/data|/volatile)"}) < 15
+    expr: (100 * node_filesystem_avail_bytes{mountpoint=~"^/(rootfs)?(|/boot|/data|/volatile)$"} / node_filesystem_size_bytes{mountpoint=~"^/(rootfs)?(|/boot|/data|/volatile)$"}) < 20
+    labels:
+      severity: warning
     annotations:
-      description: Node {{ $labels.instance }}'s filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 15% available disk space remaining.
-      summary: Node filesystem available space on {{ $labels.device }} is low
+      description: "Node filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 20% available disk space remaining."
+      summary: "Node filesystem available space is low (< 20%)"
+
+  - alert: NodeFilesystemFreeLowCritical
+    expr: (100 * node_filesystem_avail_bytes{mountpoint=~"^/(rootfs)?(|/boot|/data|/volatile)$"} / node_filesystem_size_bytes{mountpoint=~"^/(rootfs)?(|/boot|/data|/volatile)$"}) < 15
+    labels:
+      severity: critical
+    annotations:
+      description: "Node filesystem {{ $labels.device }} mounted at {{ $labels.mountpoint }} has less than 15% available disk space remaining."
+      summary: "Node filesystem available space is critically low (< 15%)"
 
   - alert: NodeMemoryUsageHigh400mb
     expr: (node_memory_MemFree_bytes + node_memory_Cached_bytes) / 1048576 < 400
     for: 30s
+    labels:
+      severity: error
     annotations:
-      description: This device's free & cached memory together is less than the threshold (400mb) with a value of {{ $value }}.
-      summary: Instance {{ $labels.instance }} memory usage is high
+      description: "Node free & cached memory together is less than the threshold (400mb) with a value of {{ $value }}."
+      summary: "Node memory usage is high (< 400mb free)"
 
   - alert: NodeMemoryUsageHigh80percent
     expr: (node_memory_MemTotal_bytes - (node_memory_MemFree_bytes + node_memory_Cached_bytes + node_memory_Buffers_bytes)) / node_memory_MemTotal_bytes * 100 > 80
     for: 30s
+    labels:
+      severity: warning
     annotations:
-      description: This device's used memory is more than the threshold (80%) with a value of {{ $value }}
-      summary: Instance {{ $labels.instance }} memory usage is high
+      description: "Node used memory is more than the threshold (80%) with a value of {{ $value }}."
+      summary: "Node memory usage is high (> 80% used)"
 
   - alert: NodeLoadHigh
     expr: node_load1 > machine_cpu_cores / 2
     for: 2m
+    labels:
+      severity: warning
     annotations:
-      description: '{{ $labels.instance }} of job {{ $labels.job }} is under high load.'
-      summary: Instance {{ $labels.instance }} under high load
+      description: "Node is under high load (load1 > cores /2 for 2 min)."
+      summary: "Node under high load"
 
   - alert: BackupMissed
     expr: (time() / 3600) - (backup_last_start_time / 3600) > 32
+    labels:
+      severity: error
     annotations:
-      description: No sucessfull backup since 32h. Last sucessfull backup was at {{ $value }}. Backup should run every 24h
-      summary: Backup run missed
+      description: "Node did not have a sucessful backup since 32h. Last sucessful backup was at {{ $value }}. Backup should run every 24h."
+      summary: "Backup run missed"
 
   - alert: UpdateMissed
     expr: (time() / 86400) - (update_last_call / 86400) > 8
+    labels:
+      severity: error
     annotations:
-      description: No sucessfull update since more than 8 days. Last update run was {{ $value }} days ago. Update should run once a week
-      summary: Update run missed
+      description: "Node did not have a sucessful update run since more than 8 days. Last update run was {{ $value }} days ago. Update should run once every 7 days."
+      summary: "Update run missed"

@@ -25,6 +25,7 @@ ExecStart=/bin/bash -c "var_lib_docker=$(readlink -e /var/lib/docker); exec /usr
     -v /sys:/sys:ro \
     -v /var/run:/var/run:ro \
     -v $var_lib_docker:/var/lib/docker:ro \
+    -v /dev/disk/:/dev/disk:ro \
     google/cadvisor \
     --housekeeping_interval=30s"
 
