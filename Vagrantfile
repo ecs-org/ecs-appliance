@@ -4,6 +4,13 @@
 require "fileutils"
 Vagrant.require_version ">= 1.6.0"
 
+# reset environment variables that are passed to guest
+# skipping this may cause failures if the guest software do not support the host locale
+ENV["LANG"] = "C.UTF-8"
+ENV["LC_ALL"] = ENV["LANG"]
+ENV["LC_MESSAGES"] = ENV["LANG"]
+ENV["LANGUAGE"] = "C"
+
 # Variables, can be overwritten by vagrant-include.rb
 $cpus = 2
 $memory = 4096

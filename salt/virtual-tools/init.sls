@@ -5,6 +5,10 @@ spice-vdagent:
   pkg:
     - installed
 
+qemu-guest-agent:
+  pkg:
+    - installed
+
 {% elif grains['virtual'] == 'VirtualBox' %}
 
 virtualbox-guest-dkms:
