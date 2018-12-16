@@ -11,7 +11,7 @@ groups:
       summary: Node reboots too often
 
   - alert: NodeFilesystemFreeLow
-    expr: (100 * node_filesystem_avail_bytes{mountpoint=~"^/(rootfs)?(|/boot|/data|/volatile)$"} / node_filesystem_size_bytes{mountpoint=~"^/(rootfs)?(|/boot|/data|/volatile)$"}) < 20
+    expr: (100 * node_filesystem_avail_bytes{mountpoint=~"^(/rootfs)?(|/|/boot|/data|/volatile)$"} / node_filesystem_size_bytes{mountpoint=~"^(/rootfs)?(|/|/boot|/data|/volatile)$"}) < 20
     labels:
       severity: warning
     annotations:
@@ -19,7 +19,7 @@ groups:
       summary: "Node filesystem available space is low (< 20%)"
 
   - alert: NodeFilesystemFreeLowCritical
-    expr: (100 * node_filesystem_avail_bytes{mountpoint=~"^/(rootfs)?(|/boot|/data|/volatile)$"} / node_filesystem_size_bytes{mountpoint=~"^/(rootfs)?(|/boot|/data|/volatile)$"}) < 15
+    expr: (100 * node_filesystem_avail_bytes{mountpoint=~"^(/rootfs)?(|/|/boot|/data|/volatile)$"} / node_filesystem_size_bytes{mountpoint=~"^(/rootfs)?(|/|/boot|/data|/volatile)$"}) < 15
     labels:
       severity: critical
     annotations:
@@ -68,3 +68,19 @@ groups:
     annotations:
       description: "Node did not have a sucessful update run since more than 8 days. Last update run was {{ $value }} days ago. Update should run once every 7 days."
       summary: "Update run missed"
+
+  - alert: LetsencryptCertValidityLow
+    expr: (letsencrypt_valid_until - time() ) / 86400 < 10
+    labels:
+      severity: warning
+    annotations:
+      description: "Node letsencrypt certificate is less than 10 days ({{ $value }}) valid."
+      summary: "Letsencrypt certificate is less than 10 days valid"
+
+  - alert: LetsencryptCertValidityCritical
+    expr: (letsencrypt_valid_until - time() ) / 86400 < 3
+    labels:
+      severity: critical
+    annotations:
+      description: "Node letsencrypt certificate is less than 3 days ({{ $value }}) valid."
+      summary: "Letsencrypt certificate is less than 3 days valid"

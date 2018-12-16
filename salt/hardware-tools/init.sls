@@ -10,5 +10,6 @@ hardware-tools:
       - nvme-cli
       - hdparm
       - lm-sensors
+      - i2c-tools
 
 {% endif %}
