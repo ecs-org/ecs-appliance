@@ -20,16 +20,14 @@ ExecStart=/usr/bin/docker run \
     --rm \
     --name %n \
     --net host \
-    -v /proc:/host/proc:ro \
-    -v /sys:/host/sys:ro \
-    -v /:/rootfs:ro \
-    -v /app/etc/metric_import:/host/metric_import \
+    --pid host \
+    --cap-add=SYS_TIME \
+    -v /:/host:ro,rslave \
+    -v /app/etc/metric_import:/etc/metric_import \
     prom/node-exporter \
     --web.listen-address {{ salt['pillar.get']('docker:ip') }}:9100 \
-    --path.procfs /host/proc \
-    --path.sysfs /host/sys \
-    --collector.textfile.directory /host/metric_import \
-    --collector.filesystem.ignored-mount-points "^/(sys|proc|dev|host|etc)($|/)" \
+    --path.rootfs /host \
+    --collector.textfile.directory /etc/metric_import \
     --no-collector.arp \
     --no-collector.bcache \
     --no-collector.conntrack \

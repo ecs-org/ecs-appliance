@@ -1,17 +1,19 @@
 prepare_metric() {
     # set/clear flags and start/stop services connected to flags
-    services="cadvisor.service node-exporter.service postgres_exporter.service process-exporter.service storage-metric-textfile.timer"
+    services="cadvisor.service node-exporter.service postgres_exporter.service process-exporter.service storage-metric-textfile.timer storage-metric-textfile.service"
 
     flag_disable "storage-metric-textfile.exporter"
     if /usr/local/sbin/smartmon-storage-metric.sh --has-devices; then
         flag_enable "has_smartmon.device"
         flag_enable "storage-metric-textfile.exporter"
+        echo "added storage-metric-textfile smartmon.device "
     else
         flag_disable "has_smartmon.device"
     fi
     if /usr/local/sbin/nvme-storage-metric.sh --has-devices; then
         flag_enable "has_nvme.device"
         flag_enable "storage-metric-textfile.exporter"
+        echo "added storage-metric-textfile nvme.device "
     else
         flag_disable "has_nvme.device"
     fi
