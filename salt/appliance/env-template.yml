@@ -9,11 +9,31 @@
 {%- macro rsa_public_from_secret(secret) -%}
 {{ salt['cmd.run_stdout']("openssl rsa  -pubout | sed '1d;$d' | tr -d '\n'", stdin=secret, python_shell=True) }}
 {%- endmacro %}
-{%- macro gpg_secret(ownername) -%}
+{%- macro gpg1_secret(ownername) -%}
 {%- set batch = 'Key-Type: 1\nKey-Length: 2048\nExpire-Date: 0\n'+
     'Name-Real: '+ ownername+ '\n%secring -&1\n%pubring -&2\n%commit\n' -%}
 {%- set gpg_call = 'gpg --quiet --no-default-keyring --enable-special-filenames --batch --yes --armor --gen-key' -%}
 {{ salt['cmd.run_stdout'](gpg_call, stdin=batch) }}
+{%- endmacro %}
+{%- macro gpg2_secret(ownername) -%}
+{%- set batch = 'Key-Type: default\nKey-Length: 2048\nExpire-Date: 0\n'+
+    'Name-Real: '+ ownername+ '\n'+
+    'Name-Email: '+ ownername+ '\n'+
+    '%no-protection\n'+
+    '%commit\n' -%}
+{%- set gpg_call = 't="$(mktemp -d -p /run)"; cat - | '+
+    ' gpg --homedir $t --batch --yes --gen-key; '+
+    ' gpg --homedir $t --batch --yes --armor --export-secret-keys;'+
+    ' rm -r $t' -%}
+{{ salt['cmd.run_stdout'](gpg_call, stdin=batch, python_shell=True) }}
+{%- endmacro -%}
+{%- macro gpg_secret(ownername) -%}
+{%- set gpg_major_ver = salt['cmd.run_stdout']('gpg --version | head -1 | sed -r "s/[^0-9\.]+([0-9]+)\.([0-9]+)\.([0-9]+)/\1/g"', python_shell=True) -%}
+{%- if gpg_major_ver == "1" -%}
+{{ gpg1_secret(ownername) }}
+{%- else -%}
+{{ gpg2_secret(ownername) }}
+{%- endif -%}
 {%- endmacro %}
 {%- set dkim_secretkey= rsa_secret() %}
 {%- set dkim_publickey= rsa_public_from_secret(dkim_secretkey) %}
