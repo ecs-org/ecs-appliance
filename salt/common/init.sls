@@ -55,7 +55,7 @@ base_packages:
       - tmux
       - jq
       - lynx
-      - mcedit
+      - mc
       - htop
 
 system_timezone:
