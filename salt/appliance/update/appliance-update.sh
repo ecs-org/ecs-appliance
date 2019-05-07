@@ -312,6 +312,10 @@ check_ecs_update() {
         if test -e /app/etc/flags/force.update.letsencrypt; then
             rm /app/etc/flags/force.update.letsencrypt
         fi
+        ACCOUNT_KEY=$(gosu app dehydrated -e | grep "ACCOUNT_KEY=" | sed -r 's/.*ACCOUNT_KEY="([^"]+)"/\1/g')
+        if test ! -e "$ACCOUNT_KEY"; then
+            gosu app dehydrated --register --accept-terms
+        fi
         gosu app dehydrated -c
     fi
 
