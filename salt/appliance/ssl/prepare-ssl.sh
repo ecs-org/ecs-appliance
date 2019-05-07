@@ -24,6 +24,10 @@ prepare_ssl () {
             echo "Information: generate certificates using letsencrypt (dehydrated client)"
             # we need a SAN (subject alternative name) for java ssl :(
             printf "%s" "$APPLIANCE_DOMAIN $APPLIANCE_DOMAIN" > $domains_file
+            ACCOUNT_KEY=$(gosu app dehydrated -e | grep "ACCOUNT_KEY=" | sed -r 's/.*ACCOUNT_KEY="([^"]+)"/\1/g')
+            if test ! -e "$ACCOUNT_KEY"; then
+                gosu app dehydrated --register --accept-terms
+            fi
             gosu app dehydrated -c
             res=$?
             if test "$res" -eq 0; then
