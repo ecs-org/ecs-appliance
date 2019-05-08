@@ -89,7 +89,7 @@ postfix_relocate_{{ source }}:
   ('redis', 1000, ''),
   ('prometheus', 1000, ''),
   ('alertmanager', 1000, ''),
-  ('grafana', 1000, ''),
+  ('grafana', 472, ''),
   ('duplicity', '',''),
   ], salt['pillar.get']("appliance:storage:ignore:volatile",false)) }}
 
