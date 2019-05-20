@@ -16,7 +16,7 @@
 {{ salt['cmd.run_stdout'](gpg_call, stdin=batch) }}
 {%- endmacro %}
 {%- macro gpg2_secret(ownername) -%}
-{%- set batch = 'Key-Type: default\nKey-Length: 2048\nExpire-Date: 0\n'+
+{%- set batch = 'Key-Type: RSA\nKey-Length: 2048\nKey-Usage: encrypt,sign\nExpire-Date: 0\n'+
     'Name-Real: '+ ownername+ '\n'+
     'Name-Email: '+ ownername+ '\n'+
     '%no-protection\n'+
@@ -226,10 +226,12 @@ ecs:
 
       SMTPD_CONFIG['listen_addr'] = ('0.0.0.0', 8025)
       SMTPD_CONFIG['domain'] = DOMAIN
+      # SMTPD_CONFIG['store_exceptions'] = True
 
-      # User registration, password reset, send client certificate and mail to
-      # receivers at a domain included in EMAIL_UNFILTERED_DOMAINS will be sent via
-      # EMAIL_BACKEND_UNFILTERED. All other mail will be sent via EMAIL_BACKEND.
+      # EMAIL_BACKEND_UNFILTERED will be used for
+      #  User registration & invitation, password reset, send client certificate,
+      #  and all mail to domains in EMAIL_UNFILTERED_DOMAINS
+      #  All other mail will be sent via EMAIL_BACKEND.
       #
       # Backend to use to NOT sent email but log email to console:
       #   django.core.mail.backends.console.EmailBackend
