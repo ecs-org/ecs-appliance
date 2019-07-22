@@ -50,7 +50,8 @@
 # change dns domain to include (replace 1.2.3.4 and 4.3.2.1 with actual ip address):
 # @   IN  A     1.2.3.4
 # @   IN  MX    10  @
-# @   IN  TXT   "v=spf1 a mx ptr ~all"
+# @   IN  TXT   "v=spf1 a mx -all"
+# _dmarc  IN  TXT "v=DMARC1; p=quarantine; sp=quarantine"
 # default._domainkey    IN  TXT   ("v=DKIM1; k=rsa; s=email; "
 #    "p={{ dkim_publickey[:250] }}"
 #    "{{ dkim_publickey[250:] }}")
