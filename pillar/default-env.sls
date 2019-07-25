@@ -155,13 +155,15 @@ ecs:
 
       EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
       EMAIL_BACKEND_UNFILTERED = 'django.core.mail.backends.console.EmailBackend'
-      EMAIL_UNFILTERED_DOMAINS = () # = ('example.com', 'shoddy.technology')
+      EMAIL_UNFILTERED_DOMAINS = ()  # = ('example.com', 'shoddy.technology')
+      EMAIL_UNFILTERED_INDIVIDUALS = ()  # = ('ada@example.org', 'tom@example.com')
 
       SMTPD_CONFIG['listen_addr'] = ('0.0.0.0', 8025)
       SMTPD_CONFIG['domain'] = DOMAIN
 
       # User registration, password reset, send client certificate and mail to
-      # receivers at a domain included in EMAIL_UNFILTERED_DOMAINS will be sent via
+      # receivers at a domain included in EMAIL_UNFILTERED_DOMAINS and user
+      # listed in EMAIL_UNFILTERED_INDIVIDUALS will be sent via
       # EMAIL_BACKEND_UNFILTERED. All other mail will be sent via EMAIL_BACKEND.
       # Use "django.core.mail.backends.console.EmailBackend"
       #   to not sent email but log to console.
