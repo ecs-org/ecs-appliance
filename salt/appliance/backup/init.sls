@@ -9,6 +9,8 @@ backup:
       - duplicity
       - lftp
       - gnupg
+      - python-paramiko
+      - python-urllib3
       - cifs-utils
       # https://sourceforge.net/projects/pgbarman/
 
