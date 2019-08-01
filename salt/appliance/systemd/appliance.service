@@ -11,7 +11,7 @@ OnFailure=appliance-failed@%n.service
 Type=simple
 Restart=always
 TimeoutStartSec=5min
-TimeoutStopSec=30s
+TimeoutStopSec=45s
 StartLimitInterval=5min
 StartLimitBurst=3
 Environment=UNITNAME=%n
@@ -28,7 +28,7 @@ ExecStartPost=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_t
     . /usr/local/share/appliance/appliance.include; appliance_status --disable; \
     systemctl --no-block start appliance-cleanup'
 ExecStop=/bin/bash -c '. /usr/local/share/appliance/env.include; userdata_to_env ecs,appliance; \
-    /usr/local/bin/docker-compose -f /app/etc/ecs/docker-compose.yml stop || true'
+    /usr/local/bin/docker-compose -f /app/etc/ecs/docker-compose.yml stop -t 20 || true'
 
 [Install]
 WantedBy=multi-user.target

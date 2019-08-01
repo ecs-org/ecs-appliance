@@ -88,7 +88,7 @@ services:
       - ecs.web
     links:
       - ecs.web
-    command: --log.level warning --stats.timeout 15s --stats.uri http://ecs_ecs.web_1:8017 --web.listen-address :9117
+    command: --log.level warning --stats.timeout 10s --stats.uri http://ecs_ecs.web_1:8017 --web.listen-address :9117
 
   memcached:
     image: memcached
