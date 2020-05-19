@@ -9,8 +9,8 @@ OnFailure=service-failed@%n.service
 
 [Service]
 Type=oneshot
-# max time for fullbackup is 5hours (equal 350GB using 20mb per Second)
-TimeoutStartSec=300min
+# max time for fullbackup is 6hours, 0:30->06:30 (equal 421GB using 20mb per Second)
+TimeoutStartSec=360min
 Environment=UNITNAME=%n
 Environment=ENV_YML=/run/active-env.yml
 ExecStart=/bin/bash -c '. /usr/local/share/appliance/env.include; \
