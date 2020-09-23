@@ -6,8 +6,8 @@ include:
 /etc/apt/preferences.d/docker-preferences:
   file.managed:
     - contents: |
-        Package: docker-engine
-        Pin: version 1.13.*
+        Package: docker.io
+        Pin: version 18.09.*
         Pin-Priority: 900
 
 # add docker options from pillar to etc/default config, add http_proxy if set
@@ -64,19 +64,23 @@ docker-service:
     - require:
       - pkg: docker
 
-docker:
-  pkgrepo.managed:
-    - name: 'deb http://apt.dockerproject.org/repo ubuntu-xenial main'
-    - humanname: "Ubuntu docker Repository"
-    - file: /etc/apt/sources.list.d/docker-xenial.list
-    - keyid: 58118E89F3A912897C070ADBF76221572C52609D
-    - keyserver: pgp.mit.edu
-
-  pkg.installed:
-    - pkgs:
-      - docker-engine
+remove_old_docker:
+  file.absent:
+    - name: /etc/apt/sources.list.d/docker-xenial.list
+  cmd.run:
+    - name: apt-get update --yes
+    - onchanges:
+      - file: remove_old_docker
+  pkg.removed:
+    - name: docker-engine
     - require:
-      - pkgrepo: docker
+      - cmd: remove_old_docker
+
+docker:
+  pkg.installed:
+    - name: docker.io
+    - require:
+      - pkg: remove_old_docker
       - file: /etc/apt/preferences.d/docker-preferences
       - network: docker-network
 
@@ -93,13 +97,12 @@ docker:
       - file: docker-service
 
 # XXX docker-3.2.1 docker-compose-1.21.0 create frontend nginx timeouts
+# XXX docker-compose >= 1.27 dropped python2 support
 docker-compose:
   file.managed:
     - name: /etc/default/docker-compose-constraint.txt
     - contents: |
-        requests >= 2.14.2
-        docker <= 3.1.99
-        docker-compose <= 1.20.99
+        docker-compose <= 1.26.99
 
   pip.installed:
     - requirements: /etc/default/docker-compose-constraint.txt
