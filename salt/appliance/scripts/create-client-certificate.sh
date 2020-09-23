@@ -2,7 +2,7 @@
 
 usage(){
     cat << EOF
-Usage:  $0 user-email@address.domain cert_name [daysvalid]
+Usage:  $0 [--sendto user@address] user-email@address.domain cert_name [daysvalid]
 
 Creates a client certificate, and send certificate via Email.
 
@@ -10,21 +10,23 @@ Creates a client certificate, and send certificate via Email.
     and must be internal (ec-office or ec-executive or ec-signing)
 + The default certificate lifetime is 7 days.
     Change this with supplying daysvalid
++ optional parameter --sendto: send cert to a different email adress
 + Requirements: Appliance must be running.
 
 EOF
     exit 1
 }
 
-daysvalid=7
+if test "$1" = "--sendto"; then sendto="$2"; shift 2; else sendto=""; fi
+if test "$2" = ""; then usage; fi
+if test "$3" != ""; then daysvalid=$3; else daysvalid=7; fi
 email="$1"
 certname="$2"
-if test "$2" = ""; then usage; fi
-if test "$3" != ""; then daysvalid=$3; fi
+if test "$sendto" = ""; then sendto=$email; fi
 
 cat << EOF | docker exec -i ecs_ecs.web_1 /start run ./manage.py shell
 
-email="$email"; certname="$certname"; daysvalid=$daysvalid;
+sendto="$sendto"; email="$email"; certname="$certname"; daysvalid=$daysvalid;
 
 import os
 from django.conf import settings
@@ -42,7 +44,7 @@ cert, passphrase = Certificate.create_for_user(
 pkcs12 = open('/tmp/user.p12', 'rb').read()
 os.remove('/tmp/user.p12')
 
-deliver(u.email,
+deliver([sendto],
     subject='Certificate {}'.format(certname),
     message='See attachment',
     from_email=settings.DEFAULT_FROM_EMAIL,
