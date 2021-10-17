@@ -132,6 +132,7 @@ services:
       - HOSTNAME=${APPLIANCE_DOMAIN}
     volumes:
       - "/app/etc/server.cert.pem:/app/import/server.cert.pem:ro"
+      - "/app/etc/isrgrootx1.pem:/app/import/isrgrootx1.pem:ro"
     ports:
       - "127.0.0.1:5090:8080"
     network_mode: "bridge"
@@ -148,6 +149,7 @@ services:
       - HOSTNAME=${APPLIANCE_DOMAIN}
     volumes:
       - "/app/etc/server.cert.pem:/app/import/server.cert.pem:ro"
+      - "/app/etc/isrgrootx1.pem:/app/import/isrgrootx1.pem:ro"
     ports:
       - "127.0.0.1:5095:8080"
     network_mode: "bridge"

@@ -36,3 +36,7 @@ include:
     - contents: |
         DATABASE_URL=postgres://app:invalid@{{ salt['pillar.get']('docker:ip') }}:5432/ecs
     - replace: false
+
+/app/etc/isrgrootx1.pem:
+  file.managed:
+    - source: salt://appliance/ecs/isrgrootx1.pem
