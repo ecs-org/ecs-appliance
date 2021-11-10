@@ -135,7 +135,7 @@ def send_message(client, message, options):
 def send_mailbox(mbox, client, args):
     margs = args.__dict__
 
-    for key, msg in mbox.iteritems():
+    for key, msg in mbox.items():
         margs['culprit'] = msg['From']
         margs['timestamp'] = email.utils.parsedate_to_datetime(
             msg['Date']).astimezone(datetime.timezone.utc).replace(tzinfo=None).isoformat()
