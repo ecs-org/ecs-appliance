@@ -38,7 +38,7 @@
 #######
 {% macro storage_parted(input_data) %}
 
-  {% for item, data in input_data.iteritems() %}
+  {% for item, data in input_data.items() %}
     {% set part_type = 'msdos' if data.type|d('') == 'mbr' else data.type|d('') %}
     {% set blkid_type = 'dos' if part_type == 'msdos' else part_type %}
 
@@ -92,7 +92,7 @@
 #######
 {% macro storage_mdadm(input_data) %}
 
-  {% for item, data in input_data.iteritems() %}
+  {% for item, data in input_data.items() %}
 "mdadm-raid-{{ item }}":
   pkg.installed:
     - name: mdadm
@@ -103,7 +103,7 @@
     {%- for device in data['devices'] %}
       - {{ device }}
     {%- endfor %}
-    {%- for sub, subvalue in data.iteritems() %}
+    {%- for sub, subvalue in data.items() %}
       {%- if sub not in ['level', 'devices'] %}
     - {{ sub }}{% if subvalue|d('') %}: {{ subvalue }}{% endif %}
       {%- endif %}
@@ -119,7 +119,7 @@
 #######
 {% macro storage_crypt(input_data) %}
 
-  {% for item, data in input_data.iteritems() %}
+  {% for item, data in input_data.items() %}
 
 {{ item }}-luks-format:
   pkg.installed:
@@ -161,7 +161,7 @@
 
 # lvm - vg
   {% if input_data.vg is defined %}
-    {% for item, data in input_data.vg.iteritems() %}
+    {% for item, data in input_data.vg.items() %}
 "lvm-vg-{{ item }}":
   pkg.installed:
     - name: lvm2
@@ -171,7 +171,7 @@
       {%- for device in data['devices'] %}
       - {{ device }}
       {%- endfor %}
-      {%- for option, optvalue in data.iteritems() %}
+      {%- for option, optvalue in data.items() %}
         {%- if option not in ['devices'] %}
     - {{ option }}{% if optvalue|d('') %}: {{ optvalue }}{% endif %}
         {%- endif %}
@@ -183,7 +183,7 @@
 
 # lvm - lv
   {% if input_data.lv is defined %}
-    {% for item, data in input_data.lv.iteritems() %}
+    {% for item, data in input_data.lv.items() %}
 "lvm-lv-{{ item }}":
   pkg.installed:
     - name: lvm2
@@ -217,7 +217,7 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
       {%- else %}
   lvm.lv_present:
     - name: {{ item }}
-        {%- for sub, subvalue in data.iteritems() %}
+        {%- for sub, subvalue in data.items() %}
           {%- if sub not in ('watch_in', 'require_in', 'require', 'watch') %}
     - {{ sub }}{% if subvalue|d('') %}: {{ subvalue }}{% endif %}
           {%- endif %}
@@ -227,7 +227,7 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
         {%- if 'require' in data %}
       - {{ data['require'] }}
         {%- endif %}
-        {%- for sub, subvalue in data.iteritems() %}
+        {%- for sub, subvalue in data.items() %}
           {%- if sub in ('watch_in', 'require_in', 'watch') %}
     - {{ sub }}:
       - {{ subvalue }}
@@ -245,7 +245,7 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
 #######
 {% macro storage_format(input_data) %}
 
-  {% for item, data in input_data.iteritems() %}
+  {% for item, data in input_data.items() %}
     {% set mkfs = 'mkswap' if data.fstype == 'swap' else 'mkfs.'+ data.fstype %}
     {% set options = data.options if data.options|d('') else "[]" %}
 "format-{{ item }}":
@@ -267,11 +267,11 @@ salt.lvm.lvdisplay(lvtarget)[lvtarget] is defined %}
 #######
 {% macro storage_mount(input_data) %}
 
-  {% for item, data in input_data.iteritems() %}
+  {% for item, data in input_data.items() %}
 "mount-{{ item }}":
   mount.mounted:
     - name: {{ item }}
-    {%- for sub, subvalue in data.iteritems() %}
+    {%- for sub, subvalue in data.items() %}
     - {{ sub }}{% if subvalue|d('') %}: {{ subvalue }}{% endif %}
     {%- endfor %}
     - onlyif: 'test "$(blkid -p -s TYPE -o value {{ data['device'] }})" == "{{ data['fstype'] }}" -a -b {{ data['device'] }}'
