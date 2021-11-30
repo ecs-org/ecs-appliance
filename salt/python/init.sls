@@ -46,9 +46,15 @@ virtualenv3-upgrade:
       - cmd: pip2-upgrade
       - cmd: pip3-upgrade
   {%- if kwargs is defined %}
-    {%- for k,d in kwargs.items() %}
+    {%- if salt['grains.get']('pythonversion','')[0] == '3' %}
+      {%- for k,d in kwargs.items() %}
     - {{ k }}: {{ d }}
-    {%- endfor %}
+      {%- endfor %}
+    {%- else %}
+      {%- for k,d in kwargs.iteritems() %}
+    - {{ k }}: {{ d }}
+      {%- endfor %}
+    {%- endif %}
   {%- endif %}
 {% endmacro %}
 
