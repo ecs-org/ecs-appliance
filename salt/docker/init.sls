@@ -28,10 +28,12 @@ docker-grub-settings:
     - makedirs: true
     - contents: |
         GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX cgroup_enable=memory swapaccount=1"
+{%- if grains['virtual']|upper not in ['LXC', 'SYSTEMD-NSPAWN', 'NSPAWN'] %}
   cmd.wait:
     - name: update-grub
     - watch:
       - file: docker-grub-settings
+{% endif %}
 
 docker-requisites:
   pkg.installed:
@@ -84,7 +86,7 @@ docker:
     - enable: true
     - require:
       - pkg: docker
-      - cmd: docker-grub-settings
+      - file: docker-grub-settings
       - pip: docker-compose
       - file: /etc/default/docker
       - file: docker-service

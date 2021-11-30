@@ -7,7 +7,7 @@
   {%- set flavor='virtual' %}
 {%- endif %}
 
-{%- if grains['virtual'] == 'LXC' %}
+{%- if grains['virtual']|upper in ['LXC', 'SYSTEMD-NSPAWN', 'NSPAWN'] %}
 linux-image:
   pkg.installed:
     - pkgs:
