@@ -15,7 +15,7 @@ python:
 
 pip2-upgrade:
   cmd.run:
-    - name: pip2 install -U pip virtualenv
+    - name: pip2 install -U "pip<21" virtualenv
     - onlyif: test "$(which pip2)" = "/usr/bin/pip2"
 
 pip3-upgrade:
