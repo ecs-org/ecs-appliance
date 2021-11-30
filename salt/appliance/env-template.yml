@@ -37,12 +37,6 @@
 {%- endmacro %}
 {%- set dkim_secretkey= rsa_secret() %}
 {%- set dkim_publickey= rsa_public_from_secret(dkim_secretkey) %}
-{%- if not extra.appliance|d(false) %}
-  {%- set dummy=extra.__setitem__('appliance', {}) %}
-{%- endif %}
-{%- if not extra.ecs|d(false) %}
-  {%- set dummy=extra.__setitem__('ecs', {}) %}
-{%- endif %}
 
 # change ecs:settings: EMAIL_BACKEND to 'django.core.mail.backends.smtp.EmailBackend'
 # change ecs:settings: ETHICS_COMMISSION_UUID to the desired uuid
