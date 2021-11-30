@@ -1,7 +1,7 @@
 {% set def_route_device = salt['cmd.run_stdout'](
     'ip route list default | grep -E "^default via" | sed -r "s/.+ dev ([^ ]+).*/\\1/g"', python_shell=true) %}
 {% set def_route_ip = salt['cmd.run_stdout'](
-    'ip addr show '+ def_route_device+ ' | grep -E "^ +inet " | sed -r "s/^ +inet ([0-9.]+).+/\\1/g"', python_shell=true) %}
+    'ip addr show '+ def_route_device+ ' | grep -E "^ +inet .+global" | sed -r "s/^ +inet ([0-9.]+).+/\\1/g"', python_shell=true) %}
 
 include:
   - appliance.directories
