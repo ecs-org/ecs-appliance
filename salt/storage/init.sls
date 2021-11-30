@@ -1,4 +1,4 @@
-{% if salt['grains.get']('pythonversion','')[0] == '3' %}
+{% if salt['grains.get']('pythonversion','')[0] == 3 %}
   {% from 'storage/lib3.sls' import storage_setup with context %}
 {% else %}
   {% from 'storage/lib2.sls' import storage_setup with context %}
