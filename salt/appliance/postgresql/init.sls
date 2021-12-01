@@ -16,7 +16,7 @@ create_man_dir_{{ i }}:
     - name: /usr/share/man/{{ i }}
     - makedirs: true
     - require_in:
-      - pkg: postresql
+      - pkg: postgresql
 {% endfor %}
 
 late_postgresql.service:
