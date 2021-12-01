@@ -66,6 +66,8 @@ docker-service:
     - require:
       - pkg: docker
 
+{% if salt['file.file_exists']('/etc/apt/sources.list.d/docker-xenial.list') %}
+{# use old setup if already installed, use included docker.io otherwise #}
 docker:
   pkgrepo.managed:
     - name: 'deb http://apt.dockerproject.org/repo ubuntu-xenial main'
@@ -81,6 +83,15 @@ docker:
       - pkgrepo: docker
       - file: /etc/apt/preferences.d/docker-preferences
       - network: docker-network
+
+{% else %}
+docker:
+  pkg.installed:
+    - pkgs:
+      - docker.io
+    - require:
+      - network: docker-network
+{% endif %}
 
   service.running:
     - enable: true
