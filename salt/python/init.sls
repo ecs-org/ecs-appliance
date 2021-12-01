@@ -12,6 +12,7 @@ python:
 
 {# XXX pip and virtualenv is broken on xenial, update from pypi #}
 {# https://github.com/pypa/pip/issues/3282 #}
+{# XXX pip >= 21.x breaks on python2 and python3 version of xenial #}
 
 pip2-upgrade:
   cmd.run:
@@ -20,7 +21,7 @@ pip2-upgrade:
 
 pip3-upgrade:
   cmd.run:
-    - name: pip3 install -U pip
+    - name: pip3 install -U "pip<21"
     - onlyif: test "$(which pip3)" = "/usr/bin/pip3"
 
 virtualenv3-upgrade:
