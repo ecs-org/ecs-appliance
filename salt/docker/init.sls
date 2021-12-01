@@ -60,6 +60,8 @@ docker-network:
         iface docker0 inet static
             address {{ salt['pillar.get']('docker:ip') }}
             netmask {{ salt['pillar.get']('docker:netmask') }}
+            bridge_fd 0
+            bridge_maxwait 0
             bridge_ports none
     - require:
       - file: etc-network-interfaces
