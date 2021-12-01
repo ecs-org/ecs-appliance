@@ -44,18 +44,29 @@ docker-requisites:
       - lxc
       - cgroup-bin
 
+etc-network-interfaces:
+  file.touch:
+    - name: /etc/network/interfaces
+
 docker-network:
-  network.managed:
-    - name: docker0
-    - type: bridge
-    - enabled: true
-    - ports: none
-    - proto: static
-    - ipaddr: {{ salt['pillar.get']('docker:ip') }}
-    - netmask: {{ salt['pillar.get']('docker:netmask') }}
-    - stp: off
+  file.blockreplace:
+    - marker_start: |
+        auto docker0
+    - marker_end: |
+            bridge_stp off
+    - append_if_not_found: true
+    - content: |
+        iface docker0 inet static
+            address {{ salt['pillar.get']('docker:ip') }}
+            netmask {{ salt['pillar.get']('docker:netmask') }}
+            bridge_ports none
     - require:
+      - file: etc-network-interfaces
       - pkg: docker-requisites
+  cmd.run:
+    - name: ifup docker0
+    - onchanges:
+      - file: docker-network
 
 docker-service:
   file.managed:
@@ -82,7 +93,7 @@ docker:
     - require:
       - pkgrepo: docker
       - file: /etc/apt/preferences.d/docker-preferences
-      - network: docker-network
+      - cmd: docker-network
 
 {% else %}
 docker:
@@ -90,7 +101,7 @@ docker:
     - pkgs:
       - docker.io
     - require:
-      - network: docker-network
+      - cmd: docker-network
 {% endif %}
 
   service.running:
