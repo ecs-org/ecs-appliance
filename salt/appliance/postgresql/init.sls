@@ -9,6 +9,16 @@ include:
     - require:
       - sls: appliance.directories
 
+{# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=891488 #}
+{% for i in ['man1', 'man2', 'man3', 'man4', 'man5', 'man6', 'man7', 'man8'] %}
+create_man_dir_{{ i }}:
+  file.directory:
+    - name: /usr/share/man/{{ i }}
+    - makedirs: true
+    - require_in:
+      - pkg: postresql
+{% endfor %}
+
 late_postgresql.service:
   file.managed:
     - name: /etc/systemd/system/late_postgresql.service
