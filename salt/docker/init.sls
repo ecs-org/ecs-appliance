@@ -50,6 +50,7 @@ etc-network-interfaces:
 
 docker-network:
   file.blockreplace:
+    - name: /etc/network/interfaces
     - marker_start: |
         auto docker0
     - marker_end: |
