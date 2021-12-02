@@ -36,7 +36,7 @@ docker-grub-settings:
         GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX cgroup_enable=memory swapaccount=1"
   cmd.wait:
 {%- if grains['virtual']|upper in ['LXC', 'SYSTEMD-NSPAWN', 'NSPAWN'] %}
-    - name: true
+    - name: "true"
 {% else %}
     - name: update-grub
 {% endif %}
