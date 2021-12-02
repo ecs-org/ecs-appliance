@@ -57,6 +57,8 @@ base_packages:
       - lynx
       - mc
       - htop
+      - sudo
+      - manpages
 
 system_timezone:
   timezone.system:
