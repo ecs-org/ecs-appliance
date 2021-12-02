@@ -10,11 +10,17 @@ include:
         Pin: version 1.13.*
         Pin-Priority: 900
 
-# add docker options from pillar to etc/default config, add http_proxy if set
+# add docker options to etc/default config, add http_proxy if set
+{%- if grains['virtual']|upper not in ['LXC', 'SYSTEMD-NSPAWN', 'NSPAWN'] %}
+  # use vfs storage driver and systemd cgroup if running under same kernel virt
+  {% set options='--bridge=docker0 --storage-driver=vfs --exec-opt native.cgroupdriver=systemd --log-driver=journald' %}
+{% else %}
+  {% set options='--bridge=docker0 --storage-driver=overlay2' %}
+{% endif %}
 /etc/default/docker:
   file.managed:
     - contents: |
-        DOCKER_OPTIONS="{{ salt['pillar.get']('docker:options', '') }}"
+        DOCKER_OPTIONS="{{ options }}"
 {%- if salt['pillar.get']('http_proxy', '') != '' %}
   {%- for a in ['http_proxy', 'HTTP_PROXY'] %}
         {{ a }}="{{ salt['pillar.get']('http_proxy') }}"
@@ -89,16 +95,41 @@ docker:
     - file: /etc/apt/sources.list.d/docker-xenial.list
     - keyid: 58118E89F3A912897C070ADBF76221572C52609D
     - keyserver: pgp.mit.edu
-
+    - require_in:
+      - pkg: docker
   pkg.installed:
     - pkgs:
       - docker-engine
     - require:
-      - pkgrepo: docker
       - file: /etc/apt/preferences.d/docker-preferences
       - cmd: docker-network
 
+{% elif grains['virtual']|upper not in ['LXC', 'SYSTEMD-NSPAWN', 'NSPAWN'] %}
+other-docker:
+  pkg.removed:
+    - pkgs:
+      - docker.io
+
+docker:
+  pkgrepo.managed:
+    - name: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable'
+    - file: /etc/apt/sources.list.d/docker-ce-xenial.list
+    - key_url: https://download.docker.com/linux/ubuntu/gpg
+    - require_in:
+      - pkg: docker
+  pkg.installed:
+    - pkgs:
+      - docker-ce
+      - docker-ce-cli
+    - require:
+      - cmd: docker-network
+
 {% else %}
+other-docker:
+  pkg.removed:
+    - pkgs:
+      - docker-ce
+
 docker:
   pkg.installed:
     - pkgs:
