@@ -11,7 +11,7 @@ include:
         Pin-Priority: 900
 
 # add docker options to etc/default config, add http_proxy if set
-{%- if grains['virtual']|upper not in ['LXC', 'SYSTEMD-NSPAWN', 'NSPAWN'] %}
+{%- if grains['virtual']|upper in ['LXC', 'SYSTEMD-NSPAWN', 'NSPAWN'] %}
   # use vfs storage driver and systemd cgroup if running under same kernel virt
   {% set options='--bridge=docker0 --storage-driver=vfs --exec-opt native.cgroupdriver=systemd --log-driver=journald' %}
 {% else %}
@@ -34,12 +34,14 @@ docker-grub-settings:
     - makedirs: true
     - contents: |
         GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX cgroup_enable=memory swapaccount=1"
-{%- if grains['virtual']|upper not in ['LXC', 'SYSTEMD-NSPAWN', 'NSPAWN'] %}
   cmd.wait:
+{%- if grains['virtual']|upper in ['LXC', 'SYSTEMD-NSPAWN', 'NSPAWN'] %}
+    - name: true
+{% else %}
     - name: update-grub
+{% endif %}
     - watch:
       - file: docker-grub-settings
-{% endif %}
 
 docker-requisites:
   pkg.installed:
@@ -104,7 +106,7 @@ docker:
       - file: /etc/apt/preferences.d/docker-preferences
       - cmd: docker-network
 
-{% elif grains['virtual']|upper not in ['LXC', 'SYSTEMD-NSPAWN', 'NSPAWN'] %}
+{% elif grains['virtual']|upper in ['LXC', 'SYSTEMD-NSPAWN', 'NSPAWN'] %}
 other-docker:
   pkg.removed:
     - pkgs:
