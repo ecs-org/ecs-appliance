@@ -120,22 +120,7 @@ services:
       - redis
     command: -redis.addr redis://ecs_redis_1:6379
 
-  mocca:
-    build:
-      context: mocca
-      args:
-        - http_proxy
-    image: ecs/mocca
-    # mem limit= -Xmx1536m + 120m
-    mem_limit: 1656m
-    environment:
-      - HOSTNAME=${APPLIANCE_DOMAIN}
-    volumes:
-      - "/app/etc/server.cert.pem:/app/import/server.cert.pem:ro"
-      - "/app/etc/isrgrootx1.pem:/app/import/isrgrootx1.pem:ro"
-    ports:
-      - "127.0.0.1:5090:8080"
-    network_mode: "bridge"
+  # disabled online version of mocca: is no longer usable because java support in browser ended
 
   pdfas:
     build:

@@ -85,7 +85,7 @@ if test -e /app/etc/flags/force.update.ecs -o \
     fi
     appliance_status "Appliance Update" "Building ECS $target (current= $last_running)"
     simple_metric ecs_last_update counter "timestamp-epoch-seconds since last update to ecs" $start_epoch_seconds
-    if ! docker-compose build mocca pdfas ecs.web; then
+    if ! docker-compose build pdfas ecs.web; then
         extra=$(systemctl status -l -q --no-pager -n 40 prepare-ecs.service | text2json);
         sentry_entry "Appliance Update" "ECS build failed" error "$extra"
         if test "$last_running" = "invalid"; then
