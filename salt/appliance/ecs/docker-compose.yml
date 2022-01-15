@@ -13,7 +13,7 @@ services:
       - /data/ecs-ca:/app/ecs-ca
       - /data/ecs-gpg:/app/ecs-gpg
       - /volatile/ecs-cache:/app/ecs-cache
-      - /app/ecs:/ecs-dev
+      - /app/ecs:/app/ecs
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
       - ECS_USERSWITCHER_ENABLED=${ECS_USERSWITCHER_ENABLED}
@@ -37,6 +37,7 @@ services:
       - /data/ecs-ca:/app/ecs-ca
       - /data/ecs-gpg:/app/ecs-gpg
       - /volatile/ecs-cache:/app/ecs-cache
+      - /app/ecs:/app/ecs
     environment:
       - ECS_SETTINGS=${ECS_SETTINGS}
     env_file:
